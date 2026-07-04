@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "displaycellpros-com"
-  }
+  },
+  "targets": {
+    "displaycellpros-com": {
+      "hosting": {
+        "main": [
+          "displaycellpros-com"
+        ],
+        "triage": [
+          "triage-displaycellpros-com"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
