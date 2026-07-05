@@ -187,22 +187,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } catch (error: any) {
       console.error("Auth Signup Error:", error);
       let errMsg = "Registration failed. Please review your details.";
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          errMsg = "An account is already linked to this email address.";
-          break;
-        case "auth/invalid-email":
-          errMsg = "The email address layout is structurally invalid.";
-          break;
-        case "auth/weak-password":
-          errMsg = "The security protocol requires a stronger password (minimum 6 characters).";
-          break;
-        case "auth/operation-not-allowed":
-          errMsg = "Email/Password registration is currently restricted in the security console.";
-          break;
-        case "auth/too-many-requests":
-          errMsg = "Throttling active: Too many requests detected from this endpoint.";
-          break;
+      if (error.code === "auth/email-already-in-use") {
+        errMsg = "An account is already linked to this email address.";
+      } else if (error.code === "auth/invalid-email") {
+        errMsg = "The email address layout is structurally invalid.";
       }
       addToast("Registration Rejected", errMsg, "error");
     } finally {

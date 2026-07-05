@@ -1,14 +1,6 @@
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 
-// Mock ResizeObserver for Recharts
-class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-window.ResizeObserver = ResizeObserver;
-
 // Mock matchMedia if needed
 Object.defineProperty(window, "matchMedia", {
   writable: true,
