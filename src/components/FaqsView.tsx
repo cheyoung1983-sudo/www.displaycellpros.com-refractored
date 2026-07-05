@@ -8,7 +8,7 @@ export function FaqsView() {
   const FAQS = [
     {
       q: "How long do repairs take?",
-      a: "Most common diagnostics and sub-micron board operations (such as screens, charging port logic chips, or batteries) are completed the same day—typically in 30 to 60 minutes in our active drive-up vehicle laboratories.",
+      a: "Most common diagnostics and sub-micron board operations (such as screens, charging port logic chips, or batteries) are completed the same day—typically in 30 to 60 minutes in our Spokane laboratory station (with our first driveway mobile laboratory vehicle currently in development).",
       category: "Repairs"
     },
     {
@@ -38,7 +38,7 @@ export function FaqsView() {
     },
     {
       q: "How does the mobile laboratory power its solder stations?",
-      a: "Our diagnostic truck runs on standalone, eco-friendly solar-charged lithium power banks. We do not hook into your home utilities or cause noise pollution—providing silent, self-contained laboratory power.",
+      a: "Our planned mobile diagnostic laboratory is engineered to run on standalone, eco-friendly solar-charged lithium power banks. We do not hook into your home utilities or cause noise pollution—providing silent, self-contained laboratory power.",
       category: "Repairs"
     },
     {

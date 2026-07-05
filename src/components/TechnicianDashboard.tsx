@@ -186,7 +186,7 @@ export const TechnicianDashboard: React.FC<TechnicianDashboardProps> = ({
     return Object.values(brandMap);
   }, [tickets]);
 
-  const COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b"];
+  const COLORS = ["#008080", "#00BFFF", "#8b5cf6", "#FFBF00"];
 
   // Formatter helpers
   const formatCurrency = (val: number) => `$${val.toFixed(2)}`;
@@ -395,14 +395,14 @@ export const TechnicianDashboard: React.FC<TechnicianDashboardProps> = ({
                       return [val, "Completed Tickets"];
                     }}
                   />
-                  <Bar dataKey="avgHours" name="Turnaround" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40}>
+                  <Bar dataKey="avgHours" name="Turnaround" fill="#008080" radius={[4, 4, 0, 0]} barSize={40}>
                     {turnaroundChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 0 ? "#ec4899" : index === 1 ? "#10b981" : index === 2 ? "#bfdbfe" : "#8b5cf6"} />
+                      <Cell key={`cell-${index}`} fill={index === 0 ? "#008080" : index === 1 ? "#00BFFF" : index === 2 ? "#FFBF00" : "#8b5cf6"} />
                     ))}
                   </Bar>
-                  <Line type="monotone" dataKey="tickets" name="Ticket Volume" stroke="#f59e0b" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="tickets" name="Ticket Volume" stroke="#FFBF00" strokeWidth={2} dot={{ r: 4 }} />
                   <Legend wrapperStyle={{ fontSize: "10px", marginTop: "5px" }} />
-                </ComposedChart>
+                  </ComposedChart>
               ) : (
                 <BarChart data={volumeChartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.4} />
@@ -419,8 +419,8 @@ export const TechnicianDashboard: React.FC<TechnicianDashboardProps> = ({
                     }}
                   />
                   <Legend wrapperStyle={{ fontSize: "10px" }} />
-                  <Bar dataKey="completed" name="Completed Solder Invoices" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="total" name="Total Sync Tickets" fill="#ff7c43" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="completed" name="Completed Solder Invoices" fill="#008080" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="total" name="Total Sync Tickets" fill="#00BFFF" radius={[4, 4, 0, 0]} />
                 </BarChart>
               )}
             </ResponsiveContainer>

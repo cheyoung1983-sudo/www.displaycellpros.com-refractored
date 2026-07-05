@@ -3396,10 +3396,10 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
       doc.save(docName);
 
       addToast(
-        "PDF Report Downloaded",
-        "A structured high-resolution telemetry report has been compiled and saved to your device.",
+        "PDF Report Download Success",
+        `Filename: "${docName}" has been successfully downloaded and stored to your local system's standard Downloads folder.`,
         "success",
-        5500
+        8000
       );
     } catch (pdfErr: any) {
       console.error("PDF generation failure:", pdfErr);
@@ -4626,243 +4626,112 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
                 {/* Sub-tabs indicators in Left Rail */}
                 <div>
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2 font-mono">Active Lab Module</p>
-                  <nav className="space-y-1">
-                    <button
-                      onClick={() => setLabTab("telemetry")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "telemetry" 
-                          ? "bg-[#008080] text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-teal-400 animate-pulse" />
-                        <span>Triage-AI Live Telemetry</span>
-                      </div>
-                      <span className={`px-1.5 py-0.2 text-[9px] rounded font-mono ${
-                        labTab === "telemetry" ? "bg-teal-700 text-white" : "bg-slate-800 text-slate-400"
-                      }`}>LAB</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("triage")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "triage" 
-                          ? "bg-blue-600 text-white shadow-md" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Terminal className="w-4 h-4" />
-                        <span>[Initiate Forensic Triage]</span>
-                      </div>
-                      <span className={`px-1.5 py-0.2 text-[9px] rounded font-mono ${
-                        labTab === "triage" ? "bg-blue-700 text-white" : "bg-slate-800 text-slate-400"
-                      }`}>LV3</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("quote_builder")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "quote_builder" 
-                          ? "bg-blue-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                        <span>[Client Terminal] (Quotes)</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-emerald-990 text-emerald-400 border border-emerald-900/40">DECOUPLED</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("pos")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "pos" 
-                          ? "bg-blue-600 text-white shadow-md" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4" />
-                        <span>[Client Terminal] (POS)</span>
-                      </div>
-                      <span className={`px-1.5 py-0.2 text-[9px] rounded font-mono ${
-                        labTab === "pos" ? "bg-blue-700 text-white" : "bg-slate-800 text-slate-400"
-                      }`}>{tickets.length}</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("tax")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "tax" 
-                          ? "bg-blue-600 text-white shadow-md" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        <span>WA Tax Compliance Agent</span>
-                      </div>
-                      <span className="text-[10px] text-green-400 font-bold">100%</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("directory")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "directory" 
-                          ? "bg-blue-600 text-white shadow-md" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Database className="w-4 h-4" />
-                        <span>GCP Service Directory</span>
-                      </div>
-                      <span className={`px-1.5 py-0.2 text-[9px] rounded font-mono ${
-                        labTab === "directory" ? "bg-emerald-900/50 text-emerald-300 font-bold" : "bg-slate-800 text-slate-400"
-                      }`}>{sdNamespaces.length}</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("escalation")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "escalation" 
-                          ? "bg-amber-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-amber-550" />
-                        <span>Audit Trajectories (Callbacks)</span>
-                      </div>
-                      <span className={`px-1.5 py-0.2 text-[9px] rounded font-mono ${
-                        labTab === "escalation" ? "bg-amber-700 text-white" : "bg-slate-800 text-slate-400"
-                      }`}>{leads.length}</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("forensics")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "forensics" 
-                          ? "bg-violet-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Cpu className="w-4 h-4 text-violet-400" />
-                        <span>[S2C Intelligence Dashboard]</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-violet-900/50 text-violet-300">RAG</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("forms")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "forms" 
-                          ? "bg-blue-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                        <span>Google Forms Intake</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-emerald-950 text-emerald-300 border border-emerald-850/40">GWS</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("gmail")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "gmail" 
-                          ? "bg-blue-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-red-400" />
-                        <span>Gmail Communications</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-red-950 text-red-300 border border-red-850/40 font-bold">GWS</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("firebase_ai")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "firebase_ai" 
-                          ? "bg-blue-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Brain className="w-4 h-4 text-purple-400" />
-                        <span>Firebase AI Workbench</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-purple-950 text-purple-300 border border-purple-850/40 font-bold">SDK</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("workspace_hub")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "workspace_hub" 
-                          ? "bg-blue-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-sky-455" />
-                        <span>Google Workspace Hub</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-sky-950 text-sky-305 border border-sky-850/45 font-bold">GWS</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("gateway")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "gateway" 
-                          ? "bg-blue-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                        <span>[NIST Compliance] (Gateway)</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-emerald-950 text-emerald-300 border border-emerald-850/40 font-bold">GW</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("smd_library")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "smd_library" 
-                          ? "bg-teal-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="w-4 h-4 text-teal-400" />
-                        <span>SMD Component Library</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-teal-950 text-teal-300 border border-teal-850/40 font-bold">LIB</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("marketing_firewall")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "marketing_firewall" 
-                          ? "bg-teal-600 text-white shadow-md font-bold" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-cyan-400 animate-pulse" />
-                        <span>B2B Go-To-Market Guard</span>
-                      </div>
-                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-[#008080]/30 text-teal-300 border border-[#008080]/30 font-bold">B2B</span>
-                    </button>
-                  </nav>
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-3 font-mono">Lab Modules Suite</p>
+                  <div className="space-y-3">
+                    {[
+                      {
+                        id: "ai_core",
+                        name: "Forensic AI Core",
+                        icon: <Brain className="w-4 h-4 text-purple-400 shrink-0 animate-pulse" />,
+                        tabs: [
+                          { id: "firebase_ai", name: "Forensic AI Workbench", badge: "SDK" },
+                          { id: "telemetry", name: "Triage-AI Live Telemetry", badge: "LIVE" },
+                          { id: "triage", name: "Hardware Sandbox", badge: "CHAT" },
+                          { id: "forensics", name: "[S2C Intelligence]", badge: "RAG" },
+                        ]
+                      },
+                      {
+                        id: "business",
+                        name: "Business Terminal",
+                        icon: <Briefcase className="w-4 h-4 text-emerald-450 shrink-0" />,
+                        tabs: [
+                          { id: "pos", name: "POS Sales Terminal", badge: "POS" },
+                          { id: "quote_builder", name: "Interactive Quotes", badge: "QUOTE" },
+                        ]
+                      },
+                      {
+                        id: "workspace",
+                        name: "Google Workspace Hub",
+                        icon: <Layers className="w-4 h-4 text-sky-450 shrink-0" />,
+                        tabs: [
+                          { id: "workspace_hub", name: "Workspace Main Hub", badge: "GWS" },
+                          { id: "forms", name: "Google Forms Intake", badge: "GWS" },
+                          { id: "gmail", name: "Gmail Communications", badge: "GWS" },
+                        ]
+                      },
+                      {
+                        id: "admin",
+                        name: "Operations & Admin",
+                        icon: <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />,
+                        tabs: [
+                          { id: "escalation", name: "Audit Callbacks", badge: "CALL" },
+                          { id: "tax", name: "WA Tax Compliance", badge: "TAX" },
+                          { id: "directory", name: "GCP Service Directory", badge: "GCP" },
+                          { id: "gateway", name: "NIST Security Gateway", badge: "GW" },
+                          { id: "marketing_firewall", name: "B2B Marketing Guard", badge: "B2B" },
+                        ]
+                      },
+                      {
+                        id: "reference",
+                        name: "Component Library",
+                        icon: <BookOpen className="w-4 h-4 text-teal-400 shrink-0" />,
+                        tabs: [
+                          { id: "smd_library", name: "SMD Component Reference", badge: "LIB" }
+                        ]
+                      }
+                    ].map((group) => {
+                      const isGroupActive = group.tabs.some(t => t.id === labTab);
+                      return (
+                        <div key={group.id} className="bg-slate-900/40 rounded-xl border border-slate-800/80 overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // Select first subtab of the group on group header click
+                              setLabTab(group.tabs[0].id as any);
+                            }}
+                            className={`w-full flex items-center justify-between p-2.5 text-xs font-bold transition-all text-left ${
+                              isGroupActive 
+                                ? "bg-slate-900/80 text-white border-b border-slate-800/60" 
+                                : "text-slate-400 hover:bg-slate-900/30 hover:text-slate-250"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {group.icon}
+                              <span>{group.name}</span>
+                            </div>
+                            <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-250 ${isGroupActive ? "rotate-180 text-teal-400" : ""}`} />
+                          </button>
+                          
+                          {isGroupActive && (
+                            <div className="p-1.5 bg-slate-950/45 space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                              {group.tabs.map((tab) => {
+                                const isTabSelected = labTab === tab.id;
+                                return (
+                                  <button
+                                    key={tab.id}
+                                    type="button"
+                                    onClick={() => setLabTab(tab.id as any)}
+                                    className={`w-full flex items-center justify-between p-2 rounded-md text-[11px] font-medium transition-all ${
+                                      isTabSelected
+                                        ? "bg-[#008080] text-white shadow-sm font-semibold"
+                                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/45"
+                                    }`}
+                                  >
+                                    <span className="truncate">{tab.name}</span>
+                                    <span className={`px-1.5 py-0.2 text-[8px] font-black rounded font-mono ${
+                                      isTabSelected ? "bg-teal-900 text-teal-200" : "bg-slate-900 text-slate-500"
+                                    }`}>
+                                      {tab.badge}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* B2B FLEET Verification Frame */}
@@ -8478,7 +8347,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       <span>TRANSMIT POS WEBHook</span>
                     </button>
                     <div className="text-[9.5px] text-center text-slate-500 font-mono leading-relaxed mt-1 select-none">
-                      *Coordinates automatically sync with physical CellSmart monitors inside mobile van.
+                      *Coordinates automatically sync with physical CellSmart monitors inside our Spokane lab.
                     </div>
                   </div>
                 </section>
@@ -9589,7 +9458,7 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
     },
     {
       q: "How does the mobile laboratory power its high-precision solder stations?",
-      a: "Our diagnostic truck runs on standalone, eco-friendly solar-charged lithium power banks. We do not hook into your home utilities or cause noise pollution—providing silent, self-contained laboratory power.",
+      a: "Our planned mobile diagnostic laboratory is engineered to run on standalone, eco-friendly solar-charged lithium power banks. We do not hook into your home utilities or cause noise pollution—providing silent, self-contained laboratory power.",
       category: "Repairs"
     },
     {
@@ -9599,7 +9468,7 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
     },
     {
       q: "How long does a logic board filter bypass or PMU rebuild take?",
-      a: "Standard diagnostics take about 15-20 minutes. Core board surgery—micro-soldering components under our microscope magnification—typically takes 30 to 50 minutes total in the van.",
+      a: "Standard diagnostics take about 15-20 minutes. Core board surgery—micro-soldering components under our microscope magnification—typically takes 30 to 50 minutes total in our planned drive-up laboratory.",
       category: "Repairs"
     },
     {
@@ -9733,10 +9602,10 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
             <div className="lg:col-span-7 max-w-2xl text-left">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-6 uppercase tracking-wider font-mono">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                 </span>
-                Mobile Micro-Soldering Trucks Actively Stationed in Spokane
+                Custom Driveway Mobile Lab Unit (Active Development)
               </div>
               
               <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight mb-6 leading-tight">
@@ -9882,7 +9751,7 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
         <div className="text-center mb-16">
           <h2 className="text-3xl font-extrabold text-white mb-4">The Display & Cell Pros Advantage</h2>
           <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            By shifting high-precision board operations into specialized, solar-powered cleanrooms on wheels, we deliver retail-competitive rates with incomparable cybersecurity.
+            By planning to shift high-precision board operations into specialized, solar-powered cleanrooms on wheels, we deliver retail-competitive rates with incomparable cybersecurity.
           </p>
         </div>
         
@@ -9890,7 +9759,7 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
           <FeatureCard 
             icon={<MapPin className="text-blue-500 w-10 h-10 mb-4" />}
             title="Zero Drive Time"
-            desc="You book. We drive. Our technicians perform motherboard microsurgery inside our silent, clean custom cargo van parked outside your curb."
+            desc="Once deployed, our mobile laboratory is planned to perform motherboard microsurgery inside our silent, clean custom cargo van parked outside your curb."
           />
           <FeatureCard 
             icon={<ShieldCheck className="text-emerald-500 w-10 h-10 mb-4" />}
@@ -9942,7 +9811,7 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
 
                 {/* Telemetry log output */}
                 <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 font-mono text-[10px] space-y-1.5 text-slate-400 text-left">
-                  <div className="text-blue-400 font-bold">&#62; TRUCK_DIAGNOSTICS_CONTR_V4</div>
+                  <div className="text-blue-400 font-bold">&#62; MOBILE_LAB_CONTR_V1</div>
                   {microscopeStep === "shorted" && (
                     <>
                       <div>[ONLINE] Multimeter set to beep/continuity mode.</div>
@@ -10010,7 +9879,7 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
               <div className="text-xs font-mono font-bold text-slate-400 mb-2.5 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-blue-400">
                   <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-                  LIVE MICROSCOPE FEEDS [FEED 01 - SPOKANE TRUCK]
+                  LIVE MICROSCOPE FEEDS [FEED 01 - SPOKANE LAB]
                 </span>
                 <span>MAGNIFICATION [32X]</span>
               </div>
@@ -10314,113 +10183,55 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
       <div className="border-t border-b border-slate-900 bg-slate-950/70 py-20 text-left select-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-xs text-emerald-400 font-extrabold uppercase font-mono tracking-widest block mb-2 text-center">
-              REAL-TIME DISPATCH INTEL
+            <span className="text-xs text-amber-500 font-extrabold uppercase font-mono tracking-widest block mb-2 text-center">
+              MOBILE LAB DEVELOPMENT PIPELINE
             </span>
             <h2 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl text-center">
-              Live Mobile Repair Fleet Status
+              Mobile Repair Laboratory Status
             </h2>
             <p className="text-slate-400 text-sm max-w-2xl mx-auto mt-3 text-center">
-              We monitor truck location buffers and active solar capacity continuously to maintain our standard 2-hour driveway arrival service agreement thresholds.
+              Our first-generation custom-built driveway micro-soldering vehicle is currently in active development to bring clinical silicon diagnostics directly to your driveway.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* TRUCK 1 */}
-            <div className="border border-slate-800 bg-slate-900/40 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-850 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400 shrink-0">
-                    <MapPin className="w-5 h-5 text-blue-400" />
+          <div className="max-w-3xl mx-auto">
+            {/* SINGLE LAB VEHICLE IN DEVELOPMENT */}
+            <div className="border border-slate-800 bg-slate-900/40 rounded-2xl p-6 md:p-8 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-850 pb-5 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400 shrink-0">
+                    <MapPin className="w-6 h-6 text-blue-400" />
                   </div>
                   <div>
-                    <span className="text-xs font-black text-white block uppercase tracking-wide">
-                      MicroSolder Truck Alpha
+                    <span className="text-xs font-mono text-blue-400 font-bold block uppercase tracking-wider">
+                      DEVELOPMENT SPEC: BUILD UNIT 01
                     </span>
-                    <span className="text-[9px] text-slate-500 font-mono">Lic. PLATE: SPK-4409</span>
+                    <h3 className="text-xl font-black text-white uppercase tracking-wide">
+                      MicroSolder Mobile Lab (Unit Alpha)
+                    </h3>
                   </div>
                 </div>
-                <span className="text-[9px] bg-sky-950 border border-sky-900 text-sky-400 font-mono px-2 py-0.5 rounded uppercase font-bold tracking-wider animate-pulse shrink-0">
-                  Repairing
+                <span className="text-xs bg-amber-950/80 border border-amber-900 text-amber-400 font-mono px-3 py-1 rounded-full uppercase font-bold tracking-wider animate-pulse self-start sm:self-center shrink-0">
+                  Prototype In Development
                 </span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed min-h-[36px]">
-                Currently replacing backlight filter and LCD array on consumer logic board in South Hill.
+              
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Our custom clinical cargo cleanroom vehicle is currently under active hardware integration. It is being designed as a fully independent, zero-emission mobile laboratory to deploy on-site microscopic logic board surgery and high-fidelity screen restorations straight to your driveway.
               </p>
-              <div className="grid grid-cols-2 gap-3 text-[10px] font-mono border-t border-slate-850 pt-3 text-slate-400">
-                <div>
-                  <span className="text-slate-500 block">Battery Reserve</span>
-                  <span className="text-emerald-400 font-bold">84% DC Solar Charge</span>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono border-t border-slate-850 pt-5 text-slate-400">
+                <div className="bg-slate-950/40 border border-slate-900 p-4 rounded-xl">
+                  <span className="text-slate-500 block mb-1">Outfitting Status</span>
+                  <span className="text-amber-400 font-bold block text-sm">75% Complete</span>
                 </div>
-                <div>
-                  <span className="text-slate-500 block">Est. Next Open Slot</span>
-                  <span className="text-white font-bold">11:15 AM PST</span>
+                <div className="bg-slate-950/40 border border-slate-900 p-4 rounded-xl">
+                  <span className="text-slate-500 block mb-1">Cleanroom Environment</span>
+                  <span className="text-emerald-400 font-bold block text-sm">ISO Class 7 Planned</span>
                 </div>
-              </div>
-            </div>
-
-            {/* TRUCK 2 */}
-            <div className="border border-slate-800 bg-slate-900/40 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-850 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400 shrink-0">
-                    <MapPin className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white block uppercase tracking-wide">
-                      MicroSolder Truck Beta
-                    </span>
-                    <span className="text-[9px] text-slate-500 font-mono">Lic. PLATE: SPK-1811</span>
-                  </div>
-                </div>
-                <span className="text-[9px] bg-emerald-950 border border-emerald-900 text-emerald-400 font-mono px-2 py-0.5 rounded uppercase font-bold tracking-wider shrink-0">
-                  En Route
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed min-h-[36px]">
-                Dispatched to corporate business corridor in Liberty Lake. ETA 18 minutes. Surcharge: $0.
-              </p>
-              <div className="grid grid-cols-2 gap-3 text-[10px] font-mono border-t border-slate-850 pt-3 text-slate-400">
-                <div>
-                  <span className="text-slate-500 block">Battery Reserve</span>
-                  <span className="text-emerald-400 font-bold">96% DC Solar Charge</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Est. Arrival</span>
-                  <span className="text-amber-400 font-bold">10:45 AM PST</span>
-                </div>
-              </div>
-            </div>
-
-            {/* TRUCK 3 */}
-            <div className="border border-slate-800 bg-slate-900/40 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-850 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400 shrink-0">
-                    <MapPin className="w-5 h-5 text-indigo-400" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white block uppercase tracking-wide">
-                      Solder Truck Gamma
-                    </span>
-                    <span className="text-[9px] text-slate-500 font-mono">Lic. PLATE: SPK-3922</span>
-                  </div>
-                </div>
-                <span className="text-[9px] bg-violet-950 border border-violet-900 text-violet-400 font-mono px-2 py-0.5 rounded uppercase font-bold tracking-wider shrink-0">
-                  Standby
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed min-h-[36px]">
-                Fully stocked carbon-neutral mobile lab parked in Spokane Valley hub. Immediately available for dispatch.
-              </p>
-              <div className="grid grid-cols-2 gap-3 text-[10px] font-mono border-t border-slate-850 pt-3 text-slate-400">
-                <div>
-                  <span className="text-slate-500 block">Battery Reserve</span>
-                  <span className="text-emerald-400 font-bold">100% DC Full Base</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Dispatch Limit</span>
-                  <span className="text-emerald-400 font-bold">Immediate</span>
+                <div className="bg-slate-950/40 border border-slate-900 p-4 rounded-xl">
+                  <span className="text-slate-500 block mb-1">Est. Deployment</span>
+                  <span className="text-white font-bold block text-sm">Q4 2026 Spokane CoV</span>
                 </div>
               </div>
             </div>
@@ -10463,7 +10274,7 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
             <span className="font-mono text-3xl font-black text-indigo-500/40 block mb-2">03</span>
             <strong className="text-white text-sm font-bold block mb-1">EcoFlow Clean Solar Power</strong>
             <span className="text-slate-400 text-xs leading-relaxed block">
-              Pure Sine-Wave clean power drawn from integrated overhead van panels. Zero carbon noise footprint, 100% hum-free diagnostics.
+              Pure Sine-Wave clean power drawn from planned integrated overhead solar panels. Zero carbon noise footprint, 100% hum-free diagnostics.
             </span>
           </div>
 
@@ -11180,8 +10991,8 @@ function CustomerHubView({
           </div>
 
           <div className="mt-8">
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono">
-              ● Google SSO & Credentialed Auth Secured • Cloud Run Sandbox Gateway
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider">
+              Google SSO & Secure Credentialed Authentication
             </span>
           </div>
         </div>
@@ -11320,7 +11131,7 @@ function CustomerHubView({
       }
 
       if (approve) {
-        addToast("Proposal Approved!", "Your repair is now active. Spokane Dispatch Unit Van assigned to carry out surgery.", "success");
+        addToast("Proposal Approved!", "Your repair is now active. Assigned to our Spokane lab to carry out surgery.", "success");
       } else {
         addToast("Proposal Rejection Registered", "You have declined this pricing quote. Spokane office notified to contact you.", "info");
       }
@@ -11369,8 +11180,8 @@ function CustomerHubView({
       const endDateTime = `${bookDate}T${endHour}:00`;
 
       const eventBody = {
-        summary: `🛠️ D&CP Home Van Surgery: ${profilePreferredDevice}`,
-        description: `Driveway Dispatch - Board forensics and hardware rescue.\nClient: ${customerName}\nPhone: ${profilePhone}\nDirections & Remarks: ${bookRemarks || "No special instructions."}\nManual synchronization triggered on workbench.`,
+        summary: `🛠️ D&CP Diagnostic/Lab Surgery: ${profilePreferredDevice}`,
+        description: `Lab Diagnostic - Board forensics and hardware rescue.\nClient: ${customerName}\nPhone: ${profilePhone}\nDirections & Remarks: ${bookRemarks || "No special instructions."}\nManual synchronization triggered on workbench.`,
         start: { dateTime: startDateTime, timeZone: "America/Los_Angeles" },
         end: { dateTime: endDateTime, timeZone: "America/Los_Angeles" }
       };
@@ -11469,8 +11280,8 @@ function CustomerHubView({
           const endDateTime = `${bookDate}T${endHour}:00`;
 
           const bodyContent = {
-            summary: `🛠️ D&CP Home Van Surgery: ${profilePreferredDevice}`,
-            description: `Driveway Dispatch - Board forensics and hardware rescue.\nClient: ${customerName}\nPhone: ${profilePhone}\nDirections & Remarks: ${bookRemarks || "No special instructions."}\nSystem Verification ID: ${newLead.id}`,
+            summary: `🛠️ D&CP Diagnostic/Lab Surgery: ${profilePreferredDevice}`,
+            description: `Lab Diagnostic - Board forensics and hardware rescue.\nClient: ${customerName}\nPhone: ${profilePhone}\nDirections & Remarks: ${bookRemarks || "No special instructions."}\nSystem Verification ID: ${newLead.id}`,
             start: { dateTime: startDateTime, timeZone: "America/Los_Angeles" },
             end: { dateTime: endDateTime, timeZone: "America/Los_Angeles" }
           };
@@ -11501,14 +11312,14 @@ function CustomerHubView({
       
       if (calendarSyncSuccess) {
         addToast(
-          "Driveway Dispatch Booked", 
-          `Spokane Mobile Lab Van scheduled on ${bookDate}! Synced successfully with your Google Calendar diary.`, 
+          "Diagnostic Lab Booked", 
+          `Spokane Lab session scheduled on ${bookDate}! Synced successfully with your Google Calendar diary.`, 
           "success"
         );
       } else {
         addToast(
-          "Driveway Dispatch Booked", 
-          `Spokane Mobile Lab Van scheduled on ${bookDate} inside slot ${bookTime}!`, 
+          "Diagnostic Lab Booked", 
+          `Spokane Lab session scheduled on ${bookDate} inside slot ${bookTime}!`, 
           "success"
         );
       }
@@ -11672,7 +11483,7 @@ function CustomerHubView({
             }`}
           >
             <Calendar className="w-4 h-4" />
-            4. Book van Repair
+            4. Book Lab Repair
           </button>
 
           <button
@@ -11700,7 +11511,7 @@ function CustomerHubView({
                   Configure Your Repair Profile
                 </h2>
                 <p className="text-slate-400 text-xs mt-1">
-                  Ensure accurate details so our driveway surgical van dispatchers can link up directly. Saved directly to authenticated cloud datastores.
+                  Ensure accurate details so our driveway surgical lab coordinators can link up directly. Saved directly to authenticated cloud datastores.
                 </p>
               </div>
 
@@ -11837,8 +11648,8 @@ function CustomerHubView({
                       </div>
                     </div>
                     {usbConnected && (
-                      <span className="text-[10px] text-emerald-400 block mt-2 text-right">
-                        ● Direct Telemetry Pipeline Established
+                      <span className="text-[10px] text-emerald-400 block mt-2 text-right font-medium">
+                        Direct Telemetry Connection Active
                       </span>
                     )}
                   </div>
@@ -11967,10 +11778,10 @@ function CustomerHubView({
                 <div className="mb-6">
                   <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <Calendar className="text-blue-400" />
-                    Dispatch Driveway Laboratory
+                    Dispatch Driveway/Lab Booking
                   </h2>
                   <p className="text-slate-400 text-xs mt-1">
-                    Book a physical driveway visit from our Spokane Valley tech van. The tech will carry out microscopic logic board soldering and screen repairs right in your driveway!
+                    Book a physical driveway or laboratory visit. Our technician will carry out microscopic logic board soldering and screen repairs right in your driveway or at our bench!
                   </p>
                 </div>
 
@@ -12248,7 +12059,7 @@ function CustomerHubView({
                       data-callback="onSubmitBooking"
                       data-action="submit"
                     >
-                      Schedule Dispatch Van Booking
+                      Schedule Dispatch/Lab Booking
                     </button>
                   </form>
 
@@ -12301,8 +12112,8 @@ function CustomerHubView({
                       Chat directly with the office AI supervisor and on-call hardware reverse engineering leads of Spokane.
                     </p>
                   </div>
-                  <span className="text-[10px] text-emerald-400 bg-emerald-900/10 border border-emerald-500/20 px-2 py-1 rounded inline-block uppercase font-mono tracking-widest">
-                    ● SECURE DIRECT CHANNEL
+                  <span className="text-[10px] text-emerald-400 bg-emerald-900/10 border border-emerald-500/20 px-2 py-1 rounded inline-block uppercase font-sans tracking-wide font-semibold">
+                    Secure Channel
                   </span>
                 </div>
 
@@ -12686,7 +12497,7 @@ function StoreView({
                 30-Day High-Turnover Runways & Depletion Curves
               </h2>
               <p className="text-[11px] text-slate-400">
-                AI-informed run-rate tracking of accessories across active mobile service vans to automate dispatch.
+                AI-informed run-rate tracking of accessories across mobile service stock to automate dispatch.
               </p>
             </div>
             
@@ -12913,8 +12724,8 @@ function StoreView({
             </div>
 
             <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/60 flex items-start gap-1.5 text-slate-400 text-[10px] leading-relaxed">
-              <span className="text-emerald-400 font-extrabold shrink-0">[VAN DIRECT]</span>
-              <span>Our driver will match this invoice with your physical ticket details. All pre-ordered items remain reserved for 72 hours.</span>
+              <span className="text-emerald-400 font-extrabold shrink-0">[LAB DIRECT]</span>
+              <span>Our representative will match this invoice with your physical ticket details. All pre-ordered items remain reserved for 72 hours.</span>
             </div>
           </div>
 

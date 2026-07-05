@@ -642,12 +642,55 @@ export const ForensicsView: React.FC<ForensicsViewProps> = ({
 
   const [selectedNodeState, setSelectedNodeState] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    setSelectedNodeState(null);
-  }, [s2cActivePathway]);
+  // Memory cache to remember previously mounted schematic documents across source-cycling
+  const [mountedCache, setMountedCache] = React.useState<Record<string, boolean>>({});
 
   const selectedPathway = pathwayData[s2cActivePathway] || pathwayData.backlight;
   const isMounted = !!mountedSources[selectedPathway.pdf];
+
+  const mountedSourcesStr = JSON.stringify(mountedSources);
+  
+  // Sync current mounted status of all schematics to memory cache
+  React.useEffect(() => {
+    setMountedCache(prev => {
+      let updated = false;
+      const nextCache = { ...prev };
+      for (const [key, value] of Object.entries(mountedSources)) {
+        if (value && !nextCache[key]) {
+          nextCache[key] = true;
+          updated = true;
+        } else if (!value && nextCache[key] && key === selectedPathway.pdf) {
+          // If the user explicitly unmounted the current active schematic, clear it from cache
+          nextCache[key] = false;
+          updated = true;
+        }
+      }
+      return updated ? nextCache : prev;
+    });
+  }, [mountedSourcesStr, selectedPathway.pdf]);
+
+  const currentPdf = selectedPathway.pdf;
+  const isCurrentlyMounted = !!mountedSources[currentPdf];
+  const isCached = !!mountedCache[currentPdf];
+
+  // Restore mounted state during source-cycling if it was previously mounted in the cache
+  React.useEffect(() => {
+    if (isCached && !isCurrentlyMounted) {
+      setMountedSources(prev => ({
+        ...prev,
+        [currentPdf]: true
+      }));
+      addToast(
+        "Cache Recalled",
+        `Previously mounted ${currentPdf} restored from local forensics memory cache.`,
+        "success"
+      );
+    }
+  }, [s2cActivePathway, currentPdf, isCached, isCurrentlyMounted, setMountedSources, addToast]);
+
+  React.useEffect(() => {
+    setSelectedNodeState(null);
+  }, [s2cActivePathway]);
 
   // Derive the active node inside the selected pathway
   const activeNodeId = selectedNodeState || (selectedPathway.nodes.find(n => n.isFault)?.id || selectedPathway.nodes[0].id);
@@ -686,8 +729,8 @@ export const ForensicsView: React.FC<ForensicsViewProps> = ({
                 <Activity className="w-4 h-4 text-violet-400 animate-pulse" />
                 1. Low-Level Ingestion Layer
               </span>
-              <span className="text-[9px] text-emerald-400 font-mono tracking-wider font-extrabold uppercase">
-                ● CORE RECOVERY API PROTOCOL
+              <span className="text-[9px] text-emerald-400 tracking-wider font-semibold uppercase">
+                Ingestion Protocol
               </span>
             </div>
 
@@ -1734,6 +1777,8 @@ double tempReading = IOPSGetTemperatureReading(sources[0]);
                       ⚠️ <strong>Verification Blocked:</strong> Grounding source unmounted. Please mount the document to verify the trace.
                     </div>
                   )}
+
+                  {/* Forensic Memory Cache Status Indicator is cleaned up */}
                 </div>
               </div>
 
