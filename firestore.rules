@@ -1,10 +1,222 @@
 rules_version = '2';
-
-// Deny read/write access to all users under any conditions
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Global Safety Net: Default Deny catch-all
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    // --- REUSABLE GLOBAL UTILITIES & PRIMITIVES ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- ENTITY SCHEMA VALIDATORS ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'email', 'createdAt'])
+        && data.keys().size() <= 8
+        && data.uid is string && data.uid.size() <= 128
+        && data.displayName is string && data.displayName.size() <= 128
+        && data.email is string && data.email.size() <= 128
+        && (!data.keys().hasAny(['phone']) || (data.phone is string && data.phone.size() <= 32))
+        && (!data.keys().hasAny(['preferredDevice']) || (data.preferredDevice is string && data.preferredDevice.size() <= 128))
+        && (!data.keys().hasAny(['photoURL']) || (data.photoURL is string && data.photoURL.size() <= 512))
+        && data.createdAt is string;
+    }
+
+    function isValidTicket(data) {
+      return data.keys().hasAll(['id', 'customerName', 'device', 'issueType', 'status', 'quotedPrice', 'tax', 'discount', 'total', 'createdAt', 'userId'])
+        && data.keys().size() <= 13
+        && data.id is string && data.id.size() <= 32
+        && data.customerName is string && data.customerName.size() <= 128
+        && data.device is string && data.device.size() <= 128
+        && data.issueType is string && (data.issueType == 'screen' || data.issueType == 'battery' || data.issueType == 'button' || data.issueType == 'other')
+        && data.status is string && (data.status == 'open' || data.status == 'parts_assigned' || data.status == 'technician_working' || data.status == 'quality_check' || data.status == 'completed')
+        && data.quotedPrice is number
+        && data.tax is number
+        && data.discount is number
+        && data.total is number
+        && data.createdAt is string
+        && data.userId is string && data.userId.size() <= 128
+        && (!data.keys().hasAny(['internalNotes']) || (data.internalNotes is string && data.internalNotes.size() <= 4096));
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll(['id', 'customerName', 'phone', 'deviceModel', 'status', 'createdAt', 'userId'])
+        && data.keys().size() <= 8
+        && data.id is string && data.id.size() <= 128
+        && data.customerName is string && data.customerName.size() <= 128
+        && data.phone is string && data.phone.size() <= 32
+        && data.deviceModel is string && data.deviceModel.size() <= 128
+        && data.status is string && (data.status == 'pending' || data.status == 'in_progress' || data.status == 'contacted' || data.status == 'completed' || data.status == 'cancelled')
+        && data.createdAt is string
+        && data.userId is string && data.userId.size() <= 128;
+    }
+
+    function isValidS2CFeedback(data) {
+      return data.keys().hasAll(['id', 'userId', 'pathway', 'rating', 'deviceModel', 'createdAt'])
+        && data.keys().size() <= 9
+        && data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.pathway is string && data.pathway.size() <= 64
+        && data.rating is string && (data.rating == 'up' || data.rating == 'down')
+        && data.deviceModel is string && data.deviceModel.size() <= 128
+        && data.createdAt is string
+        && (!data.keys().hasAny(['notes']) || (data.notes is string && data.notes.size() <= 2048))
+        && (!data.keys().hasAny(['ammeterReading']) || data.ammeterReading is number)
+        && (!data.keys().hasAny(['batteryTemp']) || data.batteryTemp is number);
+    }
+
+    function isValidDraft(data) {
+      return data.keys().hasAll(['id', 'userId', 'messages', 'forensicLogs', 'lastUpdated'])
+        && data.keys().size() <= 7
+        && data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.messages is list
+        && data.forensicLogs is list
+        && data.lastUpdated is string
+        && (!data.keys().hasAny(['forensicDevice']) || (data.forensicDevice is string && data.forensicDevice.size() <= 128))
+        && (!data.keys().hasAny(['sessionLabel']) || (data.sessionLabel is string && data.sessionLabel.size() <= 256));
+    }
+
+    function isValidPOSLog(data) {
+      return data.keys().hasAll(['id', 'timestamp', 'level', 'message', 'source', 'userId'])
+        && data.keys().size() == 6
+        && data.id is string && data.id.size() <= 128
+        && data.timestamp is string
+        && data.level is string && data.level.size() <= 32
+        && data.message is string && data.message.size() <= 2048
+        && data.source is string && (data.source == 'Square' || data.source == 'CellSmart' || data.source == 'WebHook-Receiver')
+        && data.userId is string && data.userId.size() <= 128;
+    }
+
+    function isValidRecaptchaAssessment(data) {
+      return data.keys().hasAll(['id', 'token', 'action', 'score', 'success', 'createdAt'])
+        && data.keys().size() <= 8
+        && data.id is string && data.id.size() <= 128
+        && data.token is string && data.token.size() <= 4096
+        && data.action is string && data.action.size() <= 64
+        && data.score is number
+        && data.success is bool
+        && data.createdAt is string
+        && (!data.keys().hasAny(['reasons']) || data.reasons is list)
+        && (!data.keys().hasAny(['isSimulated']) || data.isSimulated is bool);
+    }
+
+    // --- COLLECTION RULES MATCHES ---
+    match /users/{userId} {
+      allow get: if isSignedIn() && userId == request.auth.uid;
+      allow list: if isSignedIn() && userId == request.auth.uid;
+      
+      allow create: if isSignedIn() 
+        && userId == request.auth.uid 
+        && isValidId(userId)
+        && isValidUser(incoming())
+        && incoming().uid == request.auth.uid;
+        
+      allow update: if isSignedIn()
+        && userId == request.auth.uid
+        && isValidUser(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt;
+    }
+
+    match /tickets/{ticketId} {
+      // Direct access (get) allows the user to read if they own the ticket
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // List query security: Client cannot query blanket logs, must filter by their userId
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && isValidId(ticketId)
+        && isValidTicket(incoming())
+        // Enforce identity integrity
+        && incoming().userId == request.auth.uid;
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && isValidTicket(incoming())
+        // Enforce immutable fields
+        && incoming().userId == existing().userId
+        && incoming().id == existing().id
+        && incoming().createdAt == existing().createdAt;
+    }
+
+    match /high-priority-leads/{leadId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && isValidId(leadId)
+        && isValidLead(incoming())
+        && incoming().userId == request.auth.uid;
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && isValidLead(incoming())
+        && incoming().userId == existing().userId
+        && incoming().id == existing().id
+        && incoming().createdAt == existing().createdAt;
+    }
+
+    match /s2c-feedback/{feedbackId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && isValidId(feedbackId)
+        && isValidS2CFeedback(incoming())
+        && incoming().userId == request.auth.uid;
+    }
+
+    match /drafts/{draftId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create, update: if isSignedIn()
+        && isValidId(draftId)
+        && isValidDraft(incoming())
+        && incoming().userId == request.auth.uid;
+
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    match /pos-logs/{logId} {
+      allow get, list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && isValidId(logId)
+        && isValidPOSLog(incoming())
+        && incoming().userId == request.auth.uid;
+
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /recaptcha-assessments/{assessmentId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidId(assessmentId)
+        && isValidRecaptchaAssessment(incoming());
+      allow update, delete: if false;
+    }
+
+    match /quotes/{quoteId} {
+      allow read, write: if isSignedIn();
     }
   }
 }
