@@ -1370,6 +1370,9 @@ export default function App() {
           }
 
           setIsAdminClaim(isAdmin);
+          if (isAdmin) {
+            setUserRole("technician");
+          }
 
           // Update user profile info dynamically if not anonymous
           if (!user.isAnonymous) {
@@ -1754,7 +1757,24 @@ export default function App() {
         fetchFirestoreLeads(authUser.uid);
       }
     } else {
-      setActiveTab("home");
+      // Forensic RAG Session Restore: Implement 'login-redirect' guard for authenticated technicians
+      const savedTab = localStorage.getItem("dcp_last_visited_tab");
+      const savedLabTab = localStorage.getItem("dcp_last_visited_lab_tab");
+      
+      if (savedTab && savedTab !== "home" && savedTab !== "customer-hub") {
+        setActiveTab(savedTab);
+        if (savedTab === "lab" && savedLabTab) {
+          setLabTab(savedLabTab as any);
+        }
+        addToast(
+          "Security Session Restored",
+          `Authenticated: Returned to last visited ${savedTab === "lab" ? `Laboratory [${savedLabTab.toUpperCase()}]` : savedTab.toUpperCase()} dashboard.`,
+          "success"
+        );
+      } else {
+        setActiveTab("home");
+      }
+      
       fetchPOSLogs();
       if (authUser) {
         fetchFirestoreLeads(authUser.uid);
@@ -1762,6 +1782,18 @@ export default function App() {
       }
     }
   }, [userRole, authUser]);
+
+  // Track and persist last visited technician dashboard and lab sub-view to enable login-redirect guard
+  useEffect(() => {
+    if (userRole === "technician") {
+      if (activeTab && activeTab !== "home" && activeTab !== "customer-hub") {
+        localStorage.setItem("dcp_last_visited_tab", activeTab);
+        if (activeTab === "lab") {
+          localStorage.setItem("dcp_last_visited_lab_tab", labTab);
+        }
+      }
+    }
+  }, [activeTab, labTab, userRole]);
 
   // --- POS SYNC LEDGER AUTO-REFRESH ENGINE ---
   useEffect(() => {
@@ -3817,7 +3849,21 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                       return;
                     }
                     setUserRole("technician");
-                    setActiveTab("home");
+                    const savedTab = localStorage.getItem("dcp_last_visited_tab");
+                    const savedLabTab = localStorage.getItem("dcp_last_visited_lab_tab");
+                    if (savedTab && savedTab !== "home" && savedTab !== "customer-hub") {
+                      setActiveTab(savedTab);
+                      if (savedTab === "lab" && savedLabTab) {
+                        setLabTab(savedLabTab as any);
+                      }
+                      addToast(
+                        "Workspace Diagnostic Restore",
+                        `Returned to your active laboratory terminal: ${savedTab === "lab" ? `Laboratory [${savedLabTab.toUpperCase()}]` : savedTab.toUpperCase()}.`,
+                        "success"
+                      );
+                    } else {
+                      setActiveTab("home");
+                    }
                   }}
                   className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
                     userRole === "technician"
@@ -3965,7 +4011,21 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                       return;
                     }
                     setUserRole("technician");
-                    setActiveTab("home");
+                    const savedTab = localStorage.getItem("dcp_last_visited_tab");
+                    const savedLabTab = localStorage.getItem("dcp_last_visited_lab_tab");
+                    if (savedTab && savedTab !== "home" && savedTab !== "customer-hub") {
+                      setActiveTab(savedTab);
+                      if (savedTab === "lab" && savedLabTab) {
+                        setLabTab(savedLabTab as any);
+                      }
+                      addToast(
+                        "Workspace Diagnostic Restore",
+                        `Returned to your active laboratory terminal: ${savedTab === "lab" ? `Laboratory [${savedLabTab.toUpperCase()}]` : savedTab.toUpperCase()}.`,
+                        "success"
+                      );
+                    } else {
+                      setActiveTab("home");
+                    }
                     setMobileMenuOpen(false);
                   }}
                   className={`p-2.5 rounded text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-1.5 ${
