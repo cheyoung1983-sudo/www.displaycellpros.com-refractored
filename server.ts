@@ -2387,6 +2387,828 @@ Construct an authoritative, scientific audit report detailing the exact physical
     });
   });
 
+  // --- GOOGLE IDENTITY PLATFORM SERVICES REST/RPC PROXY & SIMULATOR ---
+  app.post("/api/auth/identitytoolkit-proxy", async (req, res) => {
+    const { serviceName, rpcMethod, payload, apiKey } = req.body;
+
+    if (!serviceName || !rpcMethod) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing required fields: serviceName and rpcMethod are mandatory." 
+      });
+    }
+
+    // Determine target URL path based on Service & Method
+    const key = apiKey || process.env.GEMINI_API_KEY || "AIzaSyFakeKey_DCP_Enterprise_2026";
+    const projectId = process.env.RECAPTCHA_PROJECT_ID || "displaycellpros-com";
+    
+    let targetUrl = "";
+    let httpMethod = "POST";
+    let isGetOrPatchOrDelete = false;
+
+    // Default headers
+    const requestHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Client": "display-cell-pros-forensic-RAG/1.0",
+      "x-goog-user-project": projectId
+    };
+
+    // Mapping Endpoint Logic
+    if (serviceName === "google.cloud.identitytoolkit.v1.AuthenticationService") {
+      const endpointMap: Record<string, string> = {
+        SignUp: "accounts:signUp",
+        SignInWithPassword: "accounts:signInWithPassword",
+        SendOobCode: "accounts:sendOobCode"
+      };
+      const suffix = endpointMap[rpcMethod];
+      if (suffix) targetUrl = `https://identitytoolkit.googleapis.com/v1/${suffix}?key=${key}`;
+    } 
+    else if (serviceName === "google.cloud.identitytoolkit.v1.AccountManagementService") {
+      const endpointMap: Record<string, string> = {
+        GetAccountInfo: "accounts:lookup",
+        SetAccountInfo: "accounts:update",
+        DeleteAccount: "accounts:delete"
+      };
+      const suffix = endpointMap[rpcMethod];
+      if (suffix) targetUrl = `https://identitytoolkit.googleapis.com/v1/${suffix}?key=${key}`;
+    } 
+    else if (serviceName === "google.cloud.identitytoolkit.v1.SessionManagementService") {
+      if (rpcMethod === "CreateSessionCookie") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v1/projects/${projectId}/createSessionCookie?key=${key}`;
+      }
+    } 
+    else if (serviceName === "google.cloud.identitytoolkit.v1.ProjectConfigService") {
+      if (rpcMethod === "GetProjectConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v1/projects/${projectId}/config?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "UpdateProjectConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v1/projects/${projectId}/config?key=${key}`;
+        httpMethod = "PATCH";
+        isGetOrPatchOrDelete = true;
+      }
+    } 
+    else if (serviceName === "google.cloud.identitytoolkit.admin.v2.ProjectConfigService") {
+      if (rpcMethod === "GetProjectConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/config?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "UpdateProjectConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/config?key=${key}`;
+        httpMethod = "PATCH";
+        isGetOrPatchOrDelete = true;
+      }
+      // DefaultSupportedIdpConfig Methods
+      else if (rpcMethod === "CreateDefaultSupportedIdpConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/defaultSupportedIdpConfigs?key=${key}`;
+      } else if (rpcMethod === "GetDefaultSupportedIdpConfig") {
+        const id = payload?.defaultSupportedIdpConfigId || "google.com";
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/defaultSupportedIdpConfigs/${id}?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "UpdateDefaultSupportedIdpConfig") {
+        const id = payload?.defaultSupportedIdpConfigId || "google.com";
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/defaultSupportedIdpConfigs/${id}?key=${key}`;
+        httpMethod = "PATCH";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "ListDefaultSupportedIdpConfigs") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/defaultSupportedIdpConfigs?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "DeleteDefaultSupportedIdpConfig") {
+        const id = payload?.defaultSupportedIdpConfigId || "google.com";
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/defaultSupportedIdpConfigs/${id}?key=${key}`;
+        httpMethod = "DELETE";
+        isGetOrPatchOrDelete = true;
+      }
+      // OAuthIdpConfig Methods
+      else if (rpcMethod === "CreateOAuthIdpConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/oauthIdpConfigs?key=${key}`;
+      } else if (rpcMethod === "GetOAuthIdpConfig") {
+        const id = payload?.oauthIdpConfigId || "oidc.dcp-partner-sso";
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/oauthIdpConfigs/${id}?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "UpdateOAuthIdpConfig") {
+        const id = payload?.oauthIdpConfigId || "oidc.dcp-partner-sso";
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/oauthIdpConfigs/${id}?key=${key}`;
+        httpMethod = "PATCH";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "ListOAuthIdpConfigs") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/oauthIdpConfigs?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "DeleteOAuthIdpConfig") {
+        const id = payload?.oauthIdpConfigId || "oidc.dcp-partner-sso";
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/oauthIdpConfigs/${id}?key=${key}`;
+        httpMethod = "DELETE";
+        isGetOrPatchOrDelete = true;
+      }
+    } 
+    else if (serviceName === "google.cloud.identitytoolkit.v2beta1.ProjectConfigService") {
+      if (rpcMethod === "GetProjectConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2beta1/projects/${projectId}/config?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "UpdateProjectConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2beta1/projects/${projectId}/config?key=${key}`;
+        httpMethod = "PATCH";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "EnableCicp") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2beta1/projects/${projectId}:enableCicp?key=${key}`;
+        httpMethod = "POST";
+      }
+    } 
+    else if (serviceName === "google.cloud.identitytoolkit.admin.v2.TenantManagementService") {
+      const tenantId = payload?.tenantId || "simulated-tenant-101";
+      if (rpcMethod === "CreateTenant") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/tenants?key=${key}`;
+      } else if (rpcMethod === "GetTenant") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/tenants/${tenantId}?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "ListTenants") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/tenants?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "DeleteTenant") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/tenants/${tenantId}?key=${key}`;
+        httpMethod = "DELETE";
+        isGetOrPatchOrDelete = true;
+      }
+    } 
+    else if (serviceName === "google.cloud.identitytoolkit.v2beta1.TenantManagementService") {
+      const tenantId = payload?.tenantId || "simulated-tenant-101";
+      if (rpcMethod === "CreateTenant") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2beta1/projects/${projectId}/tenants?key=${key}`;
+      } else if (rpcMethod === "GetTenant") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2beta1/projects/${projectId}/tenants/${tenantId}?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "ListTenants") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2beta1/projects/${projectId}/tenants?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "DeleteTenant") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2beta1/projects/${projectId}/tenants/${tenantId}?key=${key}`;
+        httpMethod = "DELETE";
+        isGetOrPatchOrDelete = true;
+      }
+    }
+    else if (serviceName === "google.cloud.identitytoolkit.v2.InboundSamlConfigService") {
+      const samlId = payload?.inboundSamlConfigId || "saml.dcp-enterprise-sso";
+      if (rpcMethod === "CreateInboundSamlConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/inboundSamlConfigs?key=${key}`;
+      } else if (rpcMethod === "GetInboundSamlConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/inboundSamlConfigs/${samlId}?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "UpdateInboundSamlConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/inboundSamlConfigs/${samlId}?key=${key}`;
+        httpMethod = "PATCH";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "ListInboundSamlConfigs") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/inboundSamlConfigs?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "DeleteInboundSamlConfig") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/inboundSamlConfigs/${samlId}?key=${key}`;
+        httpMethod = "DELETE";
+        isGetOrPatchOrDelete = true;
+      }
+    }
+    else if (serviceName === "google.cloud.identitytoolkit.v2.AuthenticationService") {
+      const tenantId = payload?.tenantId;
+      if (rpcMethod === "StartMfaSignIn") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/accounts/mfaSignIn:start?key=${key}`;
+      } else if (rpcMethod === "FinalizeMfaSignIn") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/accounts/mfaSignIn:finalize?key=${key}`;
+      } else if (rpcMethod === "GetPasswordPolicy") {
+        targetUrl = tenantId 
+          ? `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/tenants/${tenantId}/passwordPolicy?key=${key}`
+          : `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/passwordPolicy?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "GetRecaptchaConfig") {
+        targetUrl = tenantId 
+          ? `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/tenants/${tenantId}/recaptchaConfig?key=${key}`
+          : `https://identitytoolkit.googleapis.com/v2/projects/${projectId}/recaptchaConfig?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "RevokeToken") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/accounts:revokeToken?key=${key}`;
+      }
+    }
+    else if (serviceName === "google.cloud.identitytoolkit.v2.AccountManagementService") {
+      if (rpcMethod === "StartMfaEnrollment") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/accounts/mfaEnrollment:start?key=${key}`;
+      } else if (rpcMethod === "FinalizeMfaEnrollment") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/accounts/mfaEnrollment:finalize?key=${key}`;
+      } else if (rpcMethod === "WithdrawMfa") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v2/accounts/mfaEnrollment:withdraw?key=${key}`;
+      }
+    }
+    else if (serviceName === "google.iam.v1.IAMPolicy") {
+      const resName = payload?.resource || `projects/${projectId}`;
+      if (rpcMethod === "GetIamPolicy") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v1/${resName}:getIamPolicy?key=${key}`;
+      } else if (rpcMethod === "SetIamPolicy") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v1/${resName}:setIamPolicy?key=${key}`;
+      } else if (rpcMethod === "TestIamPermissions") {
+        targetUrl = `https://identitytoolkit.googleapis.com/v1/${resName}:testIamPermissions?key=${key}`;
+      }
+    }
+
+    if (!targetUrl) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Unsupported or invalid Service/Method configuration: ${serviceName}::${rpcMethod}` 
+      });
+    }
+
+    const startTime = Date.now();
+    let responseStatus = 200;
+    let responseHeaders: Record<string, string> = {};
+    let responseBody: any = null;
+    let transportError: string | null = null;
+    let isSimulated = false;
+
+    // Mask key for print
+    const maskedKey = key.substring(0, 8) + "...";
+    const printedUrl = targetUrl.replace(`key=${key}`, `key=${maskedKey}`);
+
+    // Build raw outbound HTTP request trace log
+    const requestPayloadString = isGetOrPatchOrDelete ? "" : `\r\n\r\n${JSON.stringify(payload, null, 2)}`;
+    const rawRequestString = `${httpMethod} ${printedUrl.replace("https://identitytoolkit.googleapis.com", "")} HTTP/1.1\r\n` +
+      `Host: identitytoolkit.googleapis.com\r\n` +
+      Object.entries(requestHeaders).map(([k, v]) => `${k}: ${v}`).join("\r\n") +
+      requestPayloadString;
+
+    try {
+      // Determine if simulating (based on mock key or absence of real GEMINI_API_KEY as client secret fallback)
+      if (key.startsWith("AIzaSyFake") || key.includes("FakeKey") || !process.env.GEMINI_API_KEY) {
+        isSimulated = true;
+        await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 150)); // Real-world latency simulation
+
+        responseHeaders = {
+          "Content-Type": "application/json; charset=UTF-8",
+          "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+          "Pragma": "no-cache",
+          "Server": "ESF",
+          "X-Content-Type-Options": "nosniff",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-XSS-Protection": "0"
+        };
+
+        // Custom High-Fidelity Mock Payload Builder
+        if (serviceName === "google.cloud.identitytoolkit.v1.AuthenticationService") {
+          if (rpcMethod === "SignUp") {
+            responseBody = {
+              kind: "identitytoolkit#SignupNewUserResponse",
+              idToken: `eyJhbGciOiJSUzI1NiIsImtpZCI6ImYxZjk5In0.eyJzdWIiOiJzaW1fdXNlcl91aWRfODIxOSIsImVtYWlsIjoi${Buffer.from(payload?.email || "test@example.com").toString("base64").substring(0, 16)}\"`,
+              email: payload?.email || "operator_simulated@displaycellpros.com",
+              refreshToken: "sim_refresh_token_71829102",
+              expiresIn: "3600",
+              localId: `sim_user_uid_df_${Math.floor(100000 + Math.random() * 900000)}`
+            };
+          } else if (rpcMethod === "SignInWithPassword") {
+            responseBody = {
+              kind: "identitytoolkit#VerifyPasswordResponse",
+              localId: `sim_user_uid_df_${Math.floor(100000 + Math.random() * 900000)}`,
+              email: payload?.email || "operator_simulated@displaycellpros.com",
+              displayName: "Lead Forensic Operator (Simulated)",
+              idToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImYxZjk5In0.eyJzdWIiOiJzaW1fdXNlcl91aWRfODIxOSJ9",
+              registered: true,
+              refreshToken: "sim_refresh_token_71829102",
+              expiresIn: "3600"
+            };
+          } else if (rpcMethod === "SendOobCode") {
+            responseBody = {
+              kind: "identitytoolkit#GetOobConfirmationCodeResponse",
+              email: payload?.email || "operator_simulated@displaycellpros.com",
+              oobCode: `sim_oob_code_${crypto.randomBytes(8).toString("hex")}`
+            };
+          }
+        } 
+        else if (serviceName === "google.cloud.identitytoolkit.v1.AccountManagementService") {
+          if (rpcMethod === "GetAccountInfo") {
+            responseBody = {
+              kind: "identitytoolkit#GetAccountInfoResponse",
+              users: [{
+                localId: payload?.localId || "sim_user_uid_df_928102",
+                email: payload?.email || "operator_simulated@displaycellpros.com",
+                emailVerified: true,
+                displayName: "Lead Forensic Operator",
+                providerUserInfo: [{
+                  providerId: "password",
+                  displayName: "Lead Forensic Operator",
+                  email: "operator_simulated@displaycellpros.com"
+                }],
+                createdAt: String(Date.now() - 1000 * 60 * 60 * 24 * 30),
+                lastLoginAt: String(Date.now() - 1000 * 60 * 5)
+              }]
+            };
+          } else if (rpcMethod === "SetAccountInfo") {
+            responseBody = {
+              kind: "identitytoolkit#SetAccountInfoResponse",
+              localId: payload?.localId || "sim_user_uid_df_928102",
+              email: payload?.email || "operator_simulated@displaycellpros.com",
+              displayName: payload?.displayName || "Lead Forensic Operator (Updated)",
+              emailVerified: payload?.emailVerified !== undefined ? payload.emailVerified : true,
+              providerUserInfo: [{
+                providerId: "password",
+                displayName: payload?.displayName || "Lead Forensic Operator (Updated)",
+                email: payload?.email || "operator_simulated@displaycellpros.com"
+              }],
+              passwordHash: "UkVGT0xXX1NBQzMwNV9TRUNVUkU=",
+              mfaInfo: []
+            };
+          } else if (rpcMethod === "DeleteAccount") {
+            responseBody = {
+              kind: "identitytoolkit#DeleteAccountResponse"
+            };
+          }
+        } 
+        else if (serviceName === "google.cloud.identitytoolkit.v1.SessionManagementService") {
+          if (rpcMethod === "CreateSessionCookie") {
+            responseBody = {
+              status: "success",
+              sessionCookie: `sim_session_cookie_${crypto.randomBytes(16).toString("hex")}`,
+              expiresIn: payload?.expiresIn || "1209600" // 14 days default
+            };
+          }
+        } 
+        else if (serviceName.includes("ProjectConfigService")) {
+          // Serves all ProjectConfigService versions (v1, admin.v2, v2beta1)
+          if (rpcMethod === "EnableCicp") {
+            responseBody = {
+              projectId: projectId,
+              cicpEnabled: true,
+              activationState: "ACTIVATED",
+              timestamp: new Date().toISOString()
+            };
+          } else {
+            responseBody = {
+              projectId: projectId,
+              authorizedDomains: ["localhost", "displaycellpros.com", "ais-dev-qaarbg7eivxlz2dpis24f5-367327296310.us-west2.run.app"],
+              signIn: {
+                email: {
+                  enabled: true,
+                  passwordRequired: true
+                },
+                anonymous: {
+                  enabled: false
+                },
+                phoneNumber: {
+                  enabled: true
+                }
+              },
+              multiFactorConfig: {
+                state: "ENABLED",
+                factorConfigs: [{
+                  state: "ENABLED",
+                  phoneNumberOfFactor: {}
+                }]
+              },
+              recaptchaConfig: {
+                emailPasswordEnforcementState: "AUDIT",
+                managedRules: [{
+                  action: "BLOCK",
+                  score: 0.3
+                }]
+              },
+              passwordPolicy: {
+                allowedMinLength: 8,
+                allowedMaxLength: 32,
+                schemaVersion: serviceName.includes("v2") ? "V2_STRONG" : "V1_LEGACY"
+              }
+            };
+          }
+          if (rpcMethod === "UpdateProjectConfig") {
+            responseBody = {
+              ...responseBody,
+              passwordPolicy: {
+                ...responseBody.passwordPolicy,
+                allowedMinLength: payload?.passwordPolicy?.allowedMinLength || 10
+              },
+              recaptchaConfig: {
+                ...responseBody.recaptchaConfig,
+                emailPasswordEnforcementState: payload?.recaptchaConfig?.emailPasswordEnforcementState || "ENFORCE"
+              }
+            };
+          } else if (rpcMethod === "CreateDefaultSupportedIdpConfig") {
+            const id = payload?.defaultSupportedIdpConfigId || "google.com";
+            responseBody = {
+              name: `projects/${projectId}/defaultSupportedIdpConfigs/${id}`,
+              enabled: payload?.enabled !== undefined ? payload.enabled : true,
+              clientId: payload?.clientId || "1046067704682-simulated.apps.googleusercontent.com",
+              clientSecret: payload?.clientSecret || "simulated_client_secret_xyz123"
+            };
+          } else if (rpcMethod === "GetDefaultSupportedIdpConfig") {
+            const id = payload?.defaultSupportedIdpConfigId || "google.com";
+            responseBody = {
+              name: `projects/${projectId}/defaultSupportedIdpConfigs/${id}`,
+              enabled: true,
+              clientId: "1046067704682-simulated.apps.googleusercontent.com",
+              clientSecret: "simulated_client_secret_xyz123"
+            };
+          } else if (rpcMethod === "UpdateDefaultSupportedIdpConfig") {
+            const id = payload?.defaultSupportedIdpConfigId || "google.com";
+            responseBody = {
+              name: `projects/${projectId}/defaultSupportedIdpConfigs/${id}`,
+              enabled: payload?.enabled !== undefined ? payload.enabled : true,
+              clientId: payload?.clientId || "1046067704682-simulated.apps.googleusercontent.com",
+              clientSecret: payload?.clientSecret || "simulated_client_secret_xyz123"
+            };
+          } else if (rpcMethod === "ListDefaultSupportedIdpConfigs") {
+            responseBody = {
+              defaultSupportedIdpConfigs: [
+                {
+                  name: `projects/${projectId}/defaultSupportedIdpConfigs/google.com`,
+                  enabled: true,
+                  clientId: "1046067704682-simulated.apps.googleusercontent.com"
+                },
+                {
+                  name: `projects/${projectId}/defaultSupportedIdpConfigs/apple.com`,
+                  enabled: false,
+                  clientId: "com.displaycellpros.service.forensics",
+                  appleSignInConfig: {
+                    codeFlowConfig: {
+                      keyId: "APPLEKEY12",
+                      teamId: "APPLETEAM34"
+                    }
+                  }
+                }
+              ],
+              nextPageToken: "sim_next_idp_page_token_881"
+            };
+          } else if (rpcMethod === "DeleteDefaultSupportedIdpConfig") {
+            const id = payload?.defaultSupportedIdpConfigId || "google.com";
+            responseBody = {
+              status: "DELETED",
+              defaultSupportedIdpConfigId: id
+            };
+          } else if (rpcMethod === "CreateOAuthIdpConfig") {
+            const id = payload?.oauthIdpConfigId || "oidc.dcp-partner-sso";
+            responseBody = {
+              name: `projects/${projectId}/oauthIdpConfigs/${id}`,
+              displayName: payload?.displayName || "DCP Forensic Partner Identity Federation",
+              enabled: true,
+              clientId: payload?.clientId || "partner_client_id_992",
+              clientSecret: payload?.clientSecret || "partner_secret_key_883",
+              issuer: payload?.issuer || "https://identity.partner-sso.org"
+            };
+          } else if (rpcMethod === "GetOAuthIdpConfig") {
+            const id = payload?.oauthIdpConfigId || "oidc.dcp-partner-sso";
+            responseBody = {
+              name: `projects/${projectId}/oauthIdpConfigs/${id}`,
+              displayName: "DCP Forensic Partner Identity Federation",
+              enabled: true,
+              clientId: "partner_client_id_992",
+              clientSecret: "partner_secret_key_883",
+              issuer: "https://identity.partner-sso.org"
+            };
+          } else if (rpcMethod === "UpdateOAuthIdpConfig") {
+            const id = payload?.oauthIdpConfigId || "oidc.dcp-partner-sso";
+            responseBody = {
+              name: `projects/${projectId}/oauthIdpConfigs/${id}`,
+              displayName: payload?.displayName || "DCP Forensic Partner Identity Federation (Updated)",
+              enabled: payload?.enabled !== undefined ? payload.enabled : true,
+              clientId: payload?.clientId || "partner_client_id_992",
+              clientSecret: payload?.clientSecret || "partner_secret_key_883",
+              issuer: payload?.issuer || "https://identity.partner-sso.org"
+            };
+          } else if (rpcMethod === "ListOAuthIdpConfigs") {
+            responseBody = {
+              oauthIdpConfigs: [
+                {
+                  name: `projects/${projectId}/oauthIdpConfigs/oidc.dcp-partner-sso`,
+                  displayName: "DCP Forensic Partner Identity Federation",
+                  enabled: true,
+                  clientId: "partner_client_id_992",
+                  issuer: "https://identity.partner-sso.org"
+                }
+              ],
+              nextPageToken: "sim_next_oauth_page_token_771"
+            };
+          } else if (rpcMethod === "DeleteOAuthIdpConfig") {
+            const id = payload?.oauthIdpConfigId || "oidc.dcp-partner-sso";
+            responseBody = {
+              status: "DELETED",
+              oauthIdpConfigId: id
+            };
+          }
+        } 
+        else if (serviceName.includes("TenantManagementService")) {
+          const tenantId = payload?.tenantId || "simulated-tenant-101";
+          if (rpcMethod === "CreateTenant") {
+            responseBody = {
+              name: `projects/${projectId}/tenants/${tenantId}`,
+              displayName: payload?.displayName || "DCP East Coast Motherboard Forensics Silo",
+              allowPasswordSignup: true,
+              enableEmailLinkSignIn: false,
+              mfaConfig: { state: "DISABLED" }
+            };
+          } else if (rpcMethod === "GetTenant") {
+            responseBody = {
+              name: `projects/${projectId}/tenants/${tenantId}`,
+              displayName: "DCP Central Forensics Vault Isolation",
+              allowPasswordSignup: true,
+              enableEmailLinkSignIn: true,
+              mfaConfig: { state: "ENABLED" }
+            };
+          } else if (rpcMethod === "ListTenants") {
+            responseBody = {
+              tenants: [
+                {
+                  name: `projects/${projectId}/tenants/east-silo-901`,
+                  displayName: "DCP East Coast Lab Isolation",
+                  allowPasswordSignup: true
+                },
+                {
+                  name: `projects/${projectId}/tenants/west-silo-902`,
+                  displayName: "DCP West Coast Silicon Forensics Facility",
+                  allowPasswordSignup: true
+                }
+              ],
+              nextPageToken: "sim_next_page_token_9012"
+            };
+          } else if (rpcMethod === "DeleteTenant") {
+            responseBody = {
+              status: "DELETED",
+              tenantId: tenantId
+            };
+          }
+        }
+        else if (serviceName === "google.cloud.identitytoolkit.v2.InboundSamlConfigService") {
+          const samlId = payload?.inboundSamlConfigId || "saml.dcp-enterprise-sso";
+          if (rpcMethod === "CreateInboundSamlConfig") {
+            responseBody = {
+              name: `projects/${projectId}/inboundSamlConfigs/${samlId}`,
+              displayName: payload?.displayName || "DCP Enterprise Federated SSO",
+              enabled: payload?.enabled !== undefined ? payload.enabled : true,
+              idpConfig: {
+                idpEntityId: payload?.idpConfig?.idpEntityId || "https://idp.displaycellpros.com/metadata",
+                ssoUrl: payload?.idpConfig?.ssoUrl || "https://idp.displaycellpros.com/sso/saml2",
+                signRequest: payload?.idpConfig?.signRequest !== undefined ? payload.idpConfig.signRequest : true,
+                certificates: payload?.idpConfig?.certificates || [
+                  {
+                    x509Certificate: "-----BEGIN CERTIFICATE-----\nMIIDdDCCAlygAwIBAgIQY...\n-----END CERTIFICATE-----"
+                  }
+                ]
+              },
+              rpConfig: {
+                rpEntityId: payload?.rpConfig?.rpEntityId || `https://${projectId}.firebaseapp.com/__/auth/handler`,
+                callbackUrl: payload?.rpConfig?.callbackUrl || `https://${projectId}.firebaseapp.com/__/auth/handler`
+              },
+              samlCustomerId: payload?.samlCustomerId || "C02df3g1h"
+            };
+          } else if (rpcMethod === "GetInboundSamlConfig") {
+            responseBody = {
+              name: `projects/${projectId}/inboundSamlConfigs/${samlId}`,
+              displayName: "DCP Enterprise Federated SSO",
+              enabled: true,
+              idpConfig: {
+                idpEntityId: "https://idp.displaycellpros.com/metadata",
+                ssoUrl: "https://idp.displaycellpros.com/sso/saml2",
+                signRequest: true,
+                certificates: [
+                  {
+                    x509Certificate: "-----BEGIN CERTIFICATE-----\nMIIDdDCCAlygAwIBAgIQY...\n-----END CERTIFICATE-----"
+                  }
+                ]
+              },
+              rpConfig: {
+                rpEntityId: `https://${projectId}.firebaseapp.com/__/auth/handler`,
+                callbackUrl: `https://${projectId}.firebaseapp.com/__/auth/handler`
+              },
+              samlCustomerId: "C02df3g1h"
+            };
+          } else if (rpcMethod === "UpdateInboundSamlConfig") {
+            responseBody = {
+              name: `projects/${projectId}/inboundSamlConfigs/${samlId}`,
+              displayName: payload?.displayName || "DCP Enterprise Federated SSO (Updated)",
+              enabled: true,
+              idpConfig: {
+                idpEntityId: "https://idp.displaycellpros.com/metadata",
+                ssoUrl: "https://idp.displaycellpros.com/sso/saml2",
+                signRequest: true,
+                certificates: payload?.idpConfig?.certificates || [
+                  {
+                    x509Certificate: "-----BEGIN CERTIFICATE-----\nMIIDdDCCAlygAwIBAgIQY...\n-----END CERTIFICATE-----"
+                  }
+                ]
+              },
+              rpConfig: {
+                rpEntityId: `https://${projectId}.firebaseapp.com/__/auth/handler`,
+                callbackUrl: `https://${projectId}.firebaseapp.com/__/auth/handler`
+              },
+              samlCustomerId: "C02df3g1h"
+            };
+          } else if (rpcMethod === "ListInboundSamlConfigs") {
+            responseBody = {
+              inboundSamlConfigs: [
+                {
+                  name: `projects/${projectId}/inboundSamlConfigs/saml.dcp-enterprise-sso`,
+                  displayName: "DCP Enterprise Federated SSO",
+                  enabled: true,
+                  idpConfig: {
+                    idpEntityId: "https://idp.displaycellpros.com/metadata",
+                    ssoUrl: "https://idp.displaycellpros.com/sso/saml2",
+                    signRequest: true,
+                    certificates: [
+                      {
+                        x509Certificate: "-----BEGIN CERTIFICATE-----\nMIIDdDCCAlygAwIBAgIQY...\n-----END CERTIFICATE-----"
+                      }
+                    ]
+                  },
+                  rpConfig: {
+                    rpEntityId: `https://${projectId}.firebaseapp.com/__/auth/handler`,
+                    callbackUrl: `https://${projectId}.firebaseapp.com/__/auth/handler`
+                  },
+                  samlCustomerId: "C02df3g1h"
+                }
+              ],
+              nextPageToken: "sim_next_saml_page_token_552"
+            };
+          } else if (rpcMethod === "DeleteInboundSamlConfig") {
+            responseBody = {
+              status: "DELETED",
+              inboundSamlConfigId: samlId
+            };
+          }
+        }
+        else if (serviceName === "google.cloud.identitytoolkit.v2.AuthenticationService") {
+          if (rpcMethod === "StartMfaSignIn") {
+            responseBody = {
+              phoneResponseInfo: {
+                sessionInfo: "sim_session_inf_1182"
+              }
+            };
+          } else if (rpcMethod === "FinalizeMfaSignIn") {
+            responseBody = {
+              idToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImYxZjk5In0.eyJzdWIiOiJzaW1fdXNlcl91aWRfODIxOSJ9",
+              refreshToken: "sim_refresh_token_71829102",
+              phoneAuthInfo: {
+                phoneNumber: payload?.phoneVerificationInfo?.phoneNumber || "+15550199222"
+              }
+            };
+          } else if (rpcMethod === "GetPasswordPolicy") {
+            responseBody = {
+              customStrengthOptions: {
+                minPasswordLength: 10
+              },
+              schemaVersion: 2,
+              allowedNonAlphanumericCharacters: ["!", "@", "#", "$", "%"],
+              enforcementState: "ENFORCED",
+              forceUpgradeOnSignin: true
+            };
+          } else if (rpcMethod === "GetRecaptchaConfig") {
+            responseBody = {
+              recaptchaKeys: {
+                siteKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              },
+              recaptchaEnforcementState: [
+                {
+                  recaptchaProvider: "RECAPTCHA_ENTERPRISE",
+                  enforcementState: "AUDIT"
+                }
+              ]
+            };
+          } else if (rpcMethod === "RevokeToken") {
+            responseBody = {
+              status: "REVOKED",
+              revocationTime: new Date().toISOString()
+            };
+          }
+        }
+        else if (serviceName === "google.cloud.identitytoolkit.v2.AccountManagementService") {
+          if (rpcMethod === "StartMfaEnrollment") {
+            responseBody = {
+              phoneResponseInfo: {
+                sessionInfo: "sim_session_inf_1182"
+              }
+            };
+          } else if (rpcMethod === "FinalizeMfaEnrollment") {
+            responseBody = {
+              idToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImYxZjk5In0.eyJzdWIiOiJzaW1fdXNlcl91aWRfODIxOSJ9",
+              refreshToken: "sim_refresh_token_71829102",
+              phoneAuthInfo: {
+                phoneNumber: "+15550199222"
+              }
+            };
+          } else if (rpcMethod === "WithdrawMfa") {
+            responseBody = {
+              idToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImYxZjk5In0.eyJzdWIiOiJzaW1fdXNlcl91aWRfODIxOSJ9",
+              refreshToken: "sim_refresh_token_71829102"
+            };
+          }
+        }
+        else if (serviceName === "google.iam.v1.IAMPolicy") {
+          const resName = payload?.resource || `projects/${projectId}`;
+          if (rpcMethod === "GetIamPolicy") {
+            responseBody = {
+              version: payload?.options?.requestedPolicyVersion || 3,
+              bindings: [
+                {
+                  role: "roles/identitytoolkit.admin",
+                  members: [
+                    "user:mike@displaycellpros.com",
+                    "serviceAccount:sa-evaluator@displaycellpros-com.iam.gserviceaccount.com"
+                  ],
+                  condition: {
+                    title: "Expirable Administrative Access",
+                    description: "Does not grant access after December 2026",
+                    expression: "request.time < timestamp('2026-12-31T23:59:59Z')"
+                  }
+                },
+                {
+                  role: "roles/identitytoolkit.viewer",
+                  members: [
+                    "group:auditors@displaycellpros.com"
+                  ]
+                }
+              ],
+              etag: "BwWWja0YfJA="
+            };
+          } else if (rpcMethod === "SetIamPolicy") {
+            responseBody = payload?.policy || {
+              version: 3,
+              bindings: [
+                {
+                  role: "roles/identitytoolkit.admin",
+                  members: [
+                    "user:mike@displaycellpros.com",
+                    "serviceAccount:sa-evaluator@displaycellpros-com.iam.gserviceaccount.com"
+                  ],
+                  condition: {
+                    title: "Expirable Administrative Access",
+                    description: "Does not grant access after December 2026",
+                    expression: "request.time < timestamp('2026-12-31T23:59:59Z')"
+                  }
+                }
+              ],
+              etag: "BwWWja0YfJA="
+            };
+          } else if (rpcMethod === "TestIamPermissions") {
+            responseBody = {
+              permissions: payload?.permissions || [
+                "identitytoolkit.projects.get",
+                "identitytoolkit.projects.update"
+              ]
+            };
+          }
+        }
+      } else {
+        // Execute real, certified production HTTP request to Identity Platform
+        const fetchOptions: RequestInit = {
+          method: httpMethod,
+          headers: requestHeaders
+        };
+
+        if (!isGetOrPatchOrDelete) {
+          fetchOptions.body = JSON.stringify(payload);
+        }
+
+        const response = await fetch(targetUrl, fetchOptions);
+
+        responseStatus = response.status;
+        response.headers.forEach((value, name) => {
+          responseHeaders[name] = value;
+        });
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          responseBody = await response.json();
+        } else {
+          responseBody = { text: await response.text() };
+        }
+      }
+    } catch (err: any) {
+      transportError = err.message || String(err);
+      responseStatus = 502;
+      responseBody = { error: { message: `Transport connection failure: ${transportError}` } };
+    }
+
+    const durationMs = Date.now() - startTime;
+    const rawResponseString = `HTTP/1.1 ${responseStatus} ${responseStatus === 200 ? "OK" : "Error"}\r\n` +
+      Object.entries(responseHeaders).map(([k, v]) => `${k}: ${v}`).join("\r\n") +
+      `\r\n\r\n${JSON.stringify(responseBody, null, 2)}`;
+
+    return res.json({
+      success: responseStatus >= 200 && responseStatus < 300,
+      serviceName,
+      rpcMethod,
+      endpoint: targetUrl,
+      status: responseStatus,
+      durationMs,
+      isSimulated,
+      rawRequestPacket: rawRequestString,
+      rawResponsePacket: rawResponseString,
+      responsePayload: responseBody
+    });
+  });
+
   // Catch-all for other unimplemented API routes to prevent crash/timeouts
   app.all("/api/*", (req, res) => {
     res.json({ message: "Mock endpoint", status: "OK", data: [] });

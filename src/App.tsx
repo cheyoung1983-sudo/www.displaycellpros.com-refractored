@@ -1384,7 +1384,24 @@ export default function App() {
             await signInAnonymously(auth);
           } catch (error: any) {
             console.error("Anonymous sign-in failed during session fallback:", error);
-            addToast("Guest Auth Error", "Offline fallback active: Anonymous guest session offline.", "warning");
+            
+            // Step B: Self-healing local/SessionStorage State Check & Graceful Offline Fallback
+            let localOfflineToken = localStorage.getItem("dcp_offline_guest_token");
+            if (!localOfflineToken) {
+              localOfflineToken = "offline_guest_" + Math.random().toString(36).substring(2, 11);
+              localStorage.setItem("dcp_offline_guest_token", localOfflineToken);
+            }
+            
+            // Inject a local safe mock user so the portal interface remains usable and offline resilient
+            setAuthUser({
+              uid: localOfflineToken,
+              isAnonymous: true,
+              email: null,
+              displayName: "Local Offline Guest",
+              emailVerified: false,
+            } as any);
+            
+            addToast("Offline Mode Engaged", "Authentication server unreachable. Secure local offline guest session initialized.", "info");
           }
         }
       } catch (authError: any) {
@@ -1685,6 +1702,32 @@ export default function App() {
     
     setTickets(prev => [...newItems, ...prev]);
     addToast("Sample Data Pre-loaded", "5 enriched operating records merged with POS ledger charts!", "success");
+  };
+
+  const handleUpdateTicket = async (updatedTicket: RepairTicket) => {
+    setTickets(prev => prev.map(t => t.id === updatedTicket.id ? updatedTicket : t));
+    
+    if (authUser?.uid) {
+      try {
+        const { doc, setDoc } = await import("firebase/firestore");
+        const docRef = doc(db, "tickets", updatedTicket.id);
+        
+        const updatePayload: any = {
+          status: updatedTicket.status,
+          estimatedHours: updatedTicket.estimatedHours !== undefined ? updatedTicket.estimatedHours : null,
+          actualHours: updatedTicket.actualHours !== undefined ? updatedTicket.actualHours : null,
+          timerStartedAt: updatedTicket.timerStartedAt || null,
+          elapsedSeconds: updatedTicket.elapsedSeconds !== undefined ? updatedTicket.elapsedSeconds : null
+        };
+        if (updatedTicket.completedAt) {
+          updatePayload.completedAt = updatedTicket.completedAt;
+        }
+        
+        await setDoc(docRef, updatePayload, { merge: true });
+      } catch (err: any) {
+        console.error("Firestore synchronisation failure for ticket updates:", err);
+      }
+    }
   };
 
   useEffect(() => {
@@ -3963,8 +4006,11 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
               </button>
 
               {/* Forensic Breadcrumb Trace */}
-              <div className="hidden sm:flex items-center gap-2.5 text-xs text-slate-400 font-mono">
-                <span className="text-slate-600 uppercase tracking-widest font-sans font-bold text-[10px]">Trace Sequence:</span>
+              <div className="hidden sm:flex items-center gap-2.5 text-xs text-slate-300 font-mono bg-slate-900/90 border border-slate-800/80 border-l-2 border-l-teal-500 px-3.5 py-1.5 rounded-lg shadow-sm shadow-black/40 animate-in fade-in duration-300">
+                <span className="text-teal-400 uppercase tracking-widest font-sans font-extrabold text-[9px] flex items-center gap-1.5 shrink-0">
+                  <Terminal className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
+                  Trace Sequence:
+                </span>
                 {backStack.map((tab, idx) => {
                   const isLast = idx === backStack.length - 1;
                   const label = (() => {
@@ -5398,6 +5444,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         tickets={tickets} 
                         onAddSampleTickets={handleAddSampleTickets}
                         isLoading={isLoadingLogs}
+                        onUpdateTicket={handleUpdateTicket}
                       />
                     </React.Suspense>
                     <section className="bg-slate-800 border border-slate-700 rounded-xl flex flex-col flex-1 shadow-md p-5 animate-in fade-in duration-300">
