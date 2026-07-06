@@ -29,44 +29,6 @@ Safety Thresholds: Terminate tests if battery temp > 45°C to prevent thermal ru
 Code Blueprint: [TypeScript, Swift, or Kotlin snippets with strong typing]
 Schema Design: [JSON payload interface for CRM/ERP synchronization]
 
-### Repository-specific developer & agent onboarding
-
-- Stack & runtime: TypeScript + React (Vite) frontend; Express + TS server entry in `server.ts` (runs via `tsx` in development). Project is bundled with `vite build` for client and `esbuild` for server (see `package.json` scripts).
-- Important npm scripts (source of truth: `package.json`):
-  - `dev` -> `tsx server.ts` (local dev server)
-  - `build` -> `vite build && esbuild server.ts --bundle --platform=node --format=cjs --outfile=dist/server.cjs`
-  - `start` -> `node dist/server.cjs`
-  - `test` -> `vitest run`
-  - `lint` -> `tsc --noEmit`
-  - `emulators` -> `firebase emulators:start`
-  - `prebuild` -> runs `node scripts/generate-sitemap.js` (sitemap generation is part of the build pipeline)
-
-- Key files & directories to reference when grounding changes:
-  - `server.ts` — primary backend entry and canonical location of API routes (triage, CoV, compliance, egress lexical firewall). When changing agent behavior, inspect this file first.
-  - `src/modules/triage-ai/ForensicsView.tsx` — interactive S2C UI, CoV wiring, and examples of component layout designators (examples in code: `FL1728`, `C247_W`, `1610A3`). Use these as live examples when writing agent responses or tests.
-  - `src/lib/firebase-admin.ts` — firebase-admin initialization used by server-side audit logging.
-  - `src/db/` — `drizzle.config.ts` and schema definitions (drizzle-orm) for any DB/ORM-related updates.
-  - `functions/` — cloud functions (if present) and serverless integration points.
-  - `scripts/generate-sitemap.js` — executed by `prebuild`; update when adding new public routes.
-  - `public/` and `assets/` — static hosting area; `index.html` is the client shell.
-
-- Environment variables commonly used (inspect `server.ts` & `src/lib/firebase-admin.ts`):
-  - `GEMINI_API_KEY` (AI model key), `RECAPTCHA_API_KEY` / `VITE_RECAPTCHA_SITE_KEY`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`.
-  - When adding integrations or tests, prefer using `firebase emulators` and sandbox tokens (server has explicit fallbacks for offline tokens).
-
-- Grounding & CoV patterns to follow (code-observable):
-  - The "Paragraph Test" / Chain-of-Verification is implemented in the UI (`ForensicsView.tsx`) via `mountedSources`, `keywordsList`, and `covCustomDraft`. When an LLM output references hardware designators, verify they are listed in mounted schematics or source files — examples: `FL1728`, `C247_W`, `Tristar 1610A3`.
-  - The server enforces outbound lexical redactions in `egressLexicalFirewall` (see `server.ts`). Do NOT remove or weaken those replacement rules; if you must add terms, modify both the firewall and any client-side lexicon references in `server.ts` to keep them synchronized.
-  - UI pattern: prefer small, composable React components under `src/components/` and keep types in `src/types.ts`.
-
-- Tests & examples:
-  - Unit tests use `vitest`. There are component tests under `src/modules/triage-ai/` (e.g., `HardwareScanChart.test.tsx`). Run `npm run test` to execute.
-
-- Editing guidance for AI agents working on this repo:
-  - Preserve existing project lexicon and anti-hallucination logic. If you add hardware designators to logic or templates, confirm their existence in local source vaults (mounted PDF names referenced in `ForensicsView.tsx` and `public/` documents). If a referenced designator is not discoverable, follow the project's rule and output: "Data not present in local source vaults".
-  - When changing server-side behavior, update environment variable docs and `package.json` scripts where applicable. Keep `server.ts` as the canonical location for API contract changes.
-  - Keep edits minimal and surgically scoped. Add specific file references and examples in your change descriptions (e.g., "Update `server.ts` egressLexicalFirewall to include TERM_X; also adjust `ForensicsView.tsx` keywordsList to include TERM_X").
-
 **GLOBAL RULES:**
 - No Hand-Waving: Use precise component codes and motherboard designators [System Prompt].
 - Anti-Hallucination: Accuracy overrides speed. Ground every claim in the source material.

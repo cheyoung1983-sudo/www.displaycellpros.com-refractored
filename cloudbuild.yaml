@@ -1,53 +1,27 @@
 steps:
-  # 1. Initialize Forensic Build Environment
-  - name: 'node:22'
-    id: 'Forensic-Install'
+  # 1. Run tests
+  - name: 'node:22-slim'
+    id: 'install'
     entrypoint: 'npm'
     args: ['install']
-
-  # 2. Compile Forensic Assets (Vite + Express Server)
-  - name: 'node:22'
-    id: 'Forensic-Build'
+  - name: 'node:22-slim'
+    id: 'test'
     entrypoint: 'npm'
-    args: ['run', 'build']
-    waitFor: ['Forensic-Install']
-    env:
-      - 'NODE_ENV=production'
+    args: ['run', 'test']
 
-  # 3. Deploy Firestore & Storage Security Audits
-  - name: 'node:22'
-    id: 'Firebase-Security-Audit'
-    entrypoint: 'npx'
-    args: ['firebase', 'deploy', '--only', 'firestore,storage,remoteconfig', '--project', '$PROJECT_ID', '--non-interactive']
-    waitFor: ['Forensic-Install']
-
-  # 4. Deploy Isolated Compute Modules (Functions)
-  - name: 'node:22'
-    id: 'Firebase-Functions-Egress'
-    entrypoint: 'npx'
-    args: ['firebase', 'deploy', '--only', 'functions', '--project', '$PROJECT_ID', '--non-interactive']
-    waitFor: ['Forensic-Install']
-
-  # 5. Build Silicon Forensic Engine (Docker Container)
+  # 2. Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Engine-Docker-Build'
-    args: [
-      'build',
-      '-t', 'gcr.io/$PROJECT_ID/app:$COMMIT_SHA',
-      '-t', 'gcr.io/$PROJECT_ID/app:latest',
-      '.'
-    ]
-    waitFor: ['Forensic-Build']
+    id: 'build'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/app:$COMMIT_SHA', '.']
 
-  # 6. Push Telemetry-Ready Image to Registry
+  # 3. Push the image
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Engine-Docker-Push'
+    id: 'push'
     args: ['push', 'gcr.io/$PROJECT_ID/app:$COMMIT_SHA']
-    waitFor: ['Engine-Docker-Build']
 
-  # 7. Instantiate Cloud Run Forensic Hub
+  # 4. Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Cloud-Run-Deployment'
+    id: 'deploy'
     entrypoint: 'gcloud'
     args:
       - 'run'
@@ -60,20 +34,6 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-      - '--set-env-vars'
-      - 'NODE_ENV=production'
-    waitFor: ['Engine-Docker-Push']
-
-  # 8. Finalize Global Forensic Gateway (Hosting)
-  - name: 'node:22'
-    id: 'Firebase-Hosting-Gateway'
-    entrypoint: 'npx'
-    args: ['firebase', 'deploy', '--only', 'hosting', '--project', '$PROJECT_ID', '--non-interactive']
-    waitFor: ['Cloud-Run-Deployment', 'Forensic-Build']
-
-options:
-  logging: CLOUD_LOGGING_ONLY
 
 images:
   - 'gcr.io/$PROJECT_ID/app:$COMMIT_SHA'
-  - 'gcr.io/$PROJECT_ID/app:latest'
