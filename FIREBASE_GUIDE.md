@@ -19,17 +19,18 @@ Firebase Emulators allow you to test Auth, Firestore, and Hosting locally withou
 - **UI**: Accessible at `http://localhost:4000`
 - **Benefits**: Faster development cycles, offline support, and safer testing of Security Rules.
 
-## 4. Hosting Optimizations
-The `firebase.json` has been tuned with:
-- **Predeploy Hooks**: Automatically runs `npm run build` before any deployment to ensure the latest code is live.
-- **Cache Control**: Long-term caching (1 year) for immutable assets in `/assets/` and short-term caching for `sitemap.xml`.
-- **Security Headers**: Includes `X-Frame-Options`, `X-Content-Type-Options`, and `Strict-Transport-Security` to harden the frontend.
+## 4. Hosting & Forensic Security Optimizations
+The `firebase.json` has been hardened with enterprise-grade configurations:
+- **Security Headers**: Implemented `Content-Security-Policy`, `Strict-Transport-Security`, and `X-Frame-Options` to prevent XSS and clickjacking.
+- **Cache Control**: Immutable long-term caching for `/assets/**` to optimize the "Forensic Gateway" load times.
+- **Service Account Integration**: The project uses a dedicated `forensic-deployer` service account in `cloudbuild.yaml` for Principle of Least Privilege.
 
-## 5. Firestore Security Rules
-Rules are located in `firestore.rules`.
-- **Validation**: Strict schema validation is implemented for `users`, `tickets`, `leads`, and `feedback`.
-- **Access Control**: Identity-based access is enforced (`request.auth.uid == userId`).
-- **Testing**: Use the Firestore Emulator to run unit tests against your rules before deploying.
+## 5. Firestore Security Rules (CoV Framework)
+Rules in `firestore.rules` follow the Chain-of-Verification (CoV) model:
+- **Identity Isolation**: Users can only access their own forensic tickets.
+- **Role-Based Access**: `forensic_investigator` role is required for global audit viewing.
+- **Lead Protection**: Public write access is limited to the `leads` collection, with investigator-only read access.
+- **NIST Compliance**: Strict "Explicit Deny" catch-all for unauthorized paths.
 
 ## 6. Recommended Next Steps
 - **Storage Rules**: Create a `storage.rules` file to protect any uploaded binary data (e.g., diagnostic photos).
