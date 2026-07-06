@@ -11,7 +11,10 @@
     "clean": "rm -rf dist dist/server.cjs",
     "lint": "tsc --noEmit",
     "test": "vitest run",
-    "sitemap": "node scripts/generate-sitemap.js"
+    "sitemap": "node scripts/generate-sitemap.js",
+    "deploy": "firebase deploy",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "emulators": "firebase emulators:start"
   },
   "dependencies": {
     "@google-cloud/recaptcha-enterprise": "^6.4.2",
