@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { BrandLogo } from "../../components/BrandLogo";
+import { evaluateBatteryTelemetry, WebUsbTelemetryBridge } from "../../services/nativeHardwareServices";
 
 interface ForensicsViewProps {
   forensicDevice: "iPhone XR" | "iPad Pro 9.7";
@@ -177,6 +178,13 @@ export const ForensicsView: React.FC<ForensicsViewProps> = ({
   const [targetAlloy, setTargetAlloy] = React.useState<"SAC305" | "Sn63_Pb37" | "LowTemp_Bi58">("SAC305");
   const [hasUnderfill, setHasUnderfill] = React.useState<boolean>(true);
   const [appliedTempC, setAppliedTempC] = React.useState<number>(370);
+
+  // Dynamic cross-platform thermodynamic check using our native hardware service profiler
+  const liveBatteryTelemetryState = React.useMemo(() => {
+    const targetVoltage = (s2cActivePathway === "charging" && s2cAmmeterReading < 0.1) ? 0.69 : 3.82;
+    const telemetryBridge = new WebUsbTelemetryBridge(s2cBatteryTemp, targetVoltage, s2cAmmeterReading, 240);
+    return evaluateBatteryTelemetry(telemetryBridge);
+  }, [s2cBatteryTemp, s2cAmmeterReading, s2cActivePathway]);
   const [validationResult, setValidationResult] = React.useState<any | null>(null);
 
   const [selectedSourceType, setSelectedSourceType] = React.useState<"pdf" | "excel_over_150k" | "excel_under_150k" | "markdown">("pdf");
@@ -1933,6 +1941,46 @@ double tempReading = IOPSGetTemperatureReading(sources[0]);
                   className="w-full h-1 bg-slate-850 rounded accent-violet-600 outline-none cursor-pointer"
                 />
               </div>
+            </div>
+
+            {/* Live Cross-Platform Telemetry Status Board */}
+            <div className="mb-3.5 p-3 rounded-lg bg-slate-950/40 border border-slate-900 text-left">
+              <span className="text-[9px] font-mono font-extrabold uppercase text-slate-500 tracking-wider block mb-1.5">
+                ⚡ Cross-Platform Thermodynamic Profiler Readout
+              </span>
+              
+              {liveBatteryTelemetryState.status === "LOCKED_OUT_THERMAL" && (
+                <div className="flex gap-2 items-start text-[10.5px] text-amber-500 font-sans leading-relaxed animate-in fade-in zoom-in-95 duration-200">
+                  <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0 text-amber-500" />
+                  <div>
+                    <strong className="block uppercase font-black tracking-wide text-[10px]">THERMAL RUNAWAY LOCKOUT</strong>
+                    Battery temp is <span className="underline font-bold font-mono">{liveBatteryTelemetryState.batteryTemp_C}°C</span> (threshold &gt;45.0°C). 
+                    Direct current injection severed immediately. Logs registered: <span className="font-mono bg-slate-900 px-1 py-0.5 rounded text-rose-400">THERMAL_LOCKOUT_EXCEEDED_45C</span>.
+                  </div>
+                </div>
+              )}
+
+              {liveBatteryTelemetryState.status === "U4500_TRISTAR_FAULT" && (
+                <div className="flex gap-2 items-start text-[10.5px] text-red-400 font-sans leading-relaxed animate-in fade-in zoom-in-95 duration-200">
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-red-400" />
+                  <div>
+                    <strong className="block uppercase font-black tracking-wide text-[10px] text-red-500">U4500 TRISTAR IC FAILURE</strong>
+                    Impedance handshake failure isolated. Current draw is <span className="font-bold font-mono">{(liveBatteryTelemetryState.instantAmperage_mA / 1000).toFixed(2)}A</span> (under 0.1A limit) with terminal voltage <span className="font-bold font-mono">{(liveBatteryTelemetryState.vTerm_mV / 1000).toFixed(2)}V</span>. 
+                    Locking out basic battery swaps; routing technician directly to BGA extraction.
+                  </div>
+                </div>
+              )}
+
+              {liveBatteryTelemetryState.status === "READY_FOR_DIAGNOSTICS" && (
+                <div className="flex gap-2 items-start text-[10.5px] text-emerald-400 font-sans leading-relaxed animate-in fade-in zoom-in-95 duration-200">
+                  <CheckCircle className="w-4 h-4 mt-0.5 shrink-0 text-emerald-400" />
+                  <div>
+                    <strong className="block uppercase font-black tracking-wide text-[10px] text-emerald-500">THERMODYNAMIC STABLE</strong>
+                    Temp: <span className="font-bold font-mono">{liveBatteryTelemetryState.batteryTemp_C}°C</span> | Voltage: <span className="font-bold font-mono">{(liveBatteryTelemetryState.vTerm_mV / 1000).toFixed(2)}V</span> | Draw: <span className="font-bold font-mono">{(liveBatteryTelemetryState.instantAmperage_mA / 1000).toFixed(2)}A</span>.
+                    WebUSB physical link-ups stabilized. Ready for comprehensive RAG diagnostics.
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4 pt-1 mb-3">

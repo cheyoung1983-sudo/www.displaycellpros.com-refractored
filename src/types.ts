@@ -13,6 +13,11 @@ export interface RepairTicket {
   userId?: string;
   internalNotes?: string;
   completedAt?: string;
+  // S2C Forensic Chronometer & Labor Telemetry fields
+  estimatedHours?: number;   // SLA Target Estimate in hours
+  actualHours?: number;      // Logged actual labor in hours
+  timerStartedAt?: string;   // Active session start ISO timestamp
+  elapsedSeconds?: number;   // Accumulated elapsed duration (seconds)
 }
 
 export interface POSLog {

@@ -17,6 +17,7 @@ import {
   Calendar
 } from "lucide-react";
 import { VerificationStatus } from "./VerificationStatus";
+import { IdentityToolkitRpcExplorer } from "./IdentityToolkitRpcExplorer";
 
 interface FirebaseUserAuditorProps {
   user: User;
@@ -408,6 +409,13 @@ export function FirebaseUserAuditor({ user, addToast, onLogout }: FirebaseUserAu
           </div>
         </div>
       )}
+
+      {/* Identity Platform AuthenticationService RPC Sandbox */}
+      <IdentityToolkitRpcExplorer 
+        currentUserIdToken={rawJwt}
+        currentUserEmail={user?.email || ""}
+        addToast={addToast}
+      />
 
       {/* Purge Safety Lock Overlay Panel */}
       {showPurgeConfirm && (
