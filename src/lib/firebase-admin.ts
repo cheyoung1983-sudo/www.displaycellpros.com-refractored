@@ -1,12 +1,10 @@
 import { initializeApp, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import firebaseConfig from "../../firebase-applet-config.json";
 
 if (!getApps().length) {
   initializeApp({
-    projectId: firebaseConfig.projectId,
-    databaseURL: (firebaseConfig as any).databaseURL || `https://${firebaseConfig.projectId}-default-rtdb.firebaseio.com`,
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID || "displaycellpros-com",
   });
 }
 

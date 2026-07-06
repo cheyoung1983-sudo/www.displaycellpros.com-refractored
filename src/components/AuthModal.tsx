@@ -11,7 +11,8 @@ import {
   AlertTriangle,
   ArrowRight,
   ShieldAlert,
-  Bot
+  Bot,
+  Settings
 } from "lucide-react";
 import { 
   signInWithEmailAndPassword, 
@@ -27,6 +28,7 @@ import {
 } from "firebase/auth";
 import { auth, db, googleProvider } from "../lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { FirebaseUIAuth } from "./FirebaseUIAuth";
 
 const GoogleSSOMaintenanceBanner: React.FC = () => (
   <div className="bg-amber-950/25 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2.5 animate-pulse mb-3">
@@ -61,6 +63,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [statusText, setStatusText] = useState("");
   const [isSandboxed, setIsSandboxed] = useState(false);
   const [persistenceMode, setPersistenceMode] = useState<"local" | "session" | "none">("local");
+  const [useFirebaseUI, setUseFirebaseUI] = useState(false);
 
   useEffect(() => {
     // Detect if running within an iframe (e.g., AI Studio preview sandbox)
@@ -125,6 +128,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         errMsg = "Incorrect email or password. Please verify your Spokane Lab credentials.";
       } else if (error.code === "auth/too-many-requests") {
         errMsg = "Too many failed attempts. This session has been temporarily throttled for security.";
+      } else if (error.message?.includes("API_KEY_HTTP_REFERRER_BLOCKED")) {
+        errMsg = "Forensic Gateway Blocked: The API key is restricted and does not allow this local origin. Update the Google Cloud Console referrer allowlist.";
       }
       addToast("Authentication Failed", errMsg, "error");
     } finally {
@@ -191,6 +196,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         errMsg = "An account is already linked to this email address.";
       } else if (error.code === "auth/invalid-email") {
         errMsg = "The email address layout is structurally invalid.";
+      } else if (error.message?.includes("API_KEY_HTTP_REFERRER_BLOCKED")) {
+        errMsg = "Forensic Node Blocked: API key restriction prevents registration from this origin. Verify Google Cloud Console security policies.";
       }
       addToast("Registration Rejected", errMsg, "error");
     } finally {
@@ -264,7 +271,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Content Wrapper */}
         <div className="p-6 flex-1 overflow-y-auto space-y-5">
           
-          {/* Iframe warning flag */}
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">Gateway Protocol</h4>
+            <button
+              onClick={() => setUseFirebaseUI(!useFirebaseUI)}
+              className="flex items-center gap-1.5 px-2 py-1 rounded bg-slate-900 border border-slate-800 text-[9px] font-mono text-teal-500 hover:text-teal-400 transition-colors"
+            >
+              <Settings className="w-3 h-3" />
+              {useFirebaseUI ? "SWITCH_TO_FORENSIC_UI" : "SWITCH_TO_STANDARD_UI"}
+            </button>
+          </div>
+
+          {useFirebaseUI ? (
+            <FirebaseUIAuth
+              onSignInSuccess={() => {
+                onClose();
+                return false; // Let custom logic handle post-auth
+              }}
+            />
+          ) : (
+            <>
+              {/* Iframe warning flag */}
           {isSandboxed && (
             <div className="bg-amber-950/40 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2.5">
               <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
@@ -663,6 +690,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 Continue with Google
               </button>
             </form>
+          )}
+          </>
           )}
 
         </div>
