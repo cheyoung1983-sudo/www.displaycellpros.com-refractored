@@ -8,8 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="13865c20-f368-41ae-9fff-2247cbf835e5" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.firebase/hosting.ZGlzdA.cache" beforeDir="false" afterPath="$PROJECT_DIR$/.firebase/hosting.ZGlzdA.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataconnect/example/connector.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/dataconnect/example/connector.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ARCHITECTURE_COMPARISON.md" beforeDir="false" afterPath="$PROJECT_DIR$/ARCHITECTURE_COMPARISON.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/firebase.json" beforeDir="false" afterPath="$PROJECT_DIR$/firebase.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
