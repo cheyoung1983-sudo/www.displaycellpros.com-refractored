@@ -38,7 +38,19 @@
     "ui": {
       "enabled": true
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    },
+    "functions": {
+      "port": 5001
+    },
+    "database": {
+      "port": 9000
+    },
+    "storage": {
+      "port": 9199
+    }
   },
   "dataconnect": {
     "source": "dataconnect"
@@ -48,30 +60,42 @@
       "codebase": "default",
       "disallowLegacyRuntimeConfig": true,
       "predeploy": [
-        "npm --prefix functions run lint",
-        "npm --prefix functions run build"
+        "npm --prefix \"$RESOURCE_DIR\" run build"
       ],
-      "source": "functions",
       "ignore": [
         "node_modules",
         ".git",
         "firebase-debug.log",
         "firebase-debug.*.log",
         "*.local"
+      ],
+      "source": "functions"
+    }
+  ],
+  "apphosting": [
+    {
+      "backendId": "dcp9",
+      "rootDir": "/",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "functions"
+      ]
+    },
+    {
+      "backendId": "dcp9",
+      "rootDir": "/",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "functions"
       ]
     }
   ],
-  "apphosting": {
-    "backendId": "dcp9",
-    "rootDir": "/",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log",
-      "functions"
-    ]
-  },
   "storage": {
     "rules": "storage.rules"
   },

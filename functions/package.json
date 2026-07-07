@@ -17,6 +17,7 @@
   "dependencies": {
     "@genkit-ai/firebase": "^1.39.0",
     "@genkit-ai/google-genai": "^1.39.0",
+    "express": "^5.2.1",
     "firebase-admin": "^13.1.2",
     "firebase-functions": "^6.3.1",
     "genkit": "^1.39.0"
@@ -29,6 +30,7 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^3.4.1",
+    "tsx": "^4.23.0",
     "typescript": "~5.1.0"
   },
   "private": true
