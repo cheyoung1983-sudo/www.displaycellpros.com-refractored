@@ -13,6 +13,11 @@ export interface RepairTicket {
   userId?: string;
   internalNotes?: string;
   completedAt?: string;
+  // S2C Forensic Chronometer & Labor Telemetry fields
+  estimatedHours?: number;   // SLA Target Estimate in hours
+  actualHours?: number;      // Logged actual labor in hours
+  timerStartedAt?: string;   // Active session start ISO timestamp
+  elapsedSeconds?: number;   // Accumulated elapsed duration (seconds)
 }
 
 export interface POSLog {
@@ -83,5 +88,26 @@ export interface S2CFeedback {
   ammeterReading: number;
   batteryTemp: number;
   createdAt: string;
+}
+
+/**
+ * Triage-AI: Hardened Technician Identity Schema
+ * Maps OIDC-compliant basic scopes to the forensic diagnostic ledger.
+ */
+export interface UserIdentitySession {
+  // Verified via openid scope [Source: 659]
+  technician_uid: string;
+  technician_email: string; // From userinfo.email
+
+  // Identity Proof for DTF [Source: 248]
+  auth_metadata: {
+    gateway_protocol: "CUSTOM_FORENSIC" | "FIREBASE_UI_STANDARD";
+    scope_tier: "NON_SENSITIVE_IDENTITY_ONLY"; // Expedites Google Trust & Safety
+    app_check_verified: boolean; // Confirms reCAPTCHA Enterprise protection
+  };
+
+  // Session Linkage [Source: 247]
+  active_station_id: string; // Binds to physical hardware workstation
+  session_timestamp_iso: string;
 }
 
