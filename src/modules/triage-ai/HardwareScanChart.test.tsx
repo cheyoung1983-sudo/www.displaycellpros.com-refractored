@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { HardwareScanChart } from "./HardwareScanChart";
 
 // Mock recharts to avoid JSDOM charting rendering exceptions
@@ -31,7 +31,7 @@ vi.mock("recharts", () => {
 
 describe("HardwareScanChart Component Diagnostic Telemetry Tests", () => {
   it("renders correctly with non-battery issues (displays EXCELLENT status)", () => {
-    const { container } = render(
+    render(
       <HardwareScanChart
         deviceBrand="Apple"
         deviceModel="iPhone 15 Pro"
@@ -40,22 +40,22 @@ describe("HardwareScanChart Component Diagnostic Telemetry Tests", () => {
     );
 
     // Verify Title Header
-    expect(container.textContent).toContain("ESTIMATED BATTERY CYCLE HEALTH");
-
+    expect(screen.getByText("ESTIMATED BATTERY CYCLE HEALTH")).toBeInTheDocument();
+    
     // Verify CHEMISTRY RETENTION tolerance message
     expect(
-      container.textContent
-    ).toContain("Chemistry retention retention is within acceptable tolerance levels.");
+      screen.getByText("Chemistry retention retention is within acceptable tolerance levels.")
+    ).toBeInTheDocument();
 
     // Verify Excellent Status
-    expect(container.textContent).toContain("EXCELLENT");
-    expect(container.textContent).toContain("94%");
+    expect(screen.getByText("EXCELLENT")).toBeInTheDocument();
+    expect(screen.getByText("94%")).toBeInTheDocument();
 
     // Verify Default Tab is V-Rails (renders AreaChart with Apple data)
-    const areaChart = container.querySelector('[data-testid="mock-area-chart"]');
+    const areaChart = screen.getByTestId("mock-area-chart");
     expect(areaChart).toBeInTheDocument();
     
-    const chartData = JSON.parse(areaChart?.getAttribute("data-data") || "[]");
+    const chartData = JSON.parse(areaChart.getAttribute("data-data") || "[]");
     expect(chartData).toHaveLength(6);
     expect(chartData[0].nominal).toBe(3.82);
     expect(chartData[0].active).toBe(3.81);
@@ -63,7 +63,7 @@ describe("HardwareScanChart Component Diagnostic Telemetry Tests", () => {
   });
 
   it("renders degraded state when battery is the primary issueType", () => {
-    const { container } = render(
+    render(
       <HardwareScanChart
         deviceBrand="Samsung"
         deviceModel="Galaxy S24"
@@ -73,25 +73,25 @@ describe("HardwareScanChart Component Diagnostic Telemetry Tests", () => {
 
     // Verify status warning message
     expect(
-      container.textContent
-    ).toContain("Battery degraded under nominal current series loads. Service required.");
+      screen.getByText("Battery degraded under nominal current series loads. Service required.")
+    ).toBeInTheDocument();
 
     // Verify DEGRADED Status
-    expect(container.textContent).toContain("DEGRADED");
-    expect(container.textContent).toContain("76%");
+    expect(screen.getByText("DEGRADED")).toBeInTheDocument();
+    expect(screen.getByText("76%")).toBeInTheDocument();
 
     // Check custom gauge percent
-    expect(container.textContent).toContain("76%");
+    expect(screen.getByText("76%")).toBeInTheDocument();
 
     // Check default V-Rails layout displays Samsung voltage data
-    const areaChart = container.querySelector('[data-testid="mock-area-chart"]');
-    const chartData = JSON.parse(areaChart?.getAttribute("data-data") || "[]");
+    const areaChart = screen.getByTestId("mock-area-chart");
+    const chartData = JSON.parse(areaChart.getAttribute("data-data") || "[]");
     expect(chartData[0].nominal).toBe(3.85); // Samsung nominal voltage bias
     expect(chartData[2].active).toBe(3.68); // samsung peak load drop check
   });
 
   it("handles Google / default brands correctly in mapping algorithms", () => {
-    const { container } = render(
+    render(
       <HardwareScanChart
         deviceBrand="Google"
         deviceModel="Pixel 8 Pro"
@@ -100,14 +100,14 @@ describe("HardwareScanChart Component Diagnostic Telemetry Tests", () => {
     );
 
     // Verify Default / Google nominal voltage bias
-    const areaChart = container.querySelector('[data-testid="mock-area-chart"]');
-    const chartData = JSON.parse(areaChart?.getAttribute("data-data") || "[]");
+    const areaChart = screen.getByTestId("mock-area-chart");
+    const chartData = JSON.parse(areaChart.getAttribute("data-data") || "[]");
     expect(chartData[0].nominal).toBe(3.80);
     expect(chartData[2].active).toBe(3.62);
   });
 
   it("switches to cycle metrics mode cleanly when clicking the tab", () => {
-    const { container } = render(
+    render(
       <HardwareScanChart
         deviceBrand="Apple"
         deviceModel="iPhone 15 Pro"
@@ -116,20 +116,19 @@ describe("HardwareScanChart Component Diagnostic Telemetry Tests", () => {
     );
 
     // Locate the tab switcher buttons
-    const cycleTabButton = container.querySelector('button[role="button"]');
+    const cycleTabButton = screen.getByRole("button", { name: /Cycles/i });
     expect(cycleTabButton).toBeInTheDocument();
 
     // Trigger state change via click interaction
-    cycleTabButton?.dispatchEvent(new Event('click', { bubbles: true }));
+    fireEvent.click(cycleTabButton);
 
     // Render area chart disappears, line chart appears
-    const areaChartAfter = container.querySelector('[data-testid="mock-area-chart"]');
-    expect(areaChartAfter).not.toBeInTheDocument();
-    const lineChart = container.querySelector('[data-testid="mock-line-chart"]');
+    expect(screen.queryByTestId("mock-area-chart")).not.toBeInTheDocument();
+    const lineChart = screen.getByTestId("mock-line-chart");
     expect(lineChart).toBeInTheDocument();
 
     // Verify the simulated health capacity degradation trend (baseHealth = 76)
-    const chartData = JSON.parse(lineChart?.getAttribute("data-data") || "[]");
+    const chartData = JSON.parse(lineChart.getAttribute("data-data") || "[]");
     expect(chartData).toHaveLength(5);
     expect(chartData[0].cycle).toBe("C-150");
     expect(chartData[0].capacity).toBe(78.5); // baseHealth (76) + 2.5

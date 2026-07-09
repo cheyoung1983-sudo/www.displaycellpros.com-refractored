@@ -134,6 +134,25 @@ export const IntakeSpecialistButton: React.FC = () => {
               </button>
             </div>
 
+            {/* Google Calendar Direct Booking Banner */}
+            <div className="bg-blue-950/45 border-b border-blue-900/40 px-6 py-3 flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="flex h-2 w-2 relative shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span className="text-slate-350 font-mono text-[11px] uppercase tracking-wider font-semibold">Soft Operations Express Scheduling</span>
+              </div>
+              <a
+                href="https://calendar.app.google/kfu75qxbATwu2Tt39"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-3 py-1.5 rounded-lg uppercase tracking-wider text-[10px] transition-all flex items-center gap-1.5 cursor-pointer font-sans shrink-0 hover:scale-[1.02] active:scale-95"
+              >
+                <span>Book Now 📅</span>
+              </a>
+            </div>
+
             {/* Chat History Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-[#111111] to-[#0a0a0a]">
               {messages.map((m, idx) => (

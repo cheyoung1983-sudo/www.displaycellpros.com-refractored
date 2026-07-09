@@ -86,6 +86,7 @@ const QuoteBuilderDashboard = React.lazy(() => import("./components/QuoteBuilder
 const SmdComponentLibrary = React.lazy(() => import("./components/SmdComponentLibrary").then(module => ({ default: module.SmdComponentLibrary })));
 const BrandLogo = React.lazy(() => import("./components/BrandLogo").then(module => ({ default: module.BrandLogo })));
 const FirebaseUserAuditor = React.lazy(() => import("./components/FirebaseUserAuditor").then(module => ({ default: module.FirebaseUserAuditor })));
+const Auth0DiagnosticExplorer = React.lazy(() => import("./components/Auth0DiagnosticExplorer").then(module => ({ default: module.Auth0DiagnosticExplorer })));
 import { QrTicketScanner } from "./components/QrTicketScanner";
 import { AuthStatus } from "./components/AuthStatus";
 import { IntakeSpecialistButton } from "./components/IntakeSpecialistButton";
@@ -281,7 +282,7 @@ export default function App() {
   });
 
   // --- DIAGNOSTIC HUB STATES ---
-  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "escalation" | "forensics" | "forms" | "gmail" | "firebase_ai" | "workspace_hub" | "gateway" | "quote_builder" | "telemetry" | "smd_library" | "marketing_firewall">("telemetry");
+  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "escalation" | "forensics" | "forms" | "gmail" | "firebase_ai" | "workspace_hub" | "gateway" | "quote_builder" | "telemetry" | "smd_library" | "marketing_firewall" | "auth0_oauth">("telemetry");
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(null);
   const [leads, setLeads] = useState<HighPriorityLead[]>([]);
   const [isLoadingLeads, setIsLoadingLeads] = useState<boolean>(false);
@@ -3685,24 +3686,17 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                 )}
               </div>
 
-              {/* DYNAMIC HEADER SESSION CONTROL ACTION */}
+              {/* DYNAMIC HEADER SESSION CONTROL ACTION REPLACED WITH BOOKING */}
               <div className="hidden md:flex items-center shrink-0">
-                {authUser && !authUser.isAnonymous ? (
-                  <button
-                    onClick={handleSignOut}
-                    className="text-[9.5px] bg-red-950/40 text-red-400 hover:text-white hover:bg-red-900/30 border border-red-500/25 px-2.5 py-1 rounded-lg uppercase tracking-wider font-extrabold transition-all cursor-pointer font-mono"
-                  >
-                    Sign Out
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="text-[9.5px] bg-teal-950/80 text-teal-350 hover:text-white hover:bg-teal-900 border border-teal-500/25 px-2.5 py-1 rounded-lg uppercase tracking-wider font-extrabold transition-all cursor-pointer font-mono flex items-center gap-1.5"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-teal-400"></span>
-                    Sign In
-                  </button>
-                )}
+                <a
+                  href="https://calendar.app.google/kfu75qxbATwu2Tt39"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-blue-500/15 active:scale-95 cursor-pointer font-sans flex items-center gap-1.5"
+                >
+                  <span className="text-sm">📅</span>
+                  Book Now with Google
+                </a>
               </div>
 
               {/* FIRESTORE BACKUP CONNECTIVITY SYNC STATUS */}
@@ -4757,12 +4751,13 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       },
                       {
                         id: "workspace",
-                        name: "Google Workspace Hub",
+                        name: "Google & Auth0 Hub",
                         icon: <Layers className="w-4 h-4 text-sky-450 shrink-0" />,
                         tabs: [
                           { id: "workspace_hub", name: "Workspace Main Hub", badge: "GWS" },
                           { id: "forms", name: "Google Forms Intake", badge: "GWS" },
                           { id: "gmail", name: "Gmail Communications", badge: "GWS" },
+                          { id: "auth0_oauth", name: "Auth0 Forensic Explorer", badge: "OIDC" },
                         ]
                       },
                       {
@@ -6901,6 +6896,14 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                     leads={leads}
                     onAddNewTicket={handleAddNewTicketFromForms}
                   />
+                )}
+
+                {labTab === "auth0_oauth" && (
+                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing Auth0 Forensic Explorer...</div>}>
+                    <Auth0DiagnosticExplorer
+                      addToast={addToast}
+                    />
+                  </React.Suspense>
                 )}
 
                 {labTab === "quote_builder" && (
@@ -9686,9 +9689,25 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
           <h2 className="text-2xl sm:text-3xl font-bold font-sans text-white tracking-tight mt-10 mb-3 max-w-lg leading-snug">
             STOP GUESSING. <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#008080] to-[#00BFFF]">START AUDITING.</span>
           </h2>
-          <p className="text-xs text-slate-400 font-medium max-w-md leading-relaxed select-none">
+          <p className="text-xs text-slate-400 font-medium max-w-md leading-relaxed select-none mb-6">
             Silicon-layer forensics, multi-point impedance signatures, and raw logic telemetry. We do not do blind part-swapping. We identify exact node collapses directly under 40x micro-magnification in Spokane and Seattle.
           </p>
+
+          {/* CENTRAL STATIC BOOK NOW CTA */}
+          <div className="mt-4 mb-8 flex justify-center w-full relative z-20">
+            <a
+              href="https://calendar.app.google/kfu75qxbATwu2Tt39"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-10 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-base uppercase tracking-widest rounded-xl shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer font-sans hover:scale-[1.03] active:scale-95 border border-blue-400/20 group relative overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <span className="text-lg animate-bounce">📅</span>
+                Book Now on Google Calendar
+              </span>
+              <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+            </a>
+          </div>
 
         </div>
       </div>
@@ -9742,16 +9761,24 @@ function HomeView({ onBookClick, onLabClick, onLegalClick }) {
                 </div>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+                <a 
+                  href="https://calendar.app.google/kfu75qxbATwu2Tt39"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-extrabold text-base transition-all shadow-lg hover:shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer group hover:scale-[1.02] active:scale-95 shrink-0"
+                >
+                  <span>📅</span> Book Now on Google
+                </a>
                 <button 
                   onClick={onBookClick}
-                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-base transition-all shadow-lg hover:shadow-blue-500/10 flex items-center justify-center gap-2 cursor-pointer group"
+                  className="px-6 py-4 bg-slate-800 hover:bg-slate-750 text-white border border-slate-700/85 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Get Instant Triage Quote <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button 
                   onClick={onLabClick}
-                  className="px-8 py-4 bg-slate-800 hover:bg-slate-750 text-white border border-slate-700/80 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="px-6 py-4 bg-slate-800 hover:bg-slate-750 text-white border border-slate-700/85 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Enter Diagnostic Lab <Cpu size={18} className="text-blue-400" />
                 </button>
@@ -11035,77 +11062,8 @@ function CustomerHubView({
     };
   }, [bookDate, bookTime, bookRemarks, customerName, profilePhone, profilePreferredDevice, authUser, googleAccessToken]);
 
-  // Requirement: block customer from accessing diagnostic features until they sign up
-  if (!authUser || authUser.isAnonymous) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12 animate-in fade-in duration-300">
-        <div className="bg-gradient-to-r from-blue-900/40 via-slate-900 to-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden text-center">
-          {/* Subtle Background decoration */}
-          <div className="absolute top-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -z-10"></div>
-
-          <div className="inline-flex items-center justify-center p-4 bg-blue-500/10 border border-blue-500/15 text-blue-400 rounded-full mb-6 animate-pulse">
-            <ShieldCheck className="w-10 h-10" />
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-3">
-            Secure Customer Signup Required
-          </h2>
-          <p className="text-slate-300 text-sm max-w-xl mx-auto mb-8 font-sans leading-relaxed">
-            As a <span className="text-blue-400 font-bold">Display & Cell Pros</span> Spokane client, you must register or sign in using a verified account to unlock advanced hardwired diagnostics and live device triage support.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto text-left mb-8">
-            <div className="bg-slate-950/60 p-5 rounded-xl border border-slate-850">
-              <div className="flex items-center gap-2 mb-2 text-blue-400">
-                <Cpu className="w-4 h-4" />
-                <h4 className="text-xs font-bold uppercase tracking-wider">Device Hardware Telemetry</h4>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Unlock direct physical WebUSB link-ups to pull complete system boards speed configurations, battery fatigue percentages, and digitizer response indexes.
-              </p>
-            </div>
-
-            <div className="bg-slate-950/60 p-5 rounded-xl border border-slate-850">
-              <div className="flex items-center gap-2 mb-2 text-emerald-400">
-                <Database className="w-4 h-4" />
-                <h4 className="text-xs font-bold uppercase tracking-wider">Enterprise Triage Loop</h4>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Connect your device diagnostic data directly into the central Spokane service database. On-duty engineers can evaluate specifications and issue price quotes in real-time.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              id="customer-google-signin"
-              onClick={handleGoogleSignIn}
-              className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/20 inline-flex items-center gap-2 w-full sm:w-auto justify-center cursor-pointer"
-            >
-              <User className="w-4 h-4" />
-              Sign Up / Connect with Google
-            </button>
-            
-            <button
-              type="button"
-              onClick={onSignInClick}
-              className="px-6 py-3.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all inline-flex items-center gap-2 w-full sm:w-auto justify-center cursor-pointer"
-            >
-              <Mail className="w-4 h-4 text-blue-400" />
-              Sign In with Email / Credentials
-            </button>
-          </div>
-
-          <div className="mt-8">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wider">
-              Google SSO & Secure Credentialed Authentication
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Requirement: block customer from accessing diagnostic features until they sign up - REMOVED for static mode
+  // Users can now directly use the complete functional workspace without login/signup constraints.
   // Filter quotes belonging to this customer
   const clientTickets = tickets.filter(t => 
     t.userId === authUser?.uid || 
@@ -11513,8 +11471,16 @@ function CustomerHubView({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
-      <div className="mb-4 flex justify-end gap-2">
-        <AuthStatus />
+      <div className="mb-4 flex justify-end gap-2 flex-wrap items-center">
+        <a
+          href="https://calendar.app.google/kfu75qxbATwu2Tt39"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-full hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-blue-500/15 active:scale-95 cursor-pointer font-sans"
+        >
+          <span className="mr-1.5 text-sm">📅</span>
+          Book Now with Google
+        </a>
         <IntakeSpecialistButton />
       </div>
       
@@ -11627,7 +11593,7 @@ function CustomerHubView({
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Display Name</label>
                   <input
                     type="text"
-                    value={customerName}
+                    value={customerName || ""}
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
                     placeholder="Jane Miller"
@@ -11639,7 +11605,7 @@ function CustomerHubView({
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cell Phone</label>
                     <input
                       type="text"
-                      value={profilePhone}
+                      value={profilePhone || ""}
                       onChange={(e) => setProfilePhone(e.target.value)}
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
                       placeholder="(509) 903-6139"
@@ -11649,7 +11615,7 @@ function CustomerHubView({
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Primary Email Address</label>
                     <input
                       type="text"
-                      value={authUser ? authUser.email : "ryan@displaycellpros.com"}
+                      value={(authUser ? authUser.email : "ryan@displaycellpros.com") || ""}
                       disabled
                       className="w-full bg-slate-950/70 border border-slate-800 rounded-lg p-3 text-sm text-slate-400 cursor-not-allowed"
                     />
@@ -11660,7 +11626,7 @@ function CustomerHubView({
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Target Device To Repair</label>
                   <input
                     type="text"
-                    value={profilePreferredDevice}
+                    value={profilePreferredDevice || ""}
                     onChange={(e) => setProfilePreferredDevice(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
                     placeholder="iPhone 14 Pro Max"
@@ -11892,6 +11858,31 @@ function CustomerHubView({
                   </p>
                 </div>
 
+                {/* Google Calendar Express Scheduler during soft operations */}
+                <div className="bg-gradient-to-r from-blue-950/40 via-slate-900 to-[#111111] border border-blue-900/35 rounded-xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 shadow-xl">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 relative shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                      </span>
+                      <h3 className="text-sm font-extrabold uppercase tracking-wider text-white font-mono">Google Calendar Express Scheduler</h3>
+                    </div>
+                    <p className="text-slate-400 text-xs max-w-xl leading-relaxed">
+                      Prefer booking instantly without filling in diagnostic fields? Connect directly to our official Google Calendar scheduler during soft operations to secure your repair slot.
+                    </p>
+                  </div>
+                  <a
+                    href="https://calendar.app.google/kfu75qxbATwu2Tt39"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sm:self-center shrink-0 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs uppercase tracking-widest rounded-lg shadow-lg hover:shadow-blue-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer font-sans hover:scale-[1.02] active:scale-95"
+                  >
+                    <span>📅</span>
+                    Book Now on Google
+                  </a>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                   {/* Form */}
                   <form onSubmit={handleBookAppointment} className="space-y-4">
@@ -11949,7 +11940,7 @@ function CustomerHubView({
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Desire Date (Manual Selector)</label>
                       <input
                         type="date"
-                        value={bookDate}
+                        value={bookDate || ""}
                         onChange={(e) => setBookDate(e.target.value)}
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 font-mono"
                       />
@@ -11958,7 +11949,7 @@ function CustomerHubView({
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Target Time Window</label>
                       <select
-                        value={bookTime}
+                        value={bookTime || ""}
                         onChange={(e) => setBookTime(e.target.value)}
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
                       >
@@ -11985,7 +11976,7 @@ function CustomerHubView({
                         )}
                       </div>
                       <textarea
-                        value={bookRemarks}
+                        value={bookRemarks || ""}
                         onChange={(e) => setBookRemarks(e.target.value)}
                         rows={3}
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 resize-none font-sans"
@@ -11993,9 +11984,9 @@ function CustomerHubView({
                       />
                       <div className="flex justify-between items-center mt-1 text-[10px] text-slate-500 font-mono">
                         <span>
-                          {bookRemarks.length > 0 ? `Draft saved locally: ${bookRemarks.length} chars` : "Auto-save active"}
+                          {(bookRemarks || "").length > 0 ? `Draft saved locally: ${(bookRemarks || "").length} chars` : "Auto-save active"}
                         </span>
-                        {bookRemarks.length > 0 && (
+                        {(bookRemarks || "").length > 0 && (
                           <button
                             type="button"
                             onClick={() => {

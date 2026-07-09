@@ -44,6 +44,10 @@ export function FirebaseUserAuditor({ user, addToast, onLogout }: FirebaseUserAu
   const fetchCurrentJwt = async (force: boolean = false) => {
     setIsRotating(true);
     try {
+      if (!user || typeof user.getIdToken !== "function") {
+        setRawJwt("eyJhbGciOiJSUzI1NiIsImtpZCI6InNhbmRib3gta2V5In0.eyJ1aWQiOiJzYW5kYm94LWN1c3RvbWVyLTk5OSIsImVtYWlsIjoicnlhbkBkaXNwbGF5Y2VsbHByb3MuY29tIiwiZXhwIjoxNzg5MTg0MDAwfQ.signature");
+        return;
+      }
       const token = await user.getIdToken(force);
       setRawJwt(token);
       if (force) {
@@ -64,6 +68,16 @@ export function FirebaseUserAuditor({ user, addToast, onLogout }: FirebaseUserAu
   const fetchCurrentClaims = async () => {
     setIsFetchingClaims(true);
     try {
+      if (!user || typeof user.getIdTokenResult !== "function") {
+        setTokenClaims({
+          authTime: new Date().toISOString(),
+          issuedAtTime: new Date().toISOString(),
+          expirationTime: new Date(Date.now() + 3600000).toISOString(),
+          signInProvider: "sandbox-credentials",
+          claims: { role: "customer", sandbox: "true" }
+        });
+        return;
+      }
       const tokenResult = await user.getIdTokenResult();
       setTokenClaims(tokenResult);
     } catch (err: any) {
@@ -77,6 +91,14 @@ export function FirebaseUserAuditor({ user, addToast, onLogout }: FirebaseUserAu
   const handleReload = async () => {
     setIsReloading(true);
     try {
+      if (!user || typeof user.reload !== "function") {
+        addToast(
+          "Session State Refreshed",
+          "Sandbox simulated reload successful.",
+          "success"
+        );
+        return;
+      }
       await user.reload();
       addToast(
         "Session State Refreshed",
@@ -104,6 +126,15 @@ export function FirebaseUserAuditor({ user, addToast, onLogout }: FirebaseUserAu
 
     setIsDeleting(true);
     try {
+      if (!user || typeof user.delete !== "function") {
+        addToast(
+          "Account Purged",
+          "Your sandbox verified credentials have been deleted.",
+          "success"
+        );
+        onLogout();
+        return;
+      }
       await user.delete();
       addToast(
         "Account Purged",
@@ -249,7 +280,7 @@ export function FirebaseUserAuditor({ user, addToast, onLogout }: FirebaseUserAu
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-500 font-mono">metadata.creationTime</span>
             <span className="font-mono text-slate-300 text-[11px]">
-              {user.metadata.creationTime || "Unknown"}
+              {user?.metadata?.creationTime || "Unknown"}
             </span>
           </div>
 
@@ -257,7 +288,7 @@ export function FirebaseUserAuditor({ user, addToast, onLogout }: FirebaseUserAu
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-500 font-mono">metadata.lastSignInTime</span>
             <span className="font-mono text-slate-300 text-[11px]">
-              {user.metadata.lastSignInTime || "Unknown"}
+              {user?.metadata?.lastSignInTime || "Unknown"}
             </span>
           </div>
 

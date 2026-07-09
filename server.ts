@@ -1,14 +1,17 @@
 import express from "express";
 import path from "path";
 import crypto from "crypto";
+import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, ThinkingLevel, GenerateVideosOperation } from "@google/genai";
 import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
 import { adminDb } from "./src/lib/firebase-admin";
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+export const app = express();
 
-app.use(express.json());
+async function startServer() {
+  const PORT = 3000;
+
+  app.use(express.json());
 
   // --- AUTOMATED LEXICAL FIREWALL MIDDLEWARE ---
   interface LexiconMapping {
@@ -3213,45 +3216,24 @@ Construct an authoritative, scientific audit report detailing the exact physical
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV === "production") {
-    const distPath = path.join(process.cwd(), 'dist');
-    // Only serve static files if not on Vercel (Vercel handles this via vercel.json rewrites)
-    if (!process.env.VERCEL) {
-      app.use(express.static(distPath));
-    }
-    app.get('*', (req, res) => {
-      if (process.env.VERCEL) {
-        // In Vercel, the frontend is handled by rewrites, so API catch-all should 404
-        res.status(404).json({ error: "API route not found" });
-      } else {
-        res.sendFile(path.join(distPath, 'index.html'));
-      }
-    });
-  } else {
-    // Late-load Vite in dev mode to keep the module clean for production builds
-    import("vite").then(({ createServer: createViteServer }) => {
-    createViteServer({
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
-    }).then((vite) => {
-      app.use(vite.middlewares);
     });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
-/**
- * Conditional Listen
- * Only start the server if this file is run directly (local dev).
- * Vercel will import the 'app' export instead.
- */
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on http://localhost:${PORT}`);
   });
 }
-
-// Export for Vercel Serverless
-export default app;
 
 // --- RESOLVE QUOTE DETERMINISTICALLY ---
 // --- SPOKANE TAX & LOCATION FORENSICS RESOLVER ---
@@ -3433,4 +3415,8 @@ function calculateLocalQuote(issueType: string, deviceTier: string, zipCode: str
     notes: "Telemetry-guided fixed repair estimation.",
     localFacilities: location
   };
+}
+
+if (process.env.VERCEL !== "1") {
+  startServer();
 }
