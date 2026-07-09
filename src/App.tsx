@@ -451,6 +451,15 @@ export default function App() {
     if (typeof window !== "undefined") {
       window.addEventListener("online", handleOnline);
       window.addEventListener("offline", handleOffline);
+
+      // Capture and dispatch Auth0 authorization code from real OIDC redirect popup
+      if (window.location.pathname.includes("/auth/callback")) {
+        const code = new URLSearchParams(window.location.search).get("code");
+        if (code && window.opener) {
+          window.opener.postMessage({ type: "AUTH0_MOCK_SUCCESS", code }, "*");
+          window.close();
+        }
+      }
     }
     return () => {
       if (typeof window !== "undefined") {

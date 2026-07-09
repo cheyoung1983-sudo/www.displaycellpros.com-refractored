@@ -59,9 +59,10 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
     }
   ]);
   
-  // Loading State
+  // Loading and Sandbox Mode States
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [tokenDetails, setTokenDetails] = useState<any>(null);
+  const [isSandbox, setIsSandbox] = useState<boolean>(true);
 
   // Generate Callback URI
   const callbackUri = typeof window !== "undefined" 
@@ -98,7 +99,7 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
     
     try {
       if (activeAction === "signup") {
-        appendLog("request", `POST ${baseUrl}/dbconnections/signup`, {
+        appendLog("request", `POST ${isSandbox ? baseUrl : "/api/auth0"}/signup`, {
           client_id: clientId,
           email,
           password,
@@ -111,32 +112,56 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
           }
         });
 
-        // Simulating the request / performing real endpoint call if possible
-        await new Promise(resolve => setTimeout(resolve, 1200));
+        if (isSandbox) {
+          // Simulating the request / performing real endpoint call if possible
+          await new Promise(resolve => setTimeout(resolve, 1200));
 
-        const mockResponse = {
-          _id: "auth0|64e8b392a83214b7e1903",
-          email_verified: false,
-          email,
-          username: username || "forensic_auditor",
-          user_metadata: {
-            assigned_facility: "Spokane Micro-soldering Lab",
-            forensic_clearance: "NIST-SP-800-88-R1",
-            telemetry_format: ".mdf"
-          }
-        };
+          const mockResponse = {
+            _id: "auth0|64e8b392a83214b7e1903",
+            email_verified: false,
+            email,
+            username: username || "forensic_auditor",
+            user_metadata: {
+              assigned_facility: "Spokane Micro-soldering Lab",
+              forensic_clearance: "NIST-SP-800-88-R1",
+              telemetry_format: ".mdf"
+            }
+          };
 
-        appendLog("response", "200 OK - User Created Successfully", mockResponse);
-        addToast(
-          "Auth0 Signup Successful",
-          `Client user registration generated under connection '${connection}'.`,
-          "success"
-        );
+          appendLog("response", "200 OK - User Created Successfully (Sandbox Sim)", mockResponse);
+          addToast(
+            "Auth0 Signup Simulated",
+            `Client user registration generated inside sandbox under connection '${connection}'.`,
+            "success"
+          );
+        } else {
+          const res = await fetch("/api/auth0/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              domain: auth0Domain,
+              clientId,
+              email,
+              password,
+              connection,
+              username: username || undefined,
+              userMetadata: {
+                assigned_facility: "Spokane Micro-soldering Lab",
+                forensic_clearance: "NIST-SP-800-88-R1",
+                telemetry_format: ".mdf"
+              }
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+          appendLog("response", `${res.status} ${res.statusText}`, data);
+          addToast("Auth0 Signup Successful", "Real user registration completed successfully on upstream tenant.", "success");
+        }
       } 
       else if (activeAction === "login_ropc") {
-        appendLog("request", `POST ${baseUrl}/oauth/token (Grant Type: password)`, {
+        appendLog("request", `POST ${isSandbox ? baseUrl : "/api/auth0"}/token (ROPC password)`, {
           client_id: clientId,
-          client_secret: "*********************",
+          client_secret: isSandbox ? "*********************" : "sk_forensic_sec_8849bca022",
           grant_type: "password",
           username: email,
           password,
@@ -144,110 +169,165 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
           realm: connection
         });
 
-        await new Promise(resolve => setTimeout(resolve, 1400));
+        if (isSandbox) {
+          await new Promise(resolve => setTimeout(resolve, 1400));
 
-        // Generate synthetic but valid looking JWT tokens
-        const syntheticAccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ." + btoa(JSON.stringify({
-          iss: baseUrl,
-          sub: "auth0|64e8b392a83214b7e1903",
-          aud: [`${baseUrl}/api/v2/`, `${baseUrl}/userinfo`],
-          iat: Math.floor(Date.now() / 1000),
-          exp: Math.floor(Date.now() / 1000) + 3600,
-          scope,
-          azp: clientId,
-          permissions: ["read:mdf", "write:telemetry"]
-        })) + ".signature_verification_ok";
+          // Generate synthetic but valid looking JWT tokens
+          const syntheticAccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ." + btoa(JSON.stringify({
+            iss: baseUrl,
+            sub: "auth0|64e8b392a83214b7e1903",
+            aud: [`${baseUrl}/api/v2/`, `${baseUrl}/userinfo`],
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 3600,
+            scope,
+            azp: clientId,
+            permissions: ["read:mdf", "write:telemetry"]
+          })) + ".signature_verification_ok";
 
-        const syntheticIdToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ." + btoa(JSON.stringify({
-          nickname: username || "auditor",
-          name: email.split("@")[0],
-          email,
-          email_verified: true,
-          iss: baseUrl,
-          sub: "auth0|64e8b392a83214b7e1903",
-          aud: clientId,
-          iat: Math.floor(Date.now() / 1000),
-          exp: Math.floor(Date.now() / 1000) + 3600,
-        })) + ".signature_verification_ok";
+          const syntheticIdToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ." + btoa(JSON.stringify({
+            nickname: username || "auditor",
+            name: email.split("@")[0],
+            email,
+            email_verified: true,
+            iss: baseUrl,
+            sub: "auth0|64e8b392a83214b7e1903",
+            aud: clientId,
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 3600,
+          })) + ".signature_verification_ok";
 
-        setAccessToken(syntheticAccessToken);
-        setTokenDetails({
-          access_token: syntheticAccessToken,
-          id_token: syntheticIdToken,
-          scope,
-          expires_in: 3600,
-          token_type: "Bearer"
-        });
+          setAccessToken(syntheticAccessToken);
+          setTokenDetails({
+            access_token: syntheticAccessToken,
+            id_token: syntheticIdToken,
+            scope,
+            expires_in: 3600,
+            token_type: "Bearer"
+          });
 
-        appendLog("response", "200 OK - Access Token Issued", {
-          access_token: `${syntheticAccessToken.substring(0, 30)}...`,
-          id_token: `${syntheticIdToken.substring(0, 30)}...`,
-          scope,
-          expires_in: 3600,
-          token_type: "Bearer"
-        });
+          appendLog("response", "200 OK - Access Token Issued (Sandbox Sim)", {
+            access_token: `${syntheticAccessToken.substring(0, 30)}...`,
+            id_token: `${syntheticIdToken.substring(0, 30)}...`,
+            scope,
+            expires_in: 3600,
+            token_type: "Bearer"
+          });
 
-        addToast(
-          "Auth0 Login Issued",
-          "OIDC credentials authorized. Access tokens saved to volatile local cache.",
-          "success"
-        );
+          addToast(
+            "Auth0 Login Issued (Sim)",
+            "OIDC credentials authorized in sandbox simulator.",
+            "success"
+          );
+        } else {
+          const res = await fetch("/api/auth0/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              domain: auth0Domain,
+              clientId,
+              clientSecret,
+              grantType: "password",
+              username: email,
+              password,
+              scope,
+              realm: connection
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+          setAccessToken(data.access_token || "");
+          setTokenDetails(data);
+          appendLog("response", `${res.status} ${res.statusText}`, data);
+          addToast("Auth0 Token Issued", "Upstream access token acquired successfully.", "success");
+        }
       }
       else if (activeAction === "userinfo") {
         if (!accessToken) {
           throw new Error("Missing credentials. Please perform an Auth0 Login (ROPC) first to obtain an Access Token.");
         }
 
-        appendLog("request", `GET ${baseUrl}/userinfo`, {
+        appendLog("request", `GET ${isSandbox ? baseUrl : "/api/auth0"}/userinfo`, {
           Headers: {
             Authorization: `Bearer ${accessToken.substring(0, 15)}...`,
             Accept: "application/json"
           }
         });
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (isSandbox) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const mockUserInfo = {
-          sub: "auth0|64e8b392a83214b7e1903",
-          nickname: "spokane_analyzer",
-          name: "Spokane Analyst Portal",
-          picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
-          updated_at: new Date().toISOString(),
-          email,
-          email_verified: true,
-          "https://displaycellpros.com/claims/facility": "Spokane South Hill Forensic",
-          "https://displaycellpros.com/claims/clearance": "LEVEL_3_S2C_AUDIT"
-        };
+          const mockUserInfo = {
+            sub: "auth0|64e8b392a83214b7e1903",
+            nickname: "spokane_analyzer",
+            name: "Spokane Analyst Portal",
+            picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+            updated_at: new Date().toISOString(),
+            email,
+            email_verified: true,
+            "https://displaycellpros.com/claims/facility": "Spokane South Hill Forensic",
+            "https://displaycellpros.com/claims/clearance": "LEVEL_3_S2C_AUDIT"
+          };
 
-        appendLog("response", "200 OK - OIDC User Profile Retrieved", mockUserInfo);
-        addToast(
-          "User Profile Loaded",
-          "Profile claims retrieved. S2C forensic credentials authenticated.",
-          "success"
-        );
+          appendLog("response", "200 OK - OIDC User Profile (Sandbox Sim)", mockUserInfo);
+          addToast(
+            "User Profile Loaded (Sim)",
+            "Profile claims retrieved inside sandbox.",
+            "success"
+          );
+        } else {
+          const res = await fetch("/api/auth0/userinfo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              domain: auth0Domain,
+              accessToken
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+          appendLog("response", `${res.status} ${res.statusText}`, data);
+          addToast("OIDC Claims Loaded", "Auth0 userprofile info retrieved successfully.", "success");
+        }
       }
       else if (activeAction === "reset") {
-        appendLog("request", `POST ${baseUrl}/dbconnections/change_password`, {
+        appendLog("request", `POST ${isSandbox ? baseUrl : "/api/auth0"}/change-password`, {
           client_id: clientId,
           email,
           connection
         });
 
-        await new Promise(resolve => setTimeout(resolve, 800));
+        if (isSandbox) {
+          await new Promise(resolve => setTimeout(resolve, 800));
 
-        appendLog("response", "200 OK - Reset Verification Code Sent", {
-          message: "We've sent an email to change your password."
-        });
+          appendLog("response", "200 OK - Reset Verification Code Sent (Sandbox Sim)", {
+            message: "We've sent an email to change your password."
+          });
 
-        addToast(
-          "Password Reset Dispatched",
-          "Auth0 connection reset code dispatched to audit inbox.",
-          "info"
-        );
+          addToast(
+            "Password Reset Simulated",
+            "Auth0 connection reset code simulated successfully.",
+            "info"
+          );
+        } else {
+          const res = await fetch("/api/auth0/change-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              domain: auth0Domain,
+              clientId,
+              email,
+              connection
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+          appendLog("response", `${res.status} ${res.statusText}`, data);
+          addToast("Password Reset Dispatched", "Change password email sent successfully.", "success");
+        }
       }
       else if (activeAction === "pkce") {
         // Build the PKCE Auth code URL
-        const authUrl = `${baseUrl}/authorize?` + new URLSearchParams({
+        const authUrl = `https://${auth0Domain}/authorize?` + new URLSearchParams({
           response_type: "code",
           client_id: clientId,
           redirect_uri: callbackUri,
@@ -257,7 +337,7 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
           code_challenge_method: "S256"
         }).toString();
 
-        appendLog("info", "Generating PKCE Authorization URL...", {
+        appendLog("info", `Generating PKCE Authorization URL (${isSandbox ? "Sandbox" : "Upstream REAL"})...`, {
           authorize_endpoint: `${baseUrl}/authorize`,
           code_challenge_method: "S256",
           code_challenge: pkceChallenge,
@@ -266,66 +346,78 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
 
         appendLog("request", `GET ${authUrl.substring(0, 120)}...`);
 
-        // Simulated popup opener
-        const win = window.open(
-          "about:blank",
-          "Auth0 OIDC Sandbox Portal",
-          "width=600,height=700"
-        );
+        if (isSandbox) {
+          // Simulated popup opener
+          const win = window.open(
+            "about:blank",
+            "Auth0 OIDC Sandbox Portal",
+            "width=600,height=700"
+          );
 
-        if (win) {
-          win.document.write(`
-            <html>
-              <head>
-                <title>Auth0 OIDC Forensic Sandbox</title>
-                <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-              </head>
-              <body class="bg-gray-950 text-slate-200 font-sans p-6 min-h-screen flex flex-col justify-between">
-                <div class="space-y-6">
-                  <div class="flex items-center gap-3 border-b border-gray-850 pb-4">
-                    <span class="text-2xl">🔬</span>
-                    <div>
-                      <h1 class="text-lg font-black tracking-wider text-teal-400 uppercase">Auth0 Sandbox Authorization</h1>
-                      <p class="text-[10px] text-slate-400 font-mono">CLIENT ID: ${clientId}</p>
+          if (win) {
+            win.document.write(`
+              <html>
+                <head>
+                  <title>Auth0 OIDC Forensic Sandbox</title>
+                  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                </head>
+                <body class="bg-gray-950 text-slate-200 font-sans p-6 min-h-screen flex flex-col justify-between">
+                  <div class="space-y-6">
+                    <div class="flex items-center gap-3 border-b border-gray-850 pb-4">
+                      <span class="text-2xl">🔬</span>
+                      <div>
+                        <h1 class="text-lg font-black tracking-wider text-teal-400 uppercase">Auth0 Sandbox Authorization</h1>
+                        <p class="text-[10px] text-slate-400 font-mono">CLIENT ID: ${clientId}</p>
+                      </div>
+                    </div>
+                    
+                    <div class="bg-gray-900 border border-teal-500/20 p-4 rounded-xl space-y-3">
+                      <p class="text-xs text-slate-300">
+                        The client application <strong class="text-white">Display & Cell Pros Spokane</strong> is requesting access to your secure forensic hardware telemetry database.
+                      </p>
+                      <div class="space-y-1.5 text-[11px] font-mono text-slate-400">
+                        <div>• Issuer: <span class="text-teal-300">${baseUrl}</span></div>
+                        <div>• Requested Scopes: <span class="text-teal-300">${scope}</span></div>
+                        <div>• Redirect URI: <span class="text-teal-300">${callbackUri}</span></div>
+                      </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-950 rounded-lg border border-gray-800 space-y-2">
+                      <div class="text-xs font-bold text-slate-300">Grant Permission as User:</div>
+                      <div class="text-xs text-teal-400 font-mono">${email}</div>
                     </div>
                   </div>
-                  
-                  <div class="bg-gray-900 border border-teal-500/20 p-4 rounded-xl space-y-3">
-                    <p class="text-xs text-slate-300">
-                      The client application <strong class="text-white">Display & Cell Pros Spokane</strong> is requesting access to your secure forensic hardware telemetry database.
-                    </p>
-                    <div class="space-y-1.5 text-[11px] font-mono text-slate-400">
-                      <div>• Issuer: <span class="text-teal-300">${baseUrl}</span></div>
-                      <div>• Requested Scopes: <span class="text-teal-300">${scope}</span></div>
-                      <div>• Redirect URI: <span class="text-teal-300">${callbackUri}</span></div>
-                    </div>
-                  </div>
 
-                  <div class="p-4 bg-gray-950 rounded-lg border border-gray-800 space-y-2">
-                    <div class="text-xs font-bold text-slate-300">Grant Permission as User:</div>
-                    <div class="text-xs text-teal-400 font-mono">${email}</div>
+                  <div class="space-y-3 pt-6 border-t border-gray-800">
+                    <button 
+                      onclick="window.opener.postMessage({ type: 'AUTH0_MOCK_SUCCESS', code: 'spl_code_' + Math.floor(Math.random() * 9999999) }, '*'); window.close();"
+                      class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-wider transition-all"
+                    >
+                      Authorize Display & Cell Pros
+                    </button>
+                    <button 
+                      onclick="window.close();"
+                      class="w-full bg-gray-900 hover:bg-gray-800 text-slate-400 font-bold py-2.5 px-4 rounded-lg text-[10px] uppercase tracking-wider transition-all"
+                    >
+                      Cancel Connection
+                    </button>
                   </div>
-                </div>
-
-                <div class="space-y-3 pt-6 border-t border-gray-800">
-                  <button 
-                    onclick="window.opener.postMessage({ type: 'AUTH0_MOCK_SUCCESS', code: 'spl_code_' + Math.floor(Math.random() * 9999999) }, '*'); window.close();"
-                    class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-wider transition-all"
-                  >
-                    Authorize Display & Cell Pros
-                  </button>
-                  <button 
-                    onclick="window.close();"
-                    class="w-full bg-gray-900 hover:bg-gray-800 text-slate-400 font-bold py-2.5 px-4 rounded-lg text-[10px] uppercase tracking-wider transition-all"
-                  >
-                    Cancel Connection
-                  </button>
-                </div>
-              </body>
-            </html>
-          `);
+                </body>
+              </html>
+            `);
+          } else {
+            addToast("Popup Blocked", "Please enable popups to test the Auth0 PKCE Authorization popup window.", "warning");
+          }
         } else {
-          addToast("Popup Blocked", "Please enable popups to test the Auth0 PKCE Authorization popup window.", "warning");
+          // Open the real upstream Auth0 authorize portal!
+          const win = window.open(
+            authUrl,
+            "Auth0 Upstream Authorize Portal",
+            "width=600,height=750"
+          );
+          if (!win) {
+            addToast("Popup Blocked", "Please enable popups to test real Auth0 PKCE login redirects.", "warning");
+          }
         }
       }
     } catch (err: any) {
@@ -352,12 +444,12 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [clientId, auth0Domain, scope, pkceCodeVerifier]);
+  }, [clientId, auth0Domain, scope, pkceCodeVerifier, isSandbox]);
 
   const exchangeCode = async (code: string) => {
     setIsLoading(true);
     const baseUrl = `https://${auth0Domain}`;
-    appendLog("request", `POST ${baseUrl}/oauth/token (Exchange Code)`, {
+    appendLog("request", `POST ${isSandbox ? baseUrl : "/api/auth0"}/token (Exchange Code)`, {
       grant_type: "authorization_code",
       client_id: clientId,
       code_verifier: pkceCodeVerifier,
@@ -365,41 +457,73 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
       redirect_uri: callbackUri
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    try {
+      if (isSandbox) {
+        await new Promise(resolve => setTimeout(resolve, 1200));
 
-    const syntheticAccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ." + btoa(JSON.stringify({
-      iss: baseUrl,
-      sub: "auth0|64e8b392a83214b7e1903",
-      aud: [`${baseUrl}/api/v2/`, `${baseUrl}/userinfo`],
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600,
-      scope,
-      azp: clientId
-    })) + ".signature_verification_ok";
+        const syntheticAccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ." + btoa(JSON.stringify({
+          iss: baseUrl,
+          sub: "auth0|64e8b392a83214b7e1903",
+          aud: [`${baseUrl}/api/v2/`, `${baseUrl}/userinfo`],
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 3600,
+          scope,
+          azp: clientId
+        })) + ".signature_verification_ok";
 
-    setAccessToken(syntheticAccessToken);
-    setTokenDetails({
-      access_token: syntheticAccessToken,
-      id_token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ.synthetic_pkce_id_token.signature_verification_ok",
-      scope,
-      expires_in: 3600,
-      token_type: "Bearer"
-    });
+        setAccessToken(syntheticAccessToken);
+        setTokenDetails({
+          access_token: syntheticAccessToken,
+          id_token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InNwb2thbmUifQ.synthetic_pkce_id_token.signature_verification_ok",
+          scope,
+          expires_in: 3600,
+          token_type: "Bearer"
+        });
 
-    appendLog("response", "200 OK - Code Exchanged successfully", {
-      access_token: `${syntheticAccessToken.substring(0, 30)}...`,
-      id_token: "eyJhbGciOiJSUzI1Ni... (decoded claims verified)",
-      scope,
-      expires_in: 3600,
-      token_type: "Bearer"
-    });
+        appendLog("response", "200 OK - Code Exchanged successfully (Sandbox Sim)", {
+          access_token: `${syntheticAccessToken.substring(0, 30)}...`,
+          id_token: "eyJhbGciOiJSUzI1Ni... (decoded claims verified)",
+          scope,
+          expires_in: 3600,
+          token_type: "Bearer"
+        });
 
-    addToast(
-      "PKCE Exchange Successful",
-      "OIDC tokens securely swapped using SHA-256 Code Challenge verifier.",
-      "success"
-    );
-    setIsLoading(false);
+        addToast(
+          "PKCE Exchange Simulated",
+          "OIDC tokens securely swapped using SHA-256 Code Challenge verifier in sandbox.",
+          "success"
+        );
+      } else {
+        const res = await fetch("/api/auth0/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain: auth0Domain,
+            clientId,
+            clientSecret,
+            grantType: "authorization_code",
+            codeVerifier: pkceCodeVerifier,
+            code,
+            redirectUri: callbackUri
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+        setAccessToken(data.access_token || "");
+        setTokenDetails(data);
+        appendLog("response", `${res.status} ${res.statusText}`, data);
+        addToast(
+          "PKCE Exchange Successful",
+          "Real OIDC tokens securely swapped and validated.",
+          "success"
+        );
+      }
+    } catch (err: any) {
+      appendLog("error", `PKCE Code Exchange Failed: ${err.message || String(err)}`);
+      addToast("Exchange Error", "Failed to swap authorization code for OIDC token.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -433,7 +557,25 @@ export const Auth0DiagnosticExplorer: React.FC<Auth0DiagnosticExplorerProps> = (
                 <Settings className="w-4 h-4 text-[#008080]" />
                 <h2 className="text-xs font-bold text-white uppercase tracking-wider">Auth0 Tenant Configuration</h2>
               </div>
-              <span className="text-[9px] text-[#00BFFF] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-950/40 border border-blue-500/20">OIDC v2.0</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSandbox(prev => !prev);
+                    appendLog("info", `Diagnostic engine mode toggled to: ${!isSandbox ? "Upstream Real-Time Endpoint Proxy" : "Offline Sandbox Simulation"}`);
+                    addToast("Engine Mode Switched", `Active engine: ${!isSandbox ? "Upstream Proxy" : "Offline Sandbox"}`, "info");
+                  }}
+                  className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border transition-all ${
+                    isSandbox 
+                      ? "bg-amber-950/40 border-amber-500/30 text-amber-400 hover:bg-amber-900/40" 
+                      : "bg-emerald-950/40 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/40"
+                  }`}
+                  title="Click to toggle between Offline Sandbox simulation and real upstream Auth0 calls via secure proxy."
+                >
+                  {isSandbox ? "SANDBOX SIMULATION" : "REAL UPSTREAM"}
+                </button>
+                <span className="text-[9px] text-[#00BFFF] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-950/40 border border-blue-500/20">OIDC v2.0</span>
+              </div>
             </div>
 
             <div className="space-y-3">

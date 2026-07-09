@@ -3210,6 +3210,117 @@ Construct an authoritative, scientific audit report detailing the exact physical
     });
   });
 
+  // --- AUTH0 AUTHENTICATION PROXY ENDPOINTS ---
+  app.post("/api/auth0/signup", async (req, res) => {
+    const { domain, clientId, email, password, connection, username, userMetadata } = req.body;
+    if (!domain || !clientId || !email || !password || !connection) {
+      return res.status(400).json({ error: "Missing required registration parameters." });
+    }
+    try {
+      const targetUrl = `https://${domain}/dbconnections/signup`;
+      const response = await fetch(targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: clientId,
+          email,
+          password,
+          connection,
+          username,
+          user_metadata: userMetadata || {}
+        })
+      });
+      const data = await response.json();
+      return res.status(response.status).json(data);
+    } catch (err: any) {
+      return res.status(502).json({ error: `Auth0 upstream connection failed: ${err.message}` });
+    }
+  });
+
+  app.post("/api/auth0/token", async (req, res) => {
+    const { domain, clientId, clientSecret, grantType, username, password, scope, realm, code, codeVerifier, redirectUri } = req.body;
+    if (!domain || !clientId || !grantType) {
+      return res.status(400).json({ error: "Missing required token exchange parameters." });
+    }
+    try {
+      const targetUrl = `https://${domain}/oauth/token`;
+      const bodyParams: any = {
+        client_id: clientId,
+        grant_type: grantType
+      };
+
+      if (clientSecret) {
+        bodyParams.client_secret = clientSecret;
+      }
+      if (username) bodyParams.username = username;
+      if (password) bodyParams.password = password;
+      if (scope) bodyParams.scope = scope;
+      if (realm) bodyParams.realm = realm;
+      if (code) bodyParams.code = code;
+      if (codeVerifier) bodyParams.code_verifier = codeVerifier;
+      if (redirectUri) bodyParams.redirect_uri = redirectUri;
+
+      const response = await fetch(targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyParams)
+      });
+      const data = await response.json();
+      return res.status(response.status).json(data);
+    } catch (err: any) {
+      return res.status(502).json({ error: `Auth0 upstream token exchange failed: ${err.message}` });
+    }
+  });
+
+  app.post("/api/auth0/userinfo", async (req, res) => {
+    const { domain, accessToken } = req.body;
+    if (!domain || !accessToken) {
+      return res.status(400).json({ error: "Missing target domain or authorization token." });
+    }
+    try {
+      const targetUrl = `https://${domain}/userinfo`;
+      const response = await fetch(targetUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Accept": "application/json"
+        }
+      });
+      const data = await response.json();
+      return res.status(response.status).json(data);
+    } catch (err: any) {
+      return res.status(502).json({ error: `Auth0 upstream userinfo failed: ${err.message}` });
+    }
+  });
+
+  app.post("/api/auth0/change-password", async (req, res) => {
+    const { domain, clientId, email, connection } = req.body;
+    if (!domain || !clientId || !email || !connection) {
+      return res.status(400).json({ error: "Missing required password reset parameters." });
+    }
+    try {
+      const targetUrl = `https://${domain}/dbconnections/change_password`;
+      const response = await fetch(targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: clientId,
+          email,
+          connection
+        })
+      });
+      const text = await response.text();
+      try {
+        const json = JSON.parse(text);
+        return res.status(response.status).json(json);
+      } catch {
+        return res.status(response.status).json({ message: text });
+      }
+    } catch (err: any) {
+      return res.status(502).json({ error: `Auth0 upstream password reset failed: ${err.message}` });
+    }
+  });
+
   // Catch-all for other unimplemented API routes to prevent crash/timeouts
   app.all("/api/*", (req, res) => {
     res.json({ message: "Mock endpoint", status: "OK", data: [] });
