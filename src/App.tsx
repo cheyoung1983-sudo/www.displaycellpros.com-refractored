@@ -84,7 +84,7 @@ const GoogleWorkspaceHubView = React.lazy(() => import("./components/GoogleWorks
 const ApiGatewayDashboard = React.lazy(() => import("./components/ApiGatewayDashboard").then(module => ({ default: module.ApiGatewayDashboard })));
 const QuoteBuilderDashboard = React.lazy(() => import("./components/QuoteBuilderDashboard"));
 const SmdComponentLibrary = React.lazy(() => import("./components/SmdComponentLibrary").then(module => ({ default: module.SmdComponentLibrary })));
-const BrandLogo = React.lazy(() => import("./components/BrandLogo").then(module => ({ default: module.BrandLogo })));
+import { BrandLogo } from "./components/BrandLogo";
 const FirebaseUserAuditor = React.lazy(() => import("./components/FirebaseUserAuditor").then(module => ({ default: module.FirebaseUserAuditor })));
 const Auth0DiagnosticExplorer = React.lazy(() => import("./components/Auth0DiagnosticExplorer").then(module => ({ default: module.Auth0DiagnosticExplorer })));
 import { QrTicketScanner } from "./components/QrTicketScanner";
@@ -6866,25 +6866,29 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 )}
 
                 {labTab === "forms" && (
-                  <FormsIntegrationView
-                    accessToken={googleAccessToken}
-                    authUser={authUser}
-                    onLinkGoogleAuth={handleGoogleSignIn}
-                    addToast={addToast}
-                    onAddNewTicket={handleAddNewTicketFromForms}
-                    onAddNewLead={handleAddNewLeadFromForms}
-                  />
+                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing Forms Integration...</div>}>
+                    <FormsIntegrationView
+                      accessToken={googleAccessToken}
+                      authUser={authUser}
+                      onLinkGoogleAuth={handleGoogleSignIn}
+                      addToast={addToast}
+                      onAddNewTicket={handleAddNewTicketFromForms}
+                      onAddNewLead={handleAddNewLeadFromForms}
+                    />
+                  </React.Suspense>
                 )}
 
                 {labTab === "gmail" && (
-                  <GmailIntegrationView
-                    accessToken={googleAccessToken}
-                    authUser={authUser}
-                    onLinkGoogleAuth={handleGoogleSignIn}
-                    addToast={addToast}
-                    tickets={tickets}
-                    leads={leads}
-                  />
+                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing Gmail Integration...</div>}>
+                    <GmailIntegrationView
+                      accessToken={googleAccessToken}
+                      authUser={authUser}
+                      onLinkGoogleAuth={handleGoogleSignIn}
+                      addToast={addToast}
+                      tickets={tickets}
+                      leads={leads}
+                    />
+                  </React.Suspense>
                 )}
 
                 {labTab === "firebase_ai" && (
@@ -6896,15 +6900,17 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 )}
 
                 {labTab === "workspace_hub" && (
-                  <GoogleWorkspaceHubView
-                    accessToken={googleAccessToken}
-                    authUser={authUser}
-                    onLinkGoogleAuth={handleGoogleSignIn}
-                    addToast={addToast}
-                    tickets={tickets}
-                    leads={leads}
-                    onAddNewTicket={handleAddNewTicketFromForms}
-                  />
+                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing Workspace Hub...</div>}>
+                    <GoogleWorkspaceHubView
+                      accessToken={googleAccessToken}
+                      authUser={authUser}
+                      onLinkGoogleAuth={handleGoogleSignIn}
+                      addToast={addToast}
+                      tickets={tickets}
+                      leads={leads}
+                      onAddNewTicket={handleAddNewTicketFromForms}
+                    />
+                  </React.Suspense>
                 )}
 
                 {labTab === "auth0_oauth" && (
@@ -6916,19 +6922,25 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 )}
 
                 {labTab === "quote_builder" && (
-                  <QuoteBuilderDashboard 
-                    addToast={addToast}
-                  />
+                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing Quote Builder...</div>}>
+                    <QuoteBuilderDashboard 
+                      addToast={addToast}
+                    />
+                  </React.Suspense>
                 )}
 
                 {labTab === "gateway" && (
-                  <ApiGatewayDashboard 
-                    tickets={tickets}
-                  />
+                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing API Gateway...</div>}>
+                    <ApiGatewayDashboard 
+                      tickets={tickets}
+                    />
+                  </React.Suspense>
                 )}
 
                 {labTab === "smd_library" && (
-                  <SmdComponentLibrary />
+                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing SMD Component Library...</div>}>
+                    <SmdComponentLibrary />
+                  </React.Suspense>
                 )}
 
                 {labTab === "marketing_firewall" && (
