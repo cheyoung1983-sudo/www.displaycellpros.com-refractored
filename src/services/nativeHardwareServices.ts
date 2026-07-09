@@ -6,8 +6,6 @@
  * Alloys & Materials: SAC305 (350°C - 400°C), Underfill softeners (200°C - 250°C)
  */
 
-import crypto from "crypto";
-
 // ============================================================================
 // 1. PHYSICAL TELEMETRY INTERNALS (iOS/Android Native USB Bridge)
 // ============================================================================
@@ -58,7 +56,7 @@ export class PhysicalTelemetryBridge {
     }
 
     return {
-      deviceUid: crypto.randomUUID(),
+      deviceUid: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
       platform: "iOS",
       serialNumber: "DNPD7210G00W",
       batteryHealthCycles: 412,
@@ -100,8 +98,6 @@ export class NISTSanitizationEngine {
     console.log(`[NIST_PURGE] Initializing physical sector sanitization on block volume ${deviceVolumePath}`);
     
     // Step 1: Secure Direct Block Cryptographic Erase (Physical NVMe/UFS discard commands)
-    // Runs 'blkdiscard' on supported devices to purge logical block translations
-    // or writes random noise followed by zeros across multiple passes
     const sectorCount = 512000;
     for (let pass = 1; pass <= 3; pass++) {
       console.log(`[NIST_PURGE] Pass ${pass}/3: Writing pseudorandom noise payload across target disk blocks...`);
@@ -111,17 +107,25 @@ export class NISTSanitizationEngine {
     console.log("[NIST_PURGE] Executing post-wipe zero-check verification to guarantee block-level isolation");
     
     // Step 3: Cryptographic Certificate Generation
-    const certificateId = `COE-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
     const timestamp = new Date().toISOString();
-    const verificationHash = crypto
-      .createHash("sha256")
-      .update(`${serialNumber}-${timestamp}-${deviceVolumePath}`)
-      .digest("hex");
 
-    // Dynamic ECDSA/RSA signed payload
-    const sign = crypto.createSign("SHA256");
-    sign.update(`${certificateId}|${serialNumber}|${verificationHash}`);
-    const digitalSignature = crypto.randomBytes(64).toString("base64"); // Representing simulated hardware signature hook
+    // Web-safe random values
+    const randomBytes = new Uint8Array(6);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      crypto.getRandomValues(randomBytes);
+    }
+    const hexId = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    const certificateId = `COE-${hexId}`;
+
+    // Simple browser-safe hash simulation for mock
+    const verificationHash = btoa(`${serialNumber}-${timestamp}-${deviceVolumePath}`).substring(0, 32);
+
+    // Dynamic signed payload simulation
+    const signatureBytes = new Uint8Array(64);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      crypto.getRandomValues(signatureBytes);
+    }
+    const digitalSignature = btoa(String.fromCharCode(...signatureBytes));
 
     return {
       certificateId,
@@ -155,7 +159,7 @@ export interface S2CDiagnosticRecord {
  * Programmatically maps symptoms (current draws) directly to Motherboard ICs/Filters.
  * Verification components are mapped to real schematic nodes (e.g. C247_W, FL1728 display filter, BATT_TEMP_NTC).
  */
-export const S2C_DIAGNOSTIC_DB: RECORD_S2C[] = [
+export const S2C_DIAGNOSTIC_DB: S2CDiagnosticRecord[] = [
   {
     modelName: "iPhone 11",
     symptomCode: "STATIC_DRAW_100MA",
@@ -188,5 +192,3 @@ export const S2C_DIAGNOSTIC_DB: RECORD_S2C[] = [
     ]
   }
 ];
-
-type RECORD_S2C = S2CDiagnosticRecord;
