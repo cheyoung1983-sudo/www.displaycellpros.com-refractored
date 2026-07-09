@@ -126,6 +126,7 @@ src/pages/
 - [ ] Component testing in isolation
 - [ ] Integration testing (full workflow)
 - [ ] Staging deployment
+- [x] Vercel configuration (vercel.json)
 
 ### Phase 2: Feature Parity (Week 2)
 - [ ] Firebase Firestore sync
@@ -133,6 +134,7 @@ src/pages/
 - [ ] Quote PDF generation
 - [ ] Email notifications
 - [ ] Error tracking (Crashlytics)
+- [ ] Vercel Environment Secret configuration
 
 ### Phase 3: Optimization (Week 3)
 - [ ] Bundle analysis
@@ -438,4 +440,3 @@ A: All Firestore data is preserved. Migration is code-only, not data.
 Generated: July 6, 2026  
 Version: 2.0 (Redesigned Static SPA)  
 Status: ✅ Complete & Ready for Testing
-

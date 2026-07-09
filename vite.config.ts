@@ -24,7 +24,7 @@ export default defineConfig(() => {
           manualChunks(id) {
             if (id.includes('node_modules')) {
               // Consolidate core dependencies to prevent circular chunk errors like U.Children undefined
-              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler') || id.includes('motion')) {
                 return 'vendor';
               }
               if (id.includes('firebase')) return 'firebase-vendor';
