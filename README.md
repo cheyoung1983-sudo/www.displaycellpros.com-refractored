@@ -3,6 +3,7 @@
 [![Continuous Integration](https://github.com/displaycellpros/triage-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/displaycellpros/triage-ai/actions/workflows/ci.yml)
 [![Vercel Deployment](https://img.shields.io/badge/Deployed_on-Vercel-black?style=flat&logo=vercel)](https://vercel.com)
 [![Platform Compliance](https://img.shields.io/badge/NIST_Compliance-SP_800--88_R1-008080.svg?style=flat)](https://nist.gov)
+[![Security reCAPTCHA](https://img.shields.io/badge/Security-reCAPTCHA_Enterprise-blue?style=flat&logo=google-cloud)](https://cloud.google.com/recaptcha-enterprise)
 
 A high-prestige, silicon-layer hardware diagnostic portal, real-time quote builder, WA State tax compliance engine, and secure cloud platform engineered for **Display & Cell Pros LLC** (Spokane, WA). This repository utilizes deep-level hardware telemetry logic and forensic RAG intelligence to audit and diagnose mobile hardware failures, bypassing traditional unscientific guesswork.
 
@@ -21,32 +22,42 @@ A custom Express-level gateway intercepts outbound JSON payloads and mutates for
 ### 3. NIST SP 800-88 R1 Sanitization Engine
 Implements secure cryptographic sanitization workflows. The board disposition engine signs digital tokens representing proof-of-erasure (CoE) for logic boards destined for parts-harvesting, ensuring zero data remnants remain.
 
-### 4. Deterministic WA Combined Sales Tax Resolver
-Enforces accurate, location-based sales tax calculations matching Washington State Department of Revenue rules. Includes specific Spokane County field operation ZIP codes (e.g., Spokane City, Spokane Valley, Airway Heights, Nine Mile, and Newman Lake) with corresponding localized service facility dispatches.
+### 4. reCAPTCHA Enterprise & Account Defender
+Protects the diagnostic and booking flows from automated bot attacks and credential leaks. Integrates directly with Google Cloud's reCAPTCHA Enterprise API to score transaction risk and verify user legitimacy across all Spokane field operation endpoints.
 
 ---
 
 ## 🏛️ System Architecture
 
-The application is structured as a high-density full-stack hybrid application:
-* **Frontend:** Single Page Application (SPA) powered by **React 18**, **Vite**, **Tailwind CSS**, and **Motion** (Animations), using **Lucide React** for icons and **Recharts** for telemetry visualizations.
-* **Backend:** Robust **Express** server (`server.ts`) hosting secure proxy APIs, AI intake workflows (using the modern `@google/genai` SDK), reCAPTCHA Enterprise verification, and Firebase Admin interactions.
-* **Databases:** **Cloud Firestore** for secure audit trails and active tickets.
+The application is structured as a high-density, hybrid multi-app workspace:
+
+### Root Application (Main Site)
+*   **Frontend:** Single Page Application (SPA) powered by **React 18**, **Vite**, **Tailwind CSS**, and **Motion**.
+*   **Backend:** Robust **Express** server (`server.ts`) hosting secure proxy APIs, AI intake workflows (using the modern `@google/genai` SDK), and Firebase interactions.
+*   **Databases:** **Cloud Firestore** for secure audit trails and active tickets.
+
+### Forensic Lab Sub-Application (`/my-nextjs-project`)
+*   **Framework:** **Next.js 15/16** (Turbopack) with App Router.
+*   **Authentication:** **Auth0 v4** (OIDC) with server-side session management and Next.js 16 Proxy configuration.
+*   **Backend Engine:** **Firebase Admin SDK** for secure, server-side laboratory operations and credentialed telemetry access.
+*   **Registry:** **GCP Service Directory** for microservice discovery and metadata management.
 
 ---
 
 ## 🚀 Optimized Deployment Blueprints
 
-This repository is pre-configured and optimized to run seamlessly on both containerized and serverless environments:
+### Option A: Firebase Hosting (Main Site)
+The primary customer-facing portal is hosted on Firebase Hosting for maximum reliability and global CDN delivery.
+*   **Target:** `https://displaycellpros-com.web.app`
+*   **Deployment:** `npm run build && npx firebase-tools deploy --only hosting`
 
-### Option A: Vercel Production Deployment (Serverless)
-The codebase includes dedicated Vercel configuration files optimized for high-performance and zero-downtime routing:
-* **`/vercel.json`:** Directs `/api/*` requests to Vercel's serverless runtime and serves the frontend from `/dist` with strict immutable client caching (`max-age=31536000`) for static assets.
-* **`/api/index.ts`:** Bridges the module-scoped Express application from `server.ts` directly into Vercel's serverless function lifecycle.
-* **SPA Routing Fallback:** Prevents 404 errors on browser refreshes by routing all non-asset requests safely back to `index.html` so React Router can resolve pages client-side.
+### Option B: Vercel (Next.js Sub-app)
+The specialized Forensic Lab application is deployed as a standalone Vercel project with targeted build isolation.
+*   **Target:** `https://displaycellproscom-refractored.vercel.app`
+*   **Config:** `my-nextjs-project/vercel.json`
 
-### Option B: Cloud Run & Docker (Containerized)
-The platform is fully containerized. You can build and deploy the container using Google Cloud Build:
+### Option C: Cloud Run & Docker (Containerized)
+The entire platform is pre-configured for containerized deployment on Google Cloud Run.
 ```bash
 gcloud builds submit --config cloudbuild.yaml
 ```
@@ -56,35 +67,38 @@ gcloud builds submit --config cloudbuild.yaml
 ## 🛠️ Local Development & Operations
 
 ### 1. Prerequisites
-Create a `.env` file at the root based on `.env.example`:
+Create a `.env` file at the root based on `.env.example` and a `.env.local` in `my-nextjs-project`:
 ```env
-PORT=3000
-NODE_ENV=development
+# Root Env
 GEMINI_API_KEY=your_gemini_api_key
-# Optional Firebase variables if implementing administrative operations
+RECAPTCHA_PROJECT_ID=displaycellpros-com
+
+# Next.js Env
+AUTH0_CLIENT_ID=dead45cd-3ca8-406b-b8bb-010561b664a8
+FIREBASE_PROJECT_ID=displaycellpros-com
 ```
 
 ### 2. Installation & Dev Start
-Install dependencies and run the local development server:
 ```bash
-# Install package dependencies
+# Main Project
 npm install
+npm run dev
 
-# Launch Vite + Express concurrently in dev mode
+# Next.js Lab
+cd my-nextjs-project
+npm install
 npm run dev
 ```
-The server binds to port `3000` (reverse-proxied internally).
 
-### 3. Verification & Best Practices
+### 3. Verification & Quality Gates
 Always run quality gates before proposing commits:
 ```bash
-# Run type checking and code quality gates
+# Root
 npm run lint
-
-# Run unit and integration tests (Vitest)
 npm run test
 
-# Compile production-ready builds
+# Next.js Lab
+cd my-nextjs-project
 npm run build
 ```
 
@@ -92,8 +106,7 @@ npm run build
 
 ## 🤖 GitHub Continuous Integration (CI)
 
-A high-performance GitHub Actions workflow is located at `.github/workflows/ci.yml`. On every `push` and `pull_request` targeting `master`, `main`, or `dev`, the pipeline automatically executes:
-1. **Multiversion Environment Matrix Check:** Validates against Node.js v20 and v22.
-2. **Strict Linter Assessment:** Runs TypeScript compilation check to catch any syntax or static analysis issues early.
-3. **Automated Test Suites:** Runs Vitest unit and integration suites.
-4. **Production Build Validation:** Verifies the bundlers successfully compile both front-end static assets and server-side esbuild bundles.
+A high-performance GitHub Actions workflow automatically executes Multiversion Environment Matrix Checks (Node.js v20/v22), Strict Linter Assessments, and Production Build Validations on every push.
+
+---
+*© 2026 Display & Cell Pros LLC. All rights reserved. Spokane/Seattle Forensic Hardware Laboratory.*
