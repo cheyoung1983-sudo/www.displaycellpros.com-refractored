@@ -2619,6 +2619,29 @@ Construct an authoritative, scientific audit report detailing the exact physical
         targetUrl = `https://identitytoolkit.googleapis.com/v1/${resName}:testIamPermissions?key=${key}`;
       }
     }
+    else if (serviceName === "google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseService") {
+      const id = payload?.assessmentId || "mock-assessment-id";
+      if (rpcMethod === "CreateAssessment") {
+        targetUrl = `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/assessments?key=${key}`;
+      } else if (rpcMethod === "AnnotateAssessment") {
+        const assessmentName = payload?.name || `projects/${projectId}/assessments/${id}`;
+        targetUrl = `https://recaptchaenterprise.googleapis.com/v1/${assessmentName}:annotate?key=${key}`;
+      } else if (rpcMethod === "ListRelatedAccountGroupMemberships") {
+        targetUrl = `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/relatedaccountgroupmemberships?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "ListRelatedAccountGroups") {
+        targetUrl = `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/relatedaccountgroups?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      } else if (rpcMethod === "SearchRelatedAccountGroupMemberships") {
+        targetUrl = `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/relatedaccountgroupmemberships:search?key=${key}`;
+      } else if (rpcMethod === "ListFirewallPolicies") {
+        targetUrl = `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/firewallpolicies?key=${key}`;
+        httpMethod = "GET";
+        isGetOrPatchOrDelete = true;
+      }
+    }
 
     if (!targetUrl) {
       return res.status(400).json({ 
@@ -2640,8 +2663,9 @@ Construct an authoritative, scientific audit report detailing the exact physical
 
     // Build raw outbound HTTP request trace log
     const requestPayloadString = isGetOrPatchOrDelete ? "" : `\r\n\r\n${JSON.stringify(payload, null, 2)}`;
-    const rawRequestString = `${httpMethod} ${printedUrl.replace("https://identitytoolkit.googleapis.com", "")} HTTP/1.1\r\n` +
-      `Host: identitytoolkit.googleapis.com\r\n` +
+    const actualHost = serviceName.includes("recaptcha") ? "recaptchaenterprise.googleapis.com" : "identitytoolkit.googleapis.com";
+    const rawRequestString = `${httpMethod} ${printedUrl.replace(`https://${actualHost}`, "")} HTTP/1.1\r\n` +
+      `Host: ${actualHost}\r\n` +
       Object.entries(requestHeaders).map(([k, v]) => `${k}: ${v}`).join("\r\n") +
       requestPayloadString;
 
@@ -3067,7 +3091,7 @@ Construct an authoritative, scientific audit report detailing the exact physical
           } else if (rpcMethod === "GetRecaptchaConfig") {
             responseBody = {
               recaptchaKeys: {
-                siteKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                siteKey: "6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl"
               },
               recaptchaEnforcementState: [
                 {
@@ -3157,6 +3181,93 @@ Construct an authoritative, scientific audit report detailing the exact physical
                 "identitytoolkit.projects.get",
                 "identitytoolkit.projects.update"
               ]
+            };
+          }
+        }
+        else if (serviceName === "google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseService") {
+          if (rpcMethod === "CreateAssessment") {
+            responseBody = {
+              name: `projects/${projectId}/assessments/sim_assessment_${Math.floor(100000 + Math.random() * 900000)}`,
+              event: {
+                token: payload?.assessment?.event?.token || "offline_token",
+                siteKey: payload?.assessment?.event?.siteKey || "6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl",
+                userAgent: payload?.assessment?.event?.userAgent || "Mozilla/5.0",
+                userIpAddress: payload?.assessment?.event?.userIpAddress || "192.168.1.1"
+              },
+              riskAnalysis: {
+                score: 0.9,
+                reasons: ["LOW_RISK_AGENT_DEVICES", "AUTHENTICATED_SESSION"]
+              },
+              tokenProperties: {
+                valid: true,
+                invalidReason: "INVALID_REASON_UNSPECIFIED",
+                action: "offline_handshake",
+                createTime: new Date().toISOString()
+              },
+              accountDefenderAssessment: {
+                labels: ["LEGITIMATE"]
+              }
+            };
+          } else if (rpcMethod === "AnnotateAssessment") {
+            responseBody = {};
+          } else if (rpcMethod === "ListRelatedAccountGroupMemberships") {
+            responseBody = {
+              relatedAccountGroupMemberships: [
+                {
+                  name: `projects/${projectId}/relatedaccountgroupmemberships/mem_${Math.floor(1000 + Math.random() * 9000)}`,
+                  accountId: payload?.accountId || "forensic_agent@displaycellpros.com",
+                  hashedAccountId: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                {
+                  name: `projects/${projectId}/relatedaccountgroupmemberships/mem_${Math.floor(1000 + Math.random() * 9000)}`,
+                  accountId: "auditor_east@displaycellpros.com",
+                  hashedAccountId: "d8819280182903102812"
+                }
+              ],
+              nextPageToken: "sim_recaptcha_page_token_901"
+            };
+          } else if (rpcMethod === "ListRelatedAccountGroups") {
+            responseBody = {
+              relatedAccountGroups: [
+                {
+                  name: `projects/${projectId}/relatedaccountgroups/group_device_uuid_9182`,
+                  membershipCount: 2
+                },
+                {
+                  name: `projects/${projectId}/relatedaccountgroups/group_ip_subnet_24`,
+                  membershipCount: 5
+                }
+              ],
+              nextPageToken: "sim_groups_page_token_882"
+            };
+          } else if (rpcMethod === "SearchRelatedAccountGroupMemberships") {
+            responseBody = {
+              relatedAccountGroupMemberships: [
+                {
+                  name: `projects/${projectId}/relatedaccountgroupmemberships/mem_search_110`,
+                  accountId: payload?.accountId || "forensic_agent@displaycellpros.com",
+                  hashedAccountId: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              nextPageToken: ""
+            };
+          } else if (rpcMethod === "ListFirewallPolicies") {
+            responseBody = {
+              firewallPolicies: [
+                {
+                  name: `projects/${projectId}/firewallpolicies/policy_allow_us_facilities`,
+                  description: "Allow all incoming transactions from Display Cell Pros US diagnostic facilities",
+                  path: "/api/*",
+                  actions: [{ allow: {} }]
+                },
+                {
+                  name: `projects/${projectId}/firewallpolicies/policy_audit_global_requests`,
+                  description: "Audit all standard external traffic scoring for credential leaks",
+                  path: "/api/auth/*",
+                  actions: [{ substitute: { path: "/api/auth/identitytoolkit-proxy" } }]
+                }
+              ],
+              nextPageToken: ""
             };
           }
         }

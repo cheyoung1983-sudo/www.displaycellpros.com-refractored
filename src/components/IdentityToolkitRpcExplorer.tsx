@@ -602,6 +602,71 @@ const SERVICES: RpcService[] = [
         })
       }
     ]
+  },
+  {
+    id: "google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseService",
+    name: "RecaptchaEnterpriseService",
+    description: "Google Cloud Fraud Defense, real-time transaction assessment & account risk scores",
+    version: "v1",
+    methods: [
+      {
+        id: "CreateAssessment",
+        label: "projects.assessments.create (Evaluate token & account context)",
+        defaultPayload: (ctx) => ({
+          assessment: {
+            event: {
+              token: "offline_handshake_verification_token_71829",
+              siteKey: "6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl",
+              expectedAction: "diagnostic_handshake",
+              accountId: ctx.email || "forensic_agent@displaycellpros.com",
+              userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+              userIpAddress: "192.168.1.100"
+            }
+          }
+        })
+      },
+      {
+        id: "AnnotateAssessment",
+        label: "projects.assessments.annotate (Label diagnostic findings for feedback)",
+        defaultPayload: () => ({
+          name: "projects/displaycellpros-com/assessments/sim_assessment_102834",
+          annotation: "LEGITIMATE",
+          reasons: ["CHARGEBACK_REVERSED", "TWO_FACTOR_AUTHENTICATED"],
+          hashedAccountId: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        })
+      },
+      {
+        id: "ListRelatedAccountGroupMemberships",
+        label: "ListRelatedAccountGroupMemberships (Audit device credentials stuffing)",
+        defaultPayload: () => ({
+          pageSize: 20,
+          pageToken: ""
+        })
+      },
+      {
+        id: "ListRelatedAccountGroups",
+        label: "ListRelatedAccountGroups (List groups with shared attributes)",
+        defaultPayload: () => ({
+          pageSize: 10,
+          pageToken: ""
+        })
+      },
+      {
+        id: "SearchRelatedAccountGroupMemberships",
+        label: "SearchRelatedAccountGroupMemberships (Query forensic device matches)",
+        defaultPayload: (ctx) => ({
+          accountId: ctx.email || "forensic_agent@displaycellpros.com",
+          pageSize: 10
+        })
+      },
+      {
+        id: "ListFirewallPolicies",
+        label: "ListFirewallPolicies (Inspect edge defense policies)",
+        defaultPayload: () => ({
+          pageSize: 10
+        })
+      }
+    ]
   }
 ];
 
@@ -836,15 +901,44 @@ export function IdentityToolkitRpcExplorer({ currentUserIdToken = "", currentUse
         method = "POST";
       }
     }
+    else if (selectedServiceId === "google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseService") {
+      const payloadObj = getParsedPayload();
+      const id = payloadObj.assessmentId || "mock-assessment-id";
+      if (selectedMethodId === "CreateAssessment") {
+        path = `v1/projects/${projId}/assessments`;
+        method = "POST";
+      } else if (selectedMethodId === "AnnotateAssessment") {
+        const assessmentName = payloadObj.name || `projects/${projId}/assessments/${id}`;
+        path = `v1/${assessmentName}:annotate`;
+        method = "POST";
+      } else if (selectedMethodId === "ListRelatedAccountGroupMemberships") {
+        path = `v1/projects/${projId}/relatedaccountgroupmemberships`;
+        method = "GET";
+      } else if (selectedMethodId === "ListRelatedAccountGroups") {
+        path = `v1/projects/${projId}/relatedaccountgroups`;
+        method = "GET";
+      } else if (selectedMethodId === "SearchRelatedAccountGroupMemberships") {
+        path = `v1/projects/${projId}/relatedaccountgroupmemberships:search`;
+        method = "POST";
+      } else if (selectedMethodId === "ListFirewallPolicies") {
+        path = `v1/projects/${projId}/firewallpolicies`;
+        method = "GET";
+      }
+    }
 
     const payloadStr = JSON.stringify(getParsedPayload(), null, 2);
     const dataSection = (method === "GET" || method === "DELETE") ? "" : ` \\\n  -d '${payloadStr.replace(/'/g, "'\\''")}'`;
 
+    const host = selectedServiceId.includes("recaptcha") 
+      ? "recaptchaenterprise.googleapis.com" 
+      : "identitytoolkit.googleapis.com";
+
     return `curl -X ${method} \\
   -H "Content-Type: application/json; charset=utf-8" \\
   -H "X-Goog-Api-Client": "display-cell-pros-forensic-RAG/1.0" \\
-  -H "x-goog-user-project": "${projId}"${dataSection} \\
-  "https://identitytoolkit.googleapis.com/${path}?key=${keyStr}"`;
+  -H "x-goog-user-project": "${projId}"\
+${dataSection ? dataSection + " \\" : ""}
+  "https://${host}/${path}?key=${keyStr}"`;
   };
 
   const handleExecute = async () => {
