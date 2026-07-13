@@ -128,6 +128,61 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "token", "action", "score", "success", "createdAt"]
+    },
+    "TechnicianChat": {
+      "title": "Technician Chat Session",
+      "description": "Stores technician AI-assisted forensic circuit diagnostic chats and telemetry histories",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "model": { "type": "string" },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": { "type": "string", "enum": ["user", "model"] },
+              "text": { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" },
+              "citations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "uri": { "type": "string" },
+                    "title": { "type": "string" }
+                  },
+                  "required": ["uri", "title"]
+                }
+              }
+            },
+            "required": ["role", "text", "timestamp"]
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "model", "messages", "createdAt"]
+    },
+    "Quote": {
+      "title": "Repair Quote",
+      "description": "Stores generated repair estimation quotes with custom items and computed regional taxes",
+      "type": "object",
+      "properties": {
+        "quoteRef": { "type": "string" },
+        "customerName": { "type": "string" },
+        "deviceModel": { "type": "string" },
+        "companyName": { "type": "string" },
+        "isCorporate": { "type": "boolean" },
+        "baseRate": { "type": "number" },
+        "tax": { "type": "number" },
+        "total": { "type": "number" },
+        "notes": { "type": "string" },
+        "localFacilities": { "type": "string" },
+        "syncedToPOS": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["quoteRef", "total", "createdAt"]
     }
   },
   "firestore": {
@@ -158,6 +213,14 @@
     "recaptcha-assessments/{assessmentId}": {
       "schema": "RecaptchaAssessment",
       "description": "Security log of all verified reCAPTCHA Enterprise telemetry assertions"
+    },
+    "technician_chats/{chatId}": {
+      "schema": "TechnicianChat",
+      "description": "Interactive AI diagnostic session transcripts for circuit reverse engineering"
+    },
+    "quotes/{quoteId}": {
+      "schema": "Quote",
+      "description": "Archived customer diagnostic quotes"
     }
   }
 }

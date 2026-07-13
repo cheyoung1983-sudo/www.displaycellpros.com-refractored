@@ -116,6 +116,16 @@ service cloud.firestore {
         && (!data.keys().hasAny(['isSimulated']) || data.isSimulated is bool);
     }
 
+    function isValidTechnicianChat(data) {
+      return data.keys().hasAll(['userId', 'title', 'model', 'messages', 'createdAt'])
+        && data.keys().size() == 5
+        && data.userId is string && data.userId.size() <= 128
+        && data.title is string && data.title.size() <= 256
+        && data.model is string && data.model.size() <= 64
+        && data.messages is list
+        && data.createdAt is string;
+    }
+
     // --- COLLECTION RULES MATCHES ---
     match /users/{userId} {
       allow get: if isSignedIn() && userId == request.auth.uid;
@@ -217,6 +227,25 @@ service cloud.firestore {
 
     match /quotes/{quoteId} {
       allow read, write: if isSignedIn();
+    }
+
+    match /technician_chats/{chatId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && isValidId(chatId)
+        && isValidTechnicianChat(incoming())
+        && incoming().userId == request.auth.uid;
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && isValidTechnicianChat(incoming())
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
     }
   }
 }
