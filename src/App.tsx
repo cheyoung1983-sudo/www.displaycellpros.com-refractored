@@ -258,6 +258,13 @@ export default function App() {
     return "home";
   });
 
+  const [showCalendarBanner, setShowCalendarBanner] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("dcp_dismissed_calendar_banner") !== "true";
+    }
+    return true;
+  });
+
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [isAdminClaim, setIsAdminClaim] = useState<boolean>(false);
@@ -4045,6 +4052,64 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
 
       {/* CORE CONTENT ROUTING AREA */}
       <main className="flex-1 pb-16">
+        {showCalendarBanner && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-2">
+            <div className="relative overflow-hidden bg-[#111111] border-2 border-teal-500/30 rounded-2xl p-5 md:p-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-5 group animate-in fade-in slide-in-from-top-4 duration-300">
+              {/* Abstract subtle matrix/circuit background for a forensic brand feel */}
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#008080_1px,transparent_1px)] [background-size:16px_16px]" />
+              
+              {/* Audit Teal accent bar on the left */}
+              <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-gradient-to-b from-[#008080] to-[#00BFFF]" />
+
+              <div className="flex items-start gap-4 z-10">
+                <div className="p-3 rounded-xl bg-teal-950/40 border border-teal-500/30 text-[#00BFFF] shrink-0 animate-pulse">
+                  <Calendar className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[9px] bg-teal-950 text-teal-400 border border-teal-500/40 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                      OPERATIONAL DIRECTIVE
+                    </span>
+                    <span className="text-[9px] bg-[#111111] text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-md font-mono uppercase tracking-wider">
+                      EXPRESS HANDSHAKE
+                    </span>
+                  </div>
+                  <h3 className="text-sm md:text-base font-black text-white mt-1.5 uppercase tracking-wide">
+                    EXPRESS ONLINE CALENDAR BOOKING ACTIVE
+                  </h3>
+                  <p className="text-xs md:text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed font-sans">
+                    Due to high operational telemetry loads in our mobile dispatch queue, we request all technical audits, screen diagnostics, and system pricing quotes be booked directly through our <span className="text-teal-400 font-bold">Google Calendar express dispatcher</span>. Secure your precision repair slot instantly.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-center gap-3 w-full md:w-auto shrink-0 justify-end z-10">
+                <a
+                  href="https://calendar.app.google/kfu75qxbATwu2Tt39"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-teal-600 to-[#00BFFF] hover:from-teal-500 hover:to-cyan-400 text-slate-950 font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 shadow-lg shadow-teal-500/10 hover:shadow-cyan-400/20 hover:scale-[1.02] active:scale-95 text-center flex items-center justify-center gap-2"
+                >
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  <span>BOOK & QUOTE INSTANTLY</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCalendarBanner(false);
+                    localStorage.setItem("dcp_dismissed_calendar_banner", "true");
+                  }}
+                  className="w-full sm:w-auto px-4 py-3.5 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl font-bold text-xs transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5 shrink-0"
+                  title="Dismiss operational alert"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Dismiss</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Email Verification Banner */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-2">
           <EmailVerificationStatus addToast={addToast} />
