@@ -1,11 +1,14 @@
 # Dependency directories
 node_modules/
+**/node_modules/
 jspm_packages/
 
 # Production build outputs
 dist/
 build/
 out/
+.next/
+**/.next/
 
 # IDEs and editors
 .idea/
@@ -45,5 +48,7 @@ pnpm-debug.log*
 *.tsbuildinfo
 .vitest
 
-# Firebase cache
+# Firebase cache and binaries
 .firebase/
+*.exe
+firebase.exe
