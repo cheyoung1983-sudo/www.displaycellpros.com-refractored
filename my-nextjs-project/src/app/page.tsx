@@ -2,41 +2,49 @@
 
 export default function Home() {
   return (
-    <div className='flex flex-col min-h-screen bg-zinc-50 font-sans dark:bg-black'>
+    <div className='flex flex-col min-h-screen bg-[#111111] font-sans text-slate-200'>
       <Header />
 
-      <main className='flex flex-1 flex-col items-center justify-center py-20 px-4 sm:px-16 bg-white dark:bg-black'>
-        <div className='max-w-3xl w-full flex flex-col items-center gap-12'>
+      <main className='flex flex-1 flex-col items-center justify-center py-20 px-4 sm:px-16'>
+        <div className='max-w-4xl w-full flex flex-col items-center gap-12'>
           <div className='flex flex-col items-center gap-6 text-center'>
-            <h1 className='text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl'>
-              Display & Cell Pros Diagnostics Hub
+            <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#008080]/10 border border-[#008080]/20 text-[#008080] text-xs font-semibold uppercase tracking-widest font-mono'>
+              <span className='relative flex h-2 w-2'>
+                <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-[#008080] opacity-75'></span>
+                <span className='relative inline-flex rounded-full h-2 w-2 bg-[#008080]'></span>
+              </span>
+              Forensic Lab Sub-Application
+            </div>
+            <h1 className='text-4xl font-black tracking-tight text-white sm:text-6xl uppercase font-mono'>
+              Hardware <span className='text-[#008080]'>Forensics</span> Lab
             </h1>
-            <p className='max-w-2xl text-xl leading-8 text-zinc-600 dark:text-zinc-400'>
-              This application provides specialized hardware diagnostic tools for mobile device triage,
-              battery health analysis, and screen performance verification for Display & Cell Pros customers.
+            <p className='max-w-3xl text-xl leading-relaxed text-slate-400'>
+              High-prestige silicon-layer diagnostic portal utilizing deep hardware telemetry logic
+              and <span className='text-[#00BFFF] font-bold'>Forensic RAG intelligence</span> to audit
+              mobile hardware failures with industrial precision.
             </p>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6 w-full'>
-            <div className='p-6 rounded-xl border border-zinc-200 bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800'>
-              <h3 className='text-lg font-semibold text-[#008080] mb-2'>Triage Tool</h3>
-              <p className='text-sm text-zinc-600 dark:text-zinc-400'>Rapid assessment of device condition and functionality.</p>
+            <div className='p-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:border-[#008080]/50 transition-all group'>
+              <h3 className='text-lg font-black text-[#008080] mb-3 uppercase font-mono group-hover:text-[#00BFFF] transition-colors'>S2C Mapping Engine</h3>
+              <p className='text-sm text-slate-400 leading-relaxed'>Programmatic Symptom-to-Circuit linkage targeting specific circuit board nodes and voltage rails.</p>
             </div>
-            <div className='p-6 rounded-xl border border-zinc-200 bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800'>
-              <h3 className='text-lg font-semibold text-[#008080] mb-2'>Battery Health</h3>
-              <p className='text-sm text-zinc-600 dark:text-zinc-400'>Deep analysis of battery cycles, capacity, and performance.</p>
+            <div className='p-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:border-[#008080]/50 transition-all group'>
+              <h3 className='text-lg font-black text-[#008080] mb-3 uppercase font-mono group-hover:text-[#00BFFF] transition-colors'>CoV Audit Trail</h3>
+              <p className='text-sm text-slate-400 leading-relaxed'>Strict Chain-of-Verification protocols ensuring every diagnostic claim is grounded in local source vaults.</p>
             </div>
-            <div className='p-6 rounded-xl border border-zinc-200 bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800'>
-              <h3 className='text-lg font-semibold text-[#008080] mb-2'>Screen Check</h3>
-              <p className='text-sm text-zinc-600 dark:text-zinc-400'>Verification of display performance and touch responsiveness.</p>
+            <div className='p-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:border-[#008080]/50 transition-all group'>
+              <h3 className='text-lg font-black text-[#008080] mb-3 uppercase font-mono group-hover:text-[#00BFFF] transition-colors'>NIST Compliance</h3>
+              <p className='text-sm text-slate-400 leading-relaxed'>SP 800-88 R1 compliant cryptographic sanitization workflows for secure hardware disposition.</p>
             </div>
           </div>
         </div>
       </main>
 
-      <footer className='py-10 border-t border-zinc-200 bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800 text-center'>
-        <p className='text-sm text-zinc-500'>
-          © {new Date().getFullYear()} Display & Cell Pros. All rights reserved.
+      <footer className='py-12 border-t border-zinc-800 bg-[#111111] text-center'>
+        <p className='text-xs font-mono text-slate-500 uppercase tracking-widest'>
+          © {new Date().getFullYear()} Display & Cell Pros LLC. Silicon Forensic Audit Facility.
         </p>
       </footer>
     </div>

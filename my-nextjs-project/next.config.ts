@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.auth0.com' },
     ],
   },
+  turbopack: {
+    root: '.',
+  },
 };
 
 export default nextConfig;
