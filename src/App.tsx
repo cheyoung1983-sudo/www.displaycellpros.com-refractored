@@ -48,8 +48,9 @@ import { Toast, ToastContainer, ToastType } from "./components/ToastNotification
 import { HardwareScanChart } from "./components/HardwareScanChart";
 import { UsbSimulator } from "./components/UsbSimulator";
 import { jsPDF } from "jspdf";
+import { OAuthDocumentationPanel } from "./components/OAuthDocumentationPanel";
 import { signInWithPopup, onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./lib/firebase";
 import { handleFirestoreError, OperationType } from "./lib/firebase-errors";
 
@@ -251,6 +252,34 @@ export default function App() {
       console.error("Failed to sync ticket on Firestore:", err);
       try {
         handleFirestoreError(err, OperationType.CREATE, `tickets/${ticketId}`);
+      } catch (formattedError: any) {
+        setFirestoreError(formattedError.message);
+      }
+    }
+  };
+
+  const handleDeleteFirestoreTicket = async (ticketId: string) => {
+    if (!authUser) {
+      alert("Please authenticate using your Google account to perform this action.");
+      return;
+    }
+    if (!confirm(`Are you sure you want to delete backup ticket ${ticketId}?`)) return;
+
+    try {
+      setFirestoreError(null);
+      const docRef = doc(db, "tickets", ticketId);
+      await deleteDoc(docRef);
+      addToast(
+        "Backup Deleted",
+        `Backup ticket ${ticketId} has been successfully deleted from Firestore.`,
+        "success",
+        3000
+      );
+      fetchFirestoreTickets(authUser.uid);
+    } catch (err) {
+      console.error("Failed to delete ticket from Firestore:", err);
+      try {
+        handleFirestoreError(err, OperationType.DELETE, `tickets/${ticketId}`);
       } catch (formattedError: any) {
         setFirestoreError(formattedError.message);
       }
@@ -2685,78 +2714,12 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       </div>
                     </div>
 
-                    {/* Step-by-Step Whitelisting Action Plan */}
-                    <div className="bg-slate-900 border border-slate-700/60 rounded-lg p-4 space-y-3 font-mono text-xs">
-                      <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs uppercase">
-                        <Settings className="w-4 h-4 text-blue-400" />
-                        <span>2. Google Console Configurations Checklist</span>
-                      </div>
-                      
-                      <div className="space-y-3 leading-relaxed text-[11px] text-slate-300">
-                        <p>
-                          To completely satisfy the Trust and Safety review and eliminate OAuth 403 / "unauthorized domain" blocks, implement these whitelists:
-                        </p>
-
-                        <div className="space-y-2.5">
-                          <div className="border border-slate-800 rounded p-2.5 bg-slate-950 space-y-1.5">
-                            <span className="text-amber-400 font-bold text-[10px] uppercase">Firebase Console Authorized Domains</span>
-                            <p className="text-slate-400 text-[10px]">Navigate to <b>Authentication &gt; Settings &gt; Authorized domains</b> and register:</p>
-                            <ul className="list-disc pl-4 space-y-1 text-slate-300">
-                              <li className="select-all">displaycellpros.com</li>
-                              <li className="select-all">ais-dev-qaarbg7eivxlz2dpis24f5-367327296310.us-west2.run.app</li>
-                            </ul>
-                          </div>
-
-                          <div className="border border-slate-800 rounded p-2.5 bg-slate-950 space-y-1.5">
-                            <span className="text-amber-400 font-bold text-[10px] uppercase">Google Cloud Console OAuth settings</span>
-                            <p className="text-slate-400 text-[10px]">Navigate to <b>APIs & Services &gt; Credentials &gt; OAuth 2.0 Client IDs</b> and configure:</p>
-                            <ul className="list-disc pl-4 space-y-1 text-slate-300">
-                              <li>
-                                <b>Authorized JavaScript Origins:</b>
-                                <div className="space-y-1 mt-1 text-[10px]">
-                                  <div className="select-all bg-slate-900 p-1 rounded">https://displaycellpros.com</div>
-                                  <div className="select-all bg-slate-900 p-1 rounded">https://ais-dev-qaarbg7eivxlz2dpis24f5-367327296310.us-west2.run.app</div>
-                                </div>
-                              </li>
-                              <li>
-                                <b>Authorized Redirect URIs:</b>
-                                <div className="space-y-1 mt-1 text-[10px]">
-                                  <div className="select-all bg-slate-900 p-1 rounded">https://displaycellpros-com.firebaseapp.com/__/auth/handler</div>
-                                </div>
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Developer Console Whitelist Test Snippet */}
-                    <div className="bg-slate-900 border border-slate-800/80 rounded-lg p-4 space-y-2.5 text-xs text-slate-300 font-mono leading-relaxed">
-                      <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs uppercase">
-                        <Terminal className="w-4 h-4 shrink-0" />
-                        <span>3. Chrome DevTools Verification Snippet:</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400">
-                        Open your Chrome DevTools (<kbd className="bg-slate-950 px-1 rounded text-white text-[10px]">F12</kbd> &gt; <b>Console</b>) and paste the code below to dynamically inspect and test if your domain is authorized to fetch Google's identity payload:
-                      </p>
-                      <pre className="bg-slate-950 border border-slate-850 p-2 rounded text-[9.5px] text-blue-300 overflow-x-auto select-all leading-normal whitespace-pre-wrap">
-{`// Run inside the Console to test if displaycellpros.com is authorized
-const apiKey = "${auth.app.options.apiKey || "API_KEY"}";
-const projectId = "${auth.app.options.projectId || "displaycellpros-com"}";
-const url = \`https://identitytoolkit.googleapis.com/v1/projects/\${projectId}/config?key=\${apiKey}\`;
-
-fetch(url)
-  .then(res => {
-    if (res.status === 200) {
-      console.log("%c✔ CONFIGURATION SUCCESS: Google APIs verified active!", "color: #10b981; font-weight: bold;");
-      return res.json().then(data => console.log("Authorized Domains:", data.authorizedDomains));
-    } else {
-      console.error(\`%c✘ API Handshake Failed with HTTP Status \${res.status}. Verify domain whitelist settings.\`, "color: #ef4444; font-weight: bold;");
-    }
-  })
-  .catch(err => console.error("Network Error during whitelisting handshake:", err));`}
-                      </pre>
-                    </div>
+                    {/* Interactive OAuth Whitelisting & Domain Audit Kit */}
+                    <OAuthDocumentationPanel 
+                      projectId="displaycellpros-com"
+                      devUrl="https://ais-dev-qaarbg7eivxlz2dpis24f5-367327296310.us-west2.run.app"
+                      prodUrl="https://displaycellpros.com"
+                    />
                   </section>
                 )}
 
@@ -3175,6 +3138,16 @@ fetch(url)
                             </span>
                           )}
                         </h3>
+                        {authUser && (
+                          <button
+                            onClick={() => fetchFirestoreTickets(authUser.uid)}
+                            className="px-2 py-1 bg-slate-900 hover:bg-slate-850 text-slate-400 hover:text-white rounded border border-slate-800 hover:border-slate-700 font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all"
+                            title="Reload backups list from Firestore"
+                          >
+                            <RefreshCw className="w-3 h-3 text-blue-400" />
+                            Refresh
+                          </button>
+                        )}
                       </div>
 
                       {authUser ? (
@@ -3191,6 +3164,7 @@ fetch(url)
                                   <th className="p-3">Device Target</th>
                                   <th className="p-3">Grand Total</th>
                                   <th className="p-3">Backup Date</th>
+                                  <th className="p-3 text-center">Actions</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-850 font-mono text-[10.5px]">
@@ -3209,6 +3183,15 @@ fetch(url)
                                     </td>
                                     <td className="p-3 text-slate-400 text-[10px]">
                                       {new Date(ft.createdAt).toLocaleString()}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                      <button
+                                        onClick={() => handleDeleteFirestoreTicket(ft.id)}
+                                        className="p-1 text-slate-500 hover:text-red-400 hover:bg-red-950/30 rounded transition-colors"
+                                        title="Delete backup from Firestore"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
                                     </td>
                                   </tr>
                                 ))}

@@ -88,6 +88,9 @@ service cloud.firestore {
         && incoming().userId == existing().userId
         && incoming().id == existing().id
         && incoming().createdAt == existing().createdAt;
+
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
     }
   }
 }
