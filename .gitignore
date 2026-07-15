@@ -1,54 +1,8 @@
-# Dependency directories
 node_modules/
-**/node_modules/
-jspm_packages/
-
-# Production build outputs
-dist/
 build/
-out/
-.next/
-**/.next/
-
-# IDEs and editors
-.idea/
-.vscode/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Operating System files
-.DS_Store
-Thumbs.db
-
-# Test coverage and logs
+dist/
 coverage/
+.DS_Store
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Environment and local variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 .env*
 !.env.example
-
-# Vercel and toolchain files
-.vercel
-.turbo
-.eslintcache
-.stylelintcache
-*.tsbuildinfo
-.vitest
-
-# Firebase cache and binaries
-.firebase/
-*.exe
-firebase.exe

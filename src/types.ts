@@ -11,13 +11,6 @@ export interface RepairTicket {
   total: number;
   createdAt: string;
   userId?: string;
-  internalNotes?: string;
-  completedAt?: string;
-  // S2C Forensic Chronometer & Labor Telemetry fields
-  estimatedHours?: number;   // SLA Target Estimate in hours
-  actualHours?: number;      // Logged actual labor in hours
-  timerStartedAt?: string;   // Active session start ISO timestamp
-  elapsedSeconds?: number;   // Accumulated elapsed duration (seconds)
 }
 
 export interface POSLog {
@@ -32,14 +25,6 @@ export interface QuoteBreakdown {
   laborCost: number;
   overhead: number;
   subtotal: number;
-  partInventoryId?: string;
-  partName?: string;
-  stockStatus?: string;
-  stockLocation?: string;
-  itemInStock?: boolean;
-  supplyChainPremium?: number;
-  laborHours?: number;
-  hourlyLaborRate?: number;
 }
 
 export interface TaxResponse {
@@ -67,26 +52,3 @@ export interface QuoteResponse {
   subtotal: number;
   grandTotal: number;
 }
-
-export interface HighPriorityLead {
-  id: string;
-  customerName: string;
-  phone: string;
-  deviceModel: string;
-  status: "pending" | "in_progress" | "contacted" | "completed" | "cancelled";
-  createdAt: string;
-  userId: string;
-}
-
-export interface S2CFeedback {
-  id: string;
-  userId: string;
-  pathway: "backlight" | "charging" | "short_rail" | string;
-  rating: "up" | "down";
-  deviceModel: string;
-  notes?: string;
-  ammeterReading: number;
-  batteryTemp: number;
-  createdAt: string;
-}
-

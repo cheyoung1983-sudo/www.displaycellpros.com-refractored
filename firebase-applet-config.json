@@ -1,9 +1,10 @@
 {
-  "projectId": "displaycellpros-com",
-  "appId": "1:1046067704682:web:ce3ca691c618904a5bab13",
-  "apiKey": "AIzaSyCkUVzpyzA2My2bLbovYlXRGIS9ojNH5Ak",
-  "authDomain": "displaycellpros-com.firebaseapp.com",
-  "storageBucket": "displaycellpros-com.firebasestorage.app",
-  "messagingSenderId": "1046067704682",
-  "measurementId": "G-E192YYWZKK"
+  "projectId": "gen-lang-client-0922849103",
+  "appId": "1:1032722499594:web:edcef8487f080cee48f7f3",
+  "apiKey": "AIzaSyCsrUe_kmHbBTgGooMrfjnkZ2JWBMDp2AE",
+  "authDomain": "gen-lang-client-0922849103.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-c2e2eafb-3cb1-4649-b652-71711906b516",
+  "storageBucket": "gen-lang-client-0922849103.firebasestorage.app",
+  "messagingSenderId": "1032722499594",
+  "measurementId": "G-LFFH5WT7NP"
 }

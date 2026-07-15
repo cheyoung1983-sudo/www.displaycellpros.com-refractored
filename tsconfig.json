@@ -22,12 +22,5 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "my-nextjs-project",
-    "**/*.test.ts",
-    "**/*.test.tsx"
-  ]
+  }
 }

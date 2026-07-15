@@ -11,35 +11,6 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
-    build: {
-      outDir: 'dist',
-      minify: 'esbuild',
-      cssMinify: true,
-      cssCodeSplit: true,
-      assetsInlineLimit: 4096, // Inline assets under 4KB to save HTTP requests
-      sourcemap: false, // Disable sourcemaps in production to conserve storage and reduce overhead
-      chunkSizeWarningLimit: 2000,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('firebase')) return 'firebase-vendor';
-              if (id.includes('@google/genai')) return 'genai-vendor';
-              if (id.includes('recharts')) return 'recharts-vendor';
-              if (id.includes('jspdf')) return 'jspdf-vendor';
-              if (id.includes('lucide-react')) return 'lucide-vendor';
-              if (id.includes('motion')) return 'motion-vendor';
-              // Keep React and core dependencies in the main vendor chunk to avoid circularity
-              return 'vendor';
-            }
-          },
-        },
-      },
-    },
-    esbuild: {
-      drop: ['console', 'debugger'], // Strip debug statements for performance and security
-      legalComments: 'none', // Exclude licensing text block sizes from compiled assets
-    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.

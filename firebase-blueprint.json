@@ -9,8 +9,6 @@
         "displayName": { "type": "string" },
         "email": { "type": "string" },
         "photoURL": { "type": "string" },
-        "phone": { "type": "string" },
-        "preferredDevice": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "email"]
@@ -31,158 +29,9 @@
         "discount": { "type": "number" },
         "total": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "userId": { "type": "string" },
-        "internalNotes": { "type": "string" }
+        "userId": { "type": "string" }
       },
       "required": ["id", "customerName", "device", "issueType", "status", "total", "createdAt"]
-    },
-    "HighPriorityLead": {
-      "title": "High Priority Lead",
-      "description": "Stores Tier 3 hardware escalation details for manual technician callback",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "customerName": { "type": "string" },
-        "phone": { "type": "string" },
-        "deviceModel": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "in_progress", "contacted", "completed", "cancelled"] },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "userId": { "type": "string" }
-      },
-      "required": ["id", "customerName", "phone", "deviceModel", "status", "createdAt", "userId"]
-    },
-    "S2CFeedback": {
-      "title": "S2C Feedback",
-      "description": "Stores user ratings and correction notes for logical circuit maps",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "pathway": { "type": "string" },
-        "rating": { "type": "string", "enum": ["up", "down"] },
-        "deviceModel": { "type": "string" },
-        "notes": { "type": "string" },
-        "ammeterReading": { "type": "number" },
-        "batteryTemp": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "userId", "pathway", "rating", "deviceModel", "createdAt"]
-    },
-    "SessionDraft": {
-      "title": "Diagnostic Session Draft",
-      "description": "Temporary auto-synced telemetry and diagnostic chat draft to resume sessions across devices",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "messages": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "role": { "type": "string", "enum": ["user", "assistant"] },
-              "text": { "type": "string" }
-            },
-            "required": ["role", "text"]
-          }
-        },
-        "forensicLogs": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "forensicDevice": { "type": "string" },
-        "sessionLabel": { "type": "string" },
-        "lastUpdated": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "userId", "messages", "forensicLogs", "lastUpdated"]
-    },
-    "POSLog": {
-      "title": "POS Log",
-      "description": "Synchronized POS transaction audit log representing active repair workstation ticketing flow",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "level": { "type": "string" },
-        "message": { "type": "string" },
-        "source": { "type": "string", "enum": ["Square", "CellSmart", "WebHook-Receiver"] },
-        "userId": { "type": "string" }
-      },
-      "required": ["id", "timestamp", "level", "message", "source", "userId"]
-    },
-    "RecaptchaAssessment": {
-      "title": "reCAPTCHA Assessment Log",
-      "description": "Stores Google reCAPTCHA Enterprise verification outcomes and telemetry risk scores",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "token": { "type": "string" },
-        "action": { "type": "string" },
-        "score": { "type": "number" },
-        "success": { "type": "boolean" },
-        "isSimulated": { "type": "boolean" },
-        "reasons": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "token", "action", "score", "success", "createdAt"]
-    },
-    "TechnicianChat": {
-      "title": "Technician Chat Session",
-      "description": "Stores technician AI-assisted forensic circuit diagnostic chats and telemetry histories",
-      "type": "object",
-      "properties": {
-        "userId": { "type": "string" },
-        "title": { "type": "string" },
-        "model": { "type": "string" },
-        "messages": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "role": { "type": "string", "enum": ["user", "model"] },
-              "text": { "type": "string" },
-              "timestamp": { "type": "string", "format": "date-time" },
-              "citations": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "uri": { "type": "string" },
-                    "title": { "type": "string" }
-                  },
-                  "required": ["uri", "title"]
-                }
-              }
-            },
-            "required": ["role", "text", "timestamp"]
-          }
-        },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["userId", "title", "model", "messages", "createdAt"]
-    },
-    "Quote": {
-      "title": "Repair Quote",
-      "description": "Stores generated repair estimation quotes with custom items and computed regional taxes",
-      "type": "object",
-      "properties": {
-        "quoteRef": { "type": "string" },
-        "customerName": { "type": "string" },
-        "deviceModel": { "type": "string" },
-        "companyName": { "type": "string" },
-        "isCorporate": { "type": "boolean" },
-        "baseRate": { "type": "number" },
-        "tax": { "type": "number" },
-        "total": { "type": "number" },
-        "notes": { "type": "string" },
-        "localFacilities": { "type": "string" },
-        "syncedToPOS": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["quoteRef", "total", "createdAt"]
     }
   },
   "firestore": {
@@ -193,34 +42,6 @@
     "tickets/{ticketId}": {
       "schema": "RepairTicket",
       "description": "Comprehensive customer repair records synced with local Spokane WA sales details"
-    },
-    "high-priority-leads/{leadId}": {
-      "schema": "HighPriorityLead",
-      "description": "Hot leads representing complex repairs routed to manual technician callback queues"
-    },
-    "s2c-feedback/{feedbackId}": {
-      "schema": "S2CFeedback",
-      "description": "Technician ratings and comments indicating validation quality of logic board circuits"
-    },
-    "drafts/{draftId}": {
-      "schema": "SessionDraft",
-      "description": "Temporary session state for live chat and telemetry data enabling cross-device resume"
-    },
-    "pos-logs/{logId}": {
-      "schema": "POSLog",
-      "description": "Synchronized real-time POS logs coupled with automated repair ticket creation actions"
-    },
-    "recaptcha-assessments/{assessmentId}": {
-      "schema": "RecaptchaAssessment",
-      "description": "Security log of all verified reCAPTCHA Enterprise telemetry assertions"
-    },
-    "technician_chats/{chatId}": {
-      "schema": "TechnicianChat",
-      "description": "Interactive AI diagnostic session transcripts for circuit reverse engineering"
-    },
-    "quotes/{quoteId}": {
-      "schema": "Quote",
-      "description": "Archived customer diagnostic quotes"
     }
   }
 }
