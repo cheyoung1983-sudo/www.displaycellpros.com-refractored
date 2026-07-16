@@ -818,8 +818,8 @@ let sdClient: RegistrationServiceClient | null = null;
 let sdClientErrorInit: string | null = null;
 let isRealClientInitialized = false;
 
-// Mode support: "simulated" by default for flawless sandbox experience, "gcp" for real connection.
-let registryMode: "simulated" | "gcp" = "simulated";
+// Mode support: "gcp" for real connection.
+let registryMode: "simulated" | "gcp" = "gcp";
 let lastGcpError: string | null = null;
 
 function getSDClient(): RegistrationServiceClient | null {

@@ -41,7 +41,8 @@ import {
   ChevronUp,
   QrCode,
   Copy,
-  Usb
+  Usb,
+  Mail
 } from "lucide-react";
 import { RepairTicket, POSLog, QuoteResponse } from "./types";
 import { Toast, ToastContainer, ToastType } from "./components/ToastNotification";
@@ -1796,6 +1797,42 @@ export default function App() {
     }
   };
 
+  const shareReportViaEmail = () => {
+    try {
+      const traceText = `--- TELEMETRY TRACE ---
+ID: COM-CORE-USB-01
+Timestamp: ${new Date().toLocaleString()}
+Manufacturer: ${deviceBrand}
+Model: ${deviceModel}
+Tier: ${deviceTier}
+Fault: ${issueType.toUpperCase()}
+Battery Health: ${issueType === "battery" ? "76%" : "94%"}
+Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
+
+      const subject = encodeURIComponent(`Diagnostic Report - ${deviceBrand} ${deviceModel}`);
+      const body = encodeURIComponent(
+        `Hello,\n\nHere is the diagnostic telemetry trace summary for the device:\n\n${traceText}\n\nYou can also access the system here:\n${window.location.href}\n\nBest regards,\nLab Terminal Sync`
+      );
+      
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+
+      addToast(
+        "Email Drafted",
+        "Your default email application has been opened with the diagnostic report details.",
+        "success",
+        4000
+      );
+    } catch (err: any) {
+      console.error("Failed to share report via email:", err);
+      addToast(
+        "Email Sharing Failed",
+        err.message || "Could not open mail client.",
+        "error",
+        5000
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-blue-500/30 flex flex-col justify-between">
       
@@ -2026,34 +2063,7 @@ export default function App() {
                         {isScanning ? "PROBING HARDWARE..." : "🔌 Connect Phone (Cable)"}
                       </button>
 
-                      <button
-                        type="button"
-                        id="btn-simulate-scan"
-                        disabled={isScanning}
-                        onClick={startHardwareScan}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-750 disabled:bg-slate-850 text-slate-300 font-bold text-[10.5px] uppercase tracking-wider rounded-lg hover:scale-[1.01] active:scale-98 transition-all border border-slate-700/60 font-mono"
-                      >
-                        <Zap className={`w-3.5 h-3.5 fill-current ${isScanning ? "animate-spin text-yellow-400" : "text-slate-400"}`} />
-                        {isScanning ? "TUNING RAIL FREQUENCY..." : "Simulate Offline Scan"}
-                      </button>
 
-                      {/* Timeout toggler switch */}
-                      <div className="mt-2.5 flex items-center justify-between px-1">
-                        <label htmlFor="forceScanTimeout" className="text-[9px] text-slate-400 hover:text-slate-200 font-bold uppercase font-mono tracking-wider cursor-pointer select-none flex items-center gap-2 transition-colors">
-                          <input
-                            id="forceScanTimeout"
-                            name="forceScanTimeout"
-                            type="checkbox"
-                            checked={forceScanTimeout}
-                            onChange={(e) => setForceScanTimeout(e.target.checked)}
-                            className="w-3.5 h-3.5 bg-slate-950 border-slate-850 rounded text-blue-600 focus:ring-blue-500/30 accent-blue-600 cursor-pointer"
-                          />
-                          Simulate Timeout Error
-                        </label>
-                        <span className={`text-[8.5px] font-mono font-extrabold ${forceScanTimeout ? "text-red-400 animate-pulse" : "text-slate-500"}`}>
-                          {forceScanTimeout ? "TIMEOUT" : "NORMAL"}
-                        </span>
-                      </div>
                       
                       <div className="bg-slate-950/70 p-2 rounded-lg border border-slate-850/60 space-y-1 text-[8.5px] text-slate-400 font-mono">
                         <div className="text-slate-300 font-extrabold uppercase text-[8px] flex items-center gap-1">
@@ -2216,15 +2226,27 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                                 <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">
                                   ID: COM-CORE-USB-01
                                 </span>
-                                <button
-                                  type="button"
-                                  id="btn-download-pdf-report"
-                                  onClick={downloadPdfReport}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-mono text-[9px] font-extrabold uppercase tracking-wider rounded transition-all shadow border border-blue-500/20"
-                                >
-                                  <FileText className="w-3.5 h-3.5 text-blue-200" />
-                                  <span>Download PDF Report</span>
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    id="btn-share-email-report"
+                                    onClick={shareReportViaEmail}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-slate-300 hover:text-white font-mono text-[9px] font-extrabold uppercase tracking-wider rounded transition-all shadow border border-slate-800 hover:border-slate-700 cursor-pointer"
+                                    title="Draft an email containing telemetry summary and link"
+                                  >
+                                    <Mail className="w-3.5 h-3.5 text-blue-400" />
+                                    <span>Share via Email</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    id="btn-download-pdf-report"
+                                    onClick={downloadPdfReport}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-mono text-[9px] font-extrabold uppercase tracking-wider rounded transition-all shadow border border-blue-500/20 cursor-pointer"
+                                  >
+                                    <FileText className="w-3.5 h-3.5 text-blue-200" />
+                                    <span>Download PDF Report</span>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           )}
@@ -2346,23 +2368,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       <span className={`px-1.5 py-0.2 text-[9px] rounded font-mono ${
                         labTab === "triage" ? "bg-blue-700 text-white" : "bg-slate-800 text-slate-400"
                       }`}>LV3</span>
-                    </button>
-
-                    <button
-                      onClick={() => setLabTab("usb")}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
-                        labTab === "usb" 
-                          ? "bg-blue-600 text-white shadow-md" 
-                          : "text-slate-300 hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Usb className="w-4 h-4" />
-                        <span>USB Transceiver Lab</span>
-                      </div>
-                      <span className={`px-1.5 py-0.2 text-[9px] rounded font-mono ${
-                        labTab === "usb" ? "bg-blue-700 text-white" : "bg-slate-800 text-slate-400"
-                      }`}>PHY</span>
                     </button>
 
                     <button
@@ -2518,84 +2523,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
               {/* === CENTRAL ACTIVE PANEL: MODULE VIEWPORTS (Col-span 6) === */}
               <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
                 
-                {/* USB TRANSCEIVER LAB MODULE */}
-                {labTab === "usb" && (
-                  <section className="bg-slate-800 border border-slate-700 rounded-xl flex flex-col flex-1 shadow-md overflow-hidden animate-in fade-in duration-200 p-5 space-y-4">
-                    <div className="flex justify-between items-center border-b border-slate-700/80 pb-3">
-                      <div className="flex items-center gap-2">
-                        <Usb className="w-5 h-5 text-blue-400" />
-                        <div>
-                          <h2 className="text-sm font-bold text-slate-100 tracking-wider uppercase font-mono">
-                            USB-C Physical Layer Transceiver Lab
-                          </h2>
-                          <p className="text-[10px] text-slate-400 font-mono">Real-time BMC protocol decoding, impedance sweeps, and transient surge testing</p>
-                        </div>
-                      </div>
-                      <span className="text-[9px] bg-blue-900/50 text-blue-300 font-bold px-2 py-0.5 rounded border border-blue-800/30 font-mono uppercase tracking-widest">
-                        PHY-SECURE
-                      </span>
-                    </div>
 
-                    <UsbSimulator
-                      onDeviceDetected={(brand, model, tier, issue, customer, email) => {
-                        setDeviceBrand(brand);
-                        setDeviceModel(model);
-                        setDeviceTier(tier);
-                        setIssueType(issue);
-                        setCustomerName(customer);
-                        setEmailInput(email);
-                        setHasScanned(true);
-
-                        // Match zip and city for high-fidelity fallback rates
-                        const WA_TAX_DATA: Record<string, { city: string; rate: number }> = {
-                          "98101": { city: "Seattle", rate: 0.1035 },
-                          "98004": { city: "Bellevue", rate: 0.101 },
-                          "98402": { city: "Tacoma", rate: 0.103 }
-                        };
-                        const zip = brand === "Apple" ? "98101" : brand === "Samsung" ? "98004" : "98402";
-                        const lookup = WA_TAX_DATA[zip] || { city: "Seattle", rate: 0.1035 };
-                        setZipInput(zip);
-                        setTaxCity(lookup.city);
-                        setTaxRate(lookup.rate);
-                        setTaxVerifiedMessage(`WASHINGTON TAX COMPLIANT: Connected via Direct Physical USB-C Cable. Destined ${lookup.city} (${zip}) local combined tax scale is ${(lookup.rate * 100).toFixed(2)}%.`);
-                        setIsValidZip(true);
-
-                        if (brand === "Apple") {
-                          setIsCorporate(true);
-                          setCompanyName("AMAZON Fleet");
-                          setB2bMessage("VERIFICATION SUCCESS: Corporate customer identified! 20% Fast-Track fleet repair discount & zero-deposit check-in is unlocked.");
-                        } else {
-                          setIsCorporate(false);
-                          setCompanyName("");
-                          setB2bMessage("Retail client verified. Standard warranty and retail billing rates applied.");
-                        }
-
-                        // Also trigger dynamic quote update!
-                        setTimeout(() => {
-                          fetchDynamicQuote();
-                        }, 100);
-                      }}
-                      onToast={(title, message, type) => {
-                        addToast(title, message, type === "success" ? "success" : type === "error" ? "error" : "info", 5000);
-                      }}
-                    />
-
-                    {/* Quick Lab Education Overlay */}
-                    <div className="bg-slate-900 border border-slate-800/80 rounded-lg p-4 space-y-2.5 text-xs text-slate-300 font-mono leading-relaxed">
-                      <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs uppercase">
-                        <Info className="w-4 h-4 shrink-0" />
-                        <span>How to Use the Handshake Lab:</span>
-                      </div>
-                      <p>
-                        WebUSB browser dialogs are frequently disabled inside secure nested iframe environments due to sandboxing policies.
-                        To resolve this block, this dedicated <b>Physical Layer Transceiver Lab</b> simulates the exact hardware voltages, Pull-down resistances (Rd), CC-pin orientations, and Power Delivery (PD) contracts.
-                      </p>
-                      <p>
-                        Selecting a device preset and clicking <b>Plug In Virtual Cable</b> will drive the BMC (Biphase Mark Coding) state machine in real-time, fetching identical telemetry values and updating the main quote calculations instantly!
-                      </p>
-                    </div>
-                  </section>
-                )}
 
                 {/* OAUTH DOMAIN VERIFICATION LAB MODULE */}
                 {labTab === "verification" && (
@@ -2631,88 +2559,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       </div>
                     </div>
 
-                    {/* Interactive HTML File Verification Generator & Simulator */}
-                    <div className="bg-slate-900 border border-slate-700/60 rounded-lg p-4 space-y-3">
-                      <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs uppercase font-mono">
-                        <CheckCircle2 className="w-4 h-4 text-blue-400" />
-                        <span>1. Interactive HTML File Verification Simulator</span>
-                      </div>
-                      
-                      <div className="space-y-3 font-mono text-xs">
-                        <p className="text-slate-400 text-[11px]">
-                          Enter your Google Search Console verification challenge code below to generate and test the live server-side verification endpoint instantly:
-                        </p>
-                        
-                        <div className="flex items-end gap-3 bg-slate-950 p-3 rounded border border-slate-850">
-                          <div className="flex-1 space-y-1.5">
-                            <label htmlFor="challengeCodeInput" className="text-[10px] text-slate-500 uppercase font-bold">Google Challenge File Code</label>
-                            <div className="flex items-center bg-slate-900 border border-slate-800 rounded px-2 py-1">
-                              <span className="text-slate-500 text-[11px] select-none">google</span>
-                              <input 
-                                id="challengeCodeInput"
-                                type="text"
-                                value={challengeCode.replace("google", "")}
-                                onChange={(e) => {
-                                  const val = e.target.value.trim().replace(".html", "").replace("google", "");
-                                  setChallengeCode(val ? `google${val}` : "google982a74c10a30b5e8");
-                                }}
-                                placeholder="982a74c10a30b5e8"
-                                className="flex-1 bg-transparent border-none text-white focus:outline-none ml-0.5 font-bold text-[11px]"
-                              />
-                              <span className="text-slate-500 text-[11px] select-none">.html</span>
-                            </div>
-                          </div>
-                          
-                          <button
-                            onClick={async () => {
-                              try {
-                                const testUrl = `/google${challengeCode.replace("google", "")}.html`;
-                                const response = await fetch(testUrl);
-                                const text = await response.text();
-                                addToast(
-                                  "Verification Test Passed",
-                                  `Endpoint ${testUrl} responded with HTTP 200 OK! Content: "${text}"`,
-                                  "success",
-                                  6000
-                                );
-                              } catch (err: any) {
-                                addToast(
-                                  "Verification Check Failed",
-                                  err.message || "Failed to reach endpoint",
-                                  "error",
-                                  6000
-                                );
-                              }
-                            }}
-                            className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1.5 px-3 rounded text-[10px] uppercase tracking-wide transition-all"
-                          >
-                            Simulate Request
-                          </button>
-                        </div>
 
-                        <div className="bg-slate-950 p-3 rounded border border-slate-850 space-y-2">
-                          <div className="flex justify-between text-[10px] text-slate-500 border-b border-slate-800 pb-1.5">
-                            <span>Challenge Property</span>
-                            <span>Dynamic Live Value</span>
-                          </div>
-                          <div className="flex justify-between items-center text-[11px]">
-                            <span className="text-slate-400">Target File Path:</span>
-                            <span className="text-blue-300 font-bold select-all bg-blue-950/40 px-1 py-0.2 rounded">/{challengeCode}.html</span>
-                          </div>
-                          <div className="flex justify-between items-center text-[11px]">
-                            <span className="text-slate-400">Served Content:</span>
-                            <span className="text-emerald-400 font-bold select-all bg-emerald-950/40 px-1 py-0.2 rounded font-mono">google-site-verification: {challengeCode}.html</span>
-                          </div>
-                          <div className="flex justify-between items-center text-[11px]">
-                            <span className="text-slate-400">Compliance Status:</span>
-                            <span className="text-emerald-400 font-bold flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                              Active & Auto-Serving
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
 
                     {/* Interactive OAuth Whitelisting & Domain Audit Kit */}
                     <OAuthDocumentationPanel 
@@ -3389,33 +3236,9 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       
                       {/* Mode and Connection status indicators */}
                       <div className="flex flex-wrap items-center gap-2">
-                        <div className="flex bg-slate-900 p-1 border border-slate-700/60 rounded-lg text-[10px] font-mono font-bold select-none">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleRegistryMode("simulated")}
-                            disabled={sdLoading}
-                            className={`px-2.5 py-1 rounded transition-all flex items-center gap-1 ${
-                              sdStatus.mode !== "gcp"
-                                ? "bg-blue-600 hover:bg-blue-500 text-white shadow"
-                                : "text-slate-400 hover:text-slate-200"
-                            }`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${sdStatus.mode !== "gcp" ? "bg-white" : "bg-slate-600"}`}></span>
-                            SIMULATED SANDBOX
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleToggleRegistryMode("gcp")}
-                            disabled={sdLoading}
-                            className={`px-2.5 py-1 rounded transition-all flex items-center gap-1 ${
-                              sdStatus.mode === "gcp"
-                                ? "bg-indigo-650 hover:bg-indigo-550 text-white shadow"
-                                : "text-slate-400 hover:text-slate-200"
-                            }`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${sdStatus.mode === "gcp" ? "bg-green-400 animate-pulse" : "bg-slate-655"}`}></span>
-                            GENUINE GCP
-                          </button>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-950/40 border border-indigo-500/20 text-indigo-300 rounded-lg text-xs font-bold font-mono select-none">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                          GENUINE GCP ACTIVE REGISTRY
                         </div>
 
                         <button
