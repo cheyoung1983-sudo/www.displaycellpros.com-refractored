@@ -50,6 +50,7 @@ import { HardwareScanChart } from "./components/HardwareScanChart";
 import { UsbSimulator } from "./components/UsbSimulator";
 import { jsPDF } from "jspdf";
 import { OAuthDocumentationPanel } from "./components/OAuthDocumentationPanel";
+import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
 import { signInWithPopup, onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./lib/firebase";
@@ -1856,6 +1857,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 <NavButton active={activeTab === "services"} onClick={() => setActiveTab("services")}>Services</NavButton>
                 <NavButton active={activeTab === "b2b"} onClick={() => setActiveTab("b2b")}>B2B Fleet</NavButton>
                 <NavButton active={activeTab === "store"} onClick={() => setActiveTab("store")}>Store</NavButton>
+                <NavButton active={activeTab === "privacy"} onClick={() => setActiveTab("privacy")}>Privacy & Consent</NavButton>
                 
                 {/* Diagnostics Embedded Laboratory Link */}
                 <button
@@ -1901,6 +1903,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
               <MobileNavButton onClick={() => { setActiveTab("services"); setMobileMenuOpen(false); }}>Services</MobileNavButton>
               <MobileNavButton onClick={() => { setActiveTab("b2b"); setMobileMenuOpen(false); }}>B2B Fleet</MobileNavButton>
               <MobileNavButton onClick={() => { setActiveTab("store"); setMobileMenuOpen(false); }}>Store</MobileNavButton>
+              <MobileNavButton onClick={() => { setActiveTab("privacy"); setMobileMenuOpen(false); }}>Privacy & Consent</MobileNavButton>
               
               <button 
                   onClick={() => { setActiveTab("lab"); setMobileMenuOpen(false); }}
@@ -1926,6 +1929,19 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
         {activeTab === "services" && <ServicesView onBookClick={() => setIsAiOpen(true)} />}
         {activeTab === "b2b" && <B2BView onBookClick={() => setIsAiOpen(true)} />}
         {activeTab === "store" && <StoreView />}
+        {activeTab === "privacy" && (
+          <PrivacyPolicyView 
+            onBackToHome={() => {
+              setActiveTab("home");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            onNavigateToLab={() => {
+              setActiveTab("lab");
+              setLabTab("triage");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
+        )}
         
         {/* --- DEEP DIAGNOSTIC HUB MAIN PANEL VIEWS --- */}
         {activeTab === "lab" && (
@@ -3879,7 +3895,17 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
               <ul className="space-y-2 text-sm text-slate-400">
                 <li>WA UBI: 605 985 265</li>
                 <li>NAICS: 811210</li>
-                <li><a href="#" className="hover:text-blue-400 transition-colors">Privacy Policy</a></li>
+                <li>
+                  <button 
+                    onClick={() => {
+                      setActiveTab("privacy");
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }} 
+                    className="hover:text-blue-400 transition-colors text-left font-medium cursor-pointer"
+                  >
+                    Privacy & Data Policy
+                  </button>
+                </li>
                 <li><a href="#" className="hover:text-blue-400 transition-colors">Liability Waiver</a></li>
               </ul>
             </div>
