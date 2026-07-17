@@ -11,7 +11,9 @@ import {
   Code,
   Layers,
   Sparkles,
-  Search
+  Search,
+  Copy,
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -71,15 +73,38 @@ export function RdsDiagnosticPanel() {
   const [loadingSingleMovie, setLoadingSingleMovie] = useState(false);
   const [singleMovieError, setSingleMovieError] = useState<string | null>(null);
 
-  // Fetch status on mount
+  // Snippets/recipes state
+  const [activeSnippetTab, setActiveSnippetTab] = useState<"v3" | "v2" | "cli">("v3");
+  const [copied, setCopied] = useState(false);
+
+  // Read manual token from localStorage if present
+  const [manualToken, setManualToken] = useState(() => {
+    return localStorage.getItem("rds_manual_auth_token") || "";
+  });
+
+  const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setManualToken(val);
+    if (val.trim()) {
+      localStorage.setItem("rds_manual_auth_token", val.trim());
+    } else {
+      localStorage.removeItem("rds_manual_auth_token");
+    }
+  };
+
+  // Fetch status on mount or when token changes
   useEffect(() => {
     fetchRdsStatus();
-  }, []);
+  }, [manualToken]);
 
   const fetchRdsStatus = async () => {
     setLoadingStatus(true);
     try {
-      const res = await fetch("/api/rds-status");
+      const headers: HeadersInit = {};
+      if (manualToken.trim()) {
+        headers["X-RDS-Auth-Token"] = manualToken.trim();
+      }
+      const res = await fetch("/api/rds-status", { headers });
       const data = await res.json();
       setStatus(data);
     } catch (err: any) {
@@ -107,7 +132,11 @@ export function RdsDiagnosticPanel() {
   const fetchMovies = async () => {
     setLoadingMovies(true);
     try {
-      const res = await fetch("/api/movies");
+      const headers: HeadersInit = {};
+      if (manualToken.trim()) {
+        headers["X-RDS-Auth-Token"] = manualToken.trim();
+      }
+      const res = await fetch("/api/movies", { headers });
       const data = await res.json();
       setMoviesData(data);
     } catch (err: any) {
@@ -132,7 +161,11 @@ export function RdsDiagnosticPanel() {
     setSingleMovieResult(null);
 
     try {
-      const res = await fetch(`/api/movies/${singleMovieId}`);
+      const headers: HeadersInit = {};
+      if (manualToken.trim()) {
+        headers["X-RDS-Auth-Token"] = manualToken.trim();
+      }
+      const res = await fetch(`/api/movies/${singleMovieId}`, { headers });
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || `HTTP error ${res.status}`);
@@ -169,6 +202,54 @@ export function RdsDiagnosticPanel() {
         >
           <RefreshCw className={`w-4 h-4 ${loadingStatus ? "animate-spin text-blue-400" : ""}`} />
         </button>
+      </div>
+
+      {/* AWS IAM Token Override Control Panel */}
+      <div className="bg-slate-900 border border-slate-750 rounded-xl p-4 space-y-3">
+        <div className="flex justify-between items-center flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold text-slate-200 font-mono uppercase tracking-wider">
+              AWS IAM Database Authentication Token Override
+            </span>
+          </div>
+          
+          {manualToken.trim() ? (
+            <span className="bg-amber-950/60 text-amber-400 border border-amber-900/40 text-[9px] font-mono px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+              Token Override Active
+            </span>
+          ) : (
+            <span className="bg-slate-800 text-slate-400 border border-slate-700 text-[9px] font-mono px-2 py-0.5 rounded-full">
+              Using Default Config (OIDC / Env Password)
+            </span>
+          )}
+        </div>
+
+        <p className="text-[11px] text-slate-400 font-mono leading-relaxed">
+          Need to test connection with a temporary AWS RDS token (15-min expiry) or a manually generated sign-in token? Paste it below to route all status requests and table queries through an isolated connection client.
+        </p>
+
+        <div className="flex gap-2">
+          <input
+            type="password"
+            placeholder="Paste your AWS RDS IAM Authentication token (presigned URL/hash) here..."
+            value={manualToken}
+            onChange={handleTokenChange}
+            className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
+          />
+          {manualToken && (
+            <button
+              onClick={() => {
+                setManualToken("");
+                localStorage.removeItem("rds_manual_auth_token");
+              }}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold font-mono transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Grid: Config Status & Connection Test */}
@@ -453,6 +534,198 @@ export function RdsDiagnosticPanel() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Code Snippets & Guides Section */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div className="flex justify-between items-center flex-wrap gap-2 border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Terminal className="w-4.5 h-4.5 text-blue-400" />
+            <span className="text-xs font-bold text-slate-100 font-mono uppercase tracking-wider">
+              AWS RDS Passwordless Connection Snippets
+            </span>
+          </div>
+
+          <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs font-mono">
+            <button
+              onClick={() => {
+                setActiveSnippetTab("v3");
+                setCopied(false);
+              }}
+              className={`px-3 py-1 rounded-md transition-all font-semibold ${
+                activeSnippetTab === "v3"
+                  ? "bg-blue-600 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              AWS SDK v3 (Modern ESM)
+            </button>
+            <button
+              onClick={() => {
+                setActiveSnippetTab("v2");
+                setCopied(false);
+              }}
+              className={`px-3 py-1 rounded-md transition-all font-semibold ${
+                activeSnippetTab === "v2"
+                  ? "bg-blue-600 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              AWS SDK v2 (Classic CJS)
+            </button>
+            <button
+              onClick={() => {
+                setActiveSnippetTab("cli");
+                setCopied(false);
+              }}
+              className={`px-3 py-1 rounded-md transition-all font-semibold ${
+                activeSnippetTab === "cli"
+                  ? "bg-blue-600 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              AWS CLI Setup
+            </button>
+          </div>
+        </div>
+
+        <p className="text-xs text-slate-400 font-mono leading-relaxed">
+          {activeSnippetTab === "cli" 
+            ? "Run standard AWS CLI credentials configuration inside your terminal to enable secure authentication from local environments."
+            : "The following template scripts demonstrate how to configure secure IAM authentication. Place them in your microservices or local test directory to run standalone database validation."
+          }
+        </p>
+
+        <div className="relative">
+          <div className="absolute right-3 top-3 z-10">
+            <button
+              onClick={() => {
+                const codeText = activeSnippetTab === "v3" ? v3Code : activeSnippetTab === "v2" ? v2Code : cliCode;
+                navigator.clipboard.writeText(codeText);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded border border-slate-700 text-[11px] font-semibold font-mono flex items-center gap-1.5 transition-all shadow-sm"
+              title="Copy snippet to clipboard"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in-50" />
+                  <span className="text-emerald-400">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Copy Code</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <pre className="bg-slate-950 text-slate-300 font-mono text-[11px] leading-relaxed p-4 rounded-xl border border-slate-800 overflow-x-auto max-h-96 text-left select-all">
+            {activeSnippetTab === "v3" ? v3Code : activeSnippetTab === "v2" ? v2Code : cliCode}
+          </pre>
+        </div>
+
+        <div className="bg-slate-950/40 border border-slate-800/80 rounded-lg p-3 text-[11px] text-slate-400 font-mono space-y-1.5">
+          <div className="font-bold text-slate-300 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+            <span>Connection Quick-Start Guide</span>
+          </div>
+          <ol className="list-decimal pl-4 space-y-1">
+            <li>Ensure your AWS RDS cluster has IAM Authentication enabled.</li>
+            <li>Verify your executing environment has valid AWS credentials or is linked via OpenID Connect (OIDC).</li>
+            <li>Run <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">npm install pg {activeSnippetTab === "v3" ? "@aws-sdk/rds-signer" : "aws-sdk"}</code> inside your test project folder.</li>
+            <li>Execute the script using <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">node script.js</code> to establish a passwordless handshake!</li>
+          </ol>
+        </div>
+      </div>
     </div>
   );
 }
+
+// Hardcoded snippets to display
+const v3Code = `// ------------------- AWS SDK v3 (ES MODULES / RECOMMENDED) -------------------
+// Install dependencies: npm install pg @aws-sdk/rds-signer
+
+import { Signer } from "@aws-sdk/rds-signer";
+import { Pool } from "pg";
+
+const signer = new Signer({
+  hostname: process.env.PGHOST || "dcp-production-db.cluster-cs7wcksg2js1.us-east-1.rds.amazonaws.com",
+  port: Number(process.env.PGPORT) || 5432,
+  username: process.env.PGUSER || "postgres",
+  region: process.env.AWS_REGION || "us-east-1"
+});
+
+const pool = new Pool({
+  host: process.env.PGHOST || "dcp-production-db.cluster-cs7wcksg2js1.us-east-1.rds.amazonaws.com",
+  user: process.env.PGUSER || "postgres",
+  database: process.env.PGDATABASE || "postgres",
+  password: () => signer.getAuthToken(),
+  port: Number(process.env.PGPORT) || 5432,
+  ssl: { rejectUnauthorized: false }
+});
+
+async function runQuery() {
+  try {
+    const res = await pool.query("SELECT version()");
+    console.log("Connected! Engine Version:", res.rows[0].version);
+  } catch (error) {
+    console.error("Database error:", error);
+  } finally {
+    await pool.end();
+  }
+}
+
+runQuery();`;
+
+const v2Code = `// ------------------- AWS SDK v2 (COMMONJS / CLASSIC STYLE) -------------------
+// Install dependencies: npm install pg aws-sdk
+
+const { Client } = require('pg');
+const AWS = require('aws-sdk');
+
+AWS.config.update({ region: 'us-east-1' });
+
+async function main() {
+  const signer = new AWS.RDS.Signer({
+    region: 'us-east-1',
+    hostname: 'dcp-production-db.cluster-cs7wcksg2js1.us-east-1.rds.amazonaws.com',
+    port: 5432,
+    username: 'postgres'
+  });
+  
+  const password = signer.getAuthToken({});
+
+  const client = new Client({
+    host: 'dcp-production-db.cluster-cs7wcksg2js1.us-east-1.rds.amazonaws.com',
+    port: 5432,
+    database: 'postgres',
+    user: 'postgres',
+    password: password,
+    ssl: { rejectUnauthorized: false }
+  });
+
+  try {
+    await client.connect();
+    const res = await client.query('SELECT version()');
+    console.log("Connected! Engine Version:", res.rows[0].version);
+  } catch (error) {
+    console.error('Database error:', error);
+    throw error;
+  } finally {
+    await client.end();
+  }
+}
+
+main().catch(console.error);`;
+
+const cliCode = `# Configure AWS CLI Credentials for local sandbox/development environments
+aws configure
+AWS Access Key ID [None]: xxxxxxxxxxxxxxxx
+AWS Secret Access Key [None]: xxxxxxxxxxxxxxxxxxxxxxxxx
+Default region name [None]: us-east-1
+Default output format [None]: json
+
+# Verify configured profile
+aws sts get-caller-identity`;

@@ -4,7 +4,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import dotenv from "dotenv";
 import { RegistrationServiceClient } from "@google-cloud/service-directory";
-import { getDbPool, isDbConfigured } from "./db";
+import { getDbPool, isDbConfigured, queryWithToken } from "./db";
 
 dotenv.config();
 
@@ -1263,6 +1263,8 @@ const mockMovies = [
 // Endpoint to check AWS RDS PostgreSQL configuration & connection status
 app.get("/api/rds-status", async (req, res) => {
   const configured = isDbConfigured();
+  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+
   const maskString = (str?: string) => {
     if (!str) return "not-set";
     if (str.length <= 8) return "****";
@@ -1278,6 +1280,7 @@ app.get("/api/rds-status", async (req, res) => {
     awsRegion: process.env.AWS_REGION || "us-east-1",
     awsRoleArn: maskString(process.env.AWS_ROLE_ARN),
     awsAccountId: maskString(process.env.AWS_ACCOUNT_ID),
+    hasManualToken: !!token
   };
 
   if (!configured) {
@@ -1289,25 +1292,29 @@ app.get("/api/rds-status", async (req, res) => {
   }
 
   try {
-    const pool = getDbPool();
     // Test the connection with a simple query
     const startTime = Date.now();
-    const result = await pool.query("SELECT NOW() as current_time, version() as db_version;");
+    const result = await queryWithToken("SELECT NOW() as current_time, version() as db_version;", [], token);
     const queryDurationMs = Date.now() - startTime;
 
     return res.json({
       success: true,
-      message: "Successfully connected to AWS RDS PostgreSQL cluster!",
+      message: token
+        ? "Successfully connected to AWS RDS PostgreSQL cluster using custom/temporary Authentication Token!"
+        : "Successfully connected to AWS RDS PostgreSQL cluster!",
       queryDurationMs,
       currentTime: result.rows[0].current_time,
       dbVersion: result.rows[0].db_version,
       config: configInfo,
+      usingManualToken: !!token
     });
   } catch (err: any) {
     console.error("[Database Connection Error]:", err);
     return res.status(500).json({
       success: false,
-      message: "Connected configuration detected, but connection attempt failed.",
+      message: token 
+        ? "Failed to connect to AWS RDS using the provided custom Auth Token."
+        : "Connected configuration detected, but connection attempt failed.",
       error: err.message || err,
       config: configInfo,
     });
@@ -1316,6 +1323,8 @@ app.get("/api/rds-status", async (req, res) => {
 
 // Endpoint to query movies
 app.get("/api/movies", async (req, res) => {
+  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+
   if (!isDbConfigured()) {
     return res.json({
       success: true,
@@ -1326,11 +1335,10 @@ app.get("/api/movies", async (req, res) => {
   }
 
   try {
-    const pool = getDbPool();
-    const result = await pool.query("SELECT * FROM movies ORDER BY id ASC;");
+    const result = await queryWithToken("SELECT * FROM movies ORDER BY id ASC;", [], token);
     return res.json({
       success: true,
-      source: "aws-rds-postgres",
+      source: token ? "aws-rds-postgres (manual-token)" : "aws-rds-postgres",
       movies: result.rows,
     });
   } catch (err: any) {
@@ -1339,7 +1347,7 @@ app.get("/api/movies", async (req, res) => {
     if (err.code === "42P01") {
       return res.json({
         success: true,
-        source: "aws-rds-postgres-fallback",
+        source: token ? "aws-rds-postgres-fallback (manual-token)" : "aws-rds-postgres-fallback",
         message: "AWS RDS is connected, but 'movies' table does not exist in database yet. Returning local simulation.",
         ddlHint: "CREATE TABLE movies (id SERIAL PRIMARY KEY, title VARCHAR(255), year INTEGER, genre VARCHAR(100)); INSERT INTO movies (title, year, genre) VALUES ('The Matrix', 1999, 'Sci-Fi'), ('Inception', 2010, 'Sci-Fi');",
         movies: mockMovies,
@@ -1357,6 +1365,7 @@ app.get("/api/movies", async (req, res) => {
 app.get("/api/movies/:id", async (req, res) => {
   const idStr = req.params.id;
   const id = Number(idStr);
+  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
 
   if (isNaN(id)) {
     return res.status(400).json({ error: "Invalid movie ID. Must be a number." });
@@ -1375,14 +1384,13 @@ app.get("/api/movies/:id", async (req, res) => {
   }
 
   try {
-    const pool = getDbPool();
-    const result = await pool.query("SELECT * FROM movies WHERE id = $1;", [id]);
+    const result = await queryWithToken("SELECT * FROM movies WHERE id = $1;", [id], token);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: `Movie with ID ${id} not found in AWS RDS.` });
     }
     return res.json({
       success: true,
-      source: "aws-rds-postgres",
+      source: token ? "aws-rds-postgres (manual-token)" : "aws-rds-postgres",
       movie: result.rows[0],
     });
   } catch (err: any) {
@@ -1394,7 +1402,7 @@ app.get("/api/movies/:id", async (req, res) => {
       }
       return res.json({
         success: true,
-        source: "aws-rds-postgres-fallback",
+        source: token ? "aws-rds-postgres-fallback (manual-token)" : "aws-rds-postgres-fallback",
         movie,
       });
     }

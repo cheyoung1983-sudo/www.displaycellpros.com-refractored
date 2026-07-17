@@ -1,7 +1,7 @@
 import { Signer } from "@aws-sdk/rds-signer";
 import { awsCredentialsProvider } from "@vercel/oidc-aws-credentials-provider";
 import { attachDatabasePool } from "@vercel/functions";
-import { Pool } from "pg";
+import { Pool, Client } from "pg";
 
 let pool: Pool | null = null;
 
@@ -65,6 +65,41 @@ export function getDbPool(): Pool {
   }
 
   return pool;
+}
+
+/**
+ * Executes a PostgreSQL query.
+ * If an explicit database authentication token (such as a 15-minute temporary AWS IAM sign-in token)
+ * is passed, it connects via an isolated single-client instance to avoid polluting or leaking the main Pool.
+ */
+export async function queryWithToken(sql: string, params: any[] = [], token?: string): Promise<any> {
+  const host = process.env.PGHOST;
+  const user = process.env.PGUSER;
+  const port = Number(process.env.PGPORT) || 5432;
+  const database = process.env.PGDATABASE || "postgres";
+
+  if (token) {
+    console.log(`[Database] Query executing via explicit token connection to ${host}:${port}/${database} as user ${user}`);
+    const client = new Client({
+      host,
+      user,
+      database,
+      password: token,
+      port,
+      ssl: { rejectUnauthorized: false },
+    });
+    await client.connect();
+    try {
+      const result = await client.query(sql, params);
+      return result;
+    } finally {
+      await client.end().catch((err) => console.warn("[Database] Error closing explicit connection:", err));
+    }
+  }
+
+  // Fallback to global pool
+  const standardPool = getDbPool();
+  return await standardPool.query(sql, params);
 }
 
 /**
