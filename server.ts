@@ -8,7 +8,7 @@ import { RegistrationServiceClient } from "@google-cloud/service-directory";
 dotenv.config();
 
 // Initialize Express
-const app = express();
+export const app = express();
 const PORT = 3000;
 
 // Middleware
@@ -1274,4 +1274,6 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
