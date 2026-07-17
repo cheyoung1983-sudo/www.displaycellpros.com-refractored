@@ -4,6 +4,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import dotenv from "dotenv";
 import { RegistrationServiceClient } from "@google-cloud/service-directory";
+import { getDbPool, isDbConfigured } from "./db";
 
 dotenv.config();
 
@@ -1250,7 +1251,163 @@ app.get("/google:hash.html", (req, res) => {
   res.send(`google-site-verification: google${hash}.html`);
 });
 
+// ---------------- AWS RDS POSTGRES INTEGRATION MODULE ----------------
+
+const mockMovies = [
+  { id: 1, title: "The Matrix", year: 1999, genre: "Sci-Fi" },
+  { id: 2, title: "Inception", year: 2010, genre: "Sci-Fi" },
+  { id: 3, title: "Interstellar", year: 2014, genre: "Adventure" },
+  { id: 4, title: "The Dark Knight", year: 2008, genre: "Action" }
+];
+
+// Endpoint to check AWS RDS PostgreSQL configuration & connection status
+app.get("/api/rds-status", async (req, res) => {
+  const configured = isDbConfigured();
+  const maskString = (str?: string) => {
+    if (!str) return "not-set";
+    if (str.length <= 8) return "****";
+    return str.substring(0, 4) + "..." + str.substring(str.length - 4);
+  };
+
+  const configInfo = {
+    configured,
+    host: maskString(process.env.PGHOST),
+    user: maskString(process.env.PGUSER),
+    database: process.env.PGDATABASE || "postgres",
+    port: process.env.PGPORT || "5432",
+    awsRegion: process.env.AWS_REGION || "us-east-1",
+    awsRoleArn: maskString(process.env.AWS_ROLE_ARN),
+    awsAccountId: maskString(process.env.AWS_ACCOUNT_ID),
+  };
+
+  if (!configured) {
+    return res.json({
+      success: false,
+      message: "AWS RDS PostgreSQL is not configured yet. Set PGHOST, PGUSER, PGDATABASE, and AWS_ROLE_ARN in your Vercel/Environment settings.",
+      config: configInfo,
+    });
+  }
+
+  try {
+    const pool = getDbPool();
+    // Test the connection with a simple query
+    const startTime = Date.now();
+    const result = await pool.query("SELECT NOW() as current_time, version() as db_version;");
+    const queryDurationMs = Date.now() - startTime;
+
+    return res.json({
+      success: true,
+      message: "Successfully connected to AWS RDS PostgreSQL cluster!",
+      queryDurationMs,
+      currentTime: result.rows[0].current_time,
+      dbVersion: result.rows[0].db_version,
+      config: configInfo,
+    });
+  } catch (err: any) {
+    console.error("[Database Connection Error]:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Connected configuration detected, but connection attempt failed.",
+      error: err.message || err,
+      config: configInfo,
+    });
+  }
+});
+
+// Endpoint to query movies
+app.get("/api/movies", async (req, res) => {
+  if (!isDbConfigured()) {
+    return res.json({
+      success: true,
+      source: "local-simulation",
+      message: "AWS RDS is not configured. Returning simulated movie list.",
+      movies: mockMovies,
+    });
+  }
+
+  try {
+    const pool = getDbPool();
+    const result = await pool.query("SELECT * FROM movies ORDER BY id ASC;");
+    return res.json({
+      success: true,
+      source: "aws-rds-postgres",
+      movies: result.rows,
+    });
+  } catch (err: any) {
+    console.warn("[Database Movies Fetch Warning]:", err.message || err);
+    // Code 42P01 means table does not exist in Postgres
+    if (err.code === "42P01") {
+      return res.json({
+        success: true,
+        source: "aws-rds-postgres-fallback",
+        message: "AWS RDS is connected, but 'movies' table does not exist in database yet. Returning local simulation.",
+        ddlHint: "CREATE TABLE movies (id SERIAL PRIMARY KEY, title VARCHAR(255), year INTEGER, genre VARCHAR(100)); INSERT INTO movies (title, year, genre) VALUES ('The Matrix', 1999, 'Sci-Fi'), ('Inception', 2010, 'Sci-Fi');",
+        movies: mockMovies,
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Failed to query database.",
+      error: err.message || err,
+    });
+  }
+});
+
+// Endpoint to query a movie by id
+app.get("/api/movies/:id", async (req, res) => {
+  const idStr = req.params.id;
+  const id = Number(idStr);
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: "Invalid movie ID. Must be a number." });
+  }
+
+  if (!isDbConfigured()) {
+    const movie = mockMovies.find(m => m.id === id);
+    if (!movie) {
+      return res.status(404).json({ error: `Movie with ID ${id} not found.` });
+    }
+    return res.json({
+      success: true,
+      source: "local-simulation",
+      movie,
+    });
+  }
+
+  try {
+    const pool = getDbPool();
+    const result = await pool.query("SELECT * FROM movies WHERE id = $1;", [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: `Movie with ID ${id} not found in AWS RDS.` });
+    }
+    return res.json({
+      success: true,
+      source: "aws-rds-postgres",
+      movie: result.rows[0],
+    });
+  } catch (err: any) {
+    console.error("[Database Movie ID Fetch Error]:", err);
+    if (err.code === "42P01") {
+      const movie = mockMovies.find(m => m.id === id);
+      if (!movie) {
+        return res.status(404).json({ error: `Movie with ID ${id} not found.` });
+      }
+      return res.json({
+        success: true,
+        source: "aws-rds-postgres-fallback",
+        movie,
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Database query failed.",
+      error: err.message || err,
+    });
+  }
+});
+
 // ---------------- VITE MIDDLEWARE CONFIG ----------------
+
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

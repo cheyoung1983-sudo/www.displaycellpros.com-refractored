@@ -48,6 +48,7 @@ import { RepairTicket, POSLog, QuoteResponse } from "./types";
 import { Toast, ToastContainer, ToastType } from "./components/ToastNotification";
 import { HardwareScanChart } from "./components/HardwareScanChart";
 import { UsbSimulator } from "./components/UsbSimulator";
+import { RdsDiagnosticPanel } from "./components/RdsDiagnosticPanel";
 import { jsPDF } from "jspdf";
 import { OAuthDocumentationPanel } from "./components/OAuthDocumentationPanel";
 import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
@@ -100,7 +101,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // --- DIAGNOSTIC HUB STATES ---
-  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "usb" | "verification">("triage");
+  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "usb" | "verification" | "postgres">("triage");
 
   // Google Cloud Service Directory state variables
   const [sdStatus, setSdStatus] = useState<{ active: boolean; usingFallback: boolean; error: string | null; message: string; mode?: string }>({
@@ -2451,6 +2452,23 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         ACTION
                       </span>
                     </button>
+
+                    <button
+                      onClick={() => setLabTab("postgres")}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
+                        labTab === "postgres" 
+                          ? "bg-blue-600 text-white shadow-md" 
+                          : "text-slate-300 hover:bg-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Database className="w-4 h-4" />
+                        <span>AWS RDS Postgres (IAM)</span>
+                      </div>
+                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-blue-905/40 text-blue-400 font-bold">
+                        DB
+                      </span>
+                    </button>
                   </nav>
                 </div>
 
@@ -2584,6 +2602,11 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       prodUrl="https://displaycellpros.com"
                     />
                   </section>
+                )}
+
+                {/* AWS RDS POSTGRESQL DIAGNOSTIC PANEL */}
+                {labTab === "postgres" && (
+                  <RdsDiagnosticPanel />
                 )}
 
                 {/* 1. TRIAGE CHAT MODULE */}
