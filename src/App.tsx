@@ -96,7 +96,15 @@ const STORE_PRODUCTS = [
 // --- MAIN MASTER APP COMPONENT ---
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>("home");
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const path = typeof window !== "undefined" ? window.location.pathname.toLowerCase() : "";
+    if (path.includes("privacy")) return "privacy";
+    if (path.includes("services")) return "services";
+    if (path.includes("b2b") || path.includes("fleet")) return "b2b";
+    if (path.includes("store")) return "store";
+    if (path.includes("lab")) return "lab";
+    return "home";
+  });
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 

@@ -74,7 +74,7 @@ export function RdsDiagnosticPanel() {
   const [singleMovieError, setSingleMovieError] = useState<string | null>(null);
 
   // Snippets/recipes state
-  const [activeSnippetTab, setActiveSnippetTab] = useState<"v3" | "v2" | "cli">("v3");
+  const [activeSnippetTab, setActiveSnippetTab] = useState<"v3" | "v2" | "cli" | "mcp">("v3");
   const [copied, setCopied] = useState(false);
 
   // Read manual token from localStorage if present
@@ -541,11 +541,11 @@ export function RdsDiagnosticPanel() {
           <div className="flex items-center gap-2">
             <Terminal className="w-4.5 h-4.5 text-blue-400" />
             <span className="text-xs font-bold text-slate-100 font-mono uppercase tracking-wider">
-              AWS RDS Passwordless Connection Snippets
+              {activeSnippetTab === "mcp" ? "AWS MCP Server Configuration" : "AWS RDS Connection & Agent Snippets"}
             </span>
           </div>
 
-          <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs font-mono">
+          <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs font-mono flex-wrap gap-1">
             <button
               onClick={() => {
                 setActiveSnippetTab("v3");
@@ -557,7 +557,7 @@ export function RdsDiagnosticPanel() {
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              AWS SDK v3 (Modern ESM)
+              AWS SDK v3 (ESM)
             </button>
             <button
               onClick={() => {
@@ -570,7 +570,7 @@ export function RdsDiagnosticPanel() {
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              AWS SDK v2 (Classic CJS)
+              AWS SDK v2 (CJS)
             </button>
             <button
               onClick={() => {
@@ -585,12 +585,27 @@ export function RdsDiagnosticPanel() {
             >
               AWS CLI Setup
             </button>
+            <button
+              onClick={() => {
+                setActiveSnippetTab("mcp");
+                setCopied(false);
+              }}
+              className={`px-3 py-1 rounded-md transition-all font-semibold ${
+                activeSnippetTab === "mcp"
+                  ? "bg-blue-600 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              AWS MCP Server
+            </button>
           </div>
         </div>
 
         <p className="text-xs text-slate-400 font-mono leading-relaxed">
           {activeSnippetTab === "cli" 
             ? "Run standard AWS CLI credentials configuration inside your terminal to enable secure authentication from local environments."
+            : activeSnippetTab === "mcp"
+            ? "Configure the AWS Model Context Protocol (MCP) server inside your Claude Desktop or MCP Client to securely expose RDS, S3, DynamoDB, and Bedrock tools directly to AI Agents."
             : "The following template scripts demonstrate how to configure secure IAM authentication. Place them in your microservices or local test directory to run standalone database validation."
           }
         </p>
@@ -599,7 +614,11 @@ export function RdsDiagnosticPanel() {
           <div className="absolute right-3 top-3 z-10">
             <button
               onClick={() => {
-                const codeText = activeSnippetTab === "v3" ? v3Code : activeSnippetTab === "v2" ? v2Code : cliCode;
+                const codeText = 
+                  activeSnippetTab === "v3" ? v3Code : 
+                  activeSnippetTab === "v2" ? v2Code : 
+                  activeSnippetTab === "cli" ? cliCode : 
+                  mcpCode;
                 navigator.clipboard.writeText(codeText);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
@@ -622,21 +641,30 @@ export function RdsDiagnosticPanel() {
           </div>
 
           <pre className="bg-slate-950 text-slate-300 font-mono text-[11px] leading-relaxed p-4 rounded-xl border border-slate-800 overflow-x-auto max-h-96 text-left select-all">
-            {activeSnippetTab === "v3" ? v3Code : activeSnippetTab === "v2" ? v2Code : cliCode}
+            {activeSnippetTab === "v3" ? v3Code : activeSnippetTab === "v2" ? v2Code : activeSnippetTab === "cli" ? cliCode : mcpCode}
           </pre>
         </div>
 
         <div className="bg-slate-950/40 border border-slate-800/80 rounded-lg p-3 text-[11px] text-slate-400 font-mono space-y-1.5">
           <div className="font-bold text-slate-300 flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            <span>Connection Quick-Start Guide</span>
+            <span>{activeSnippetTab === "mcp" ? "AWS MCP Server Quick-Start Guide" : "Connection Quick-Start Guide"}</span>
           </div>
-          <ol className="list-decimal pl-4 space-y-1">
-            <li>Ensure your AWS RDS cluster has IAM Authentication enabled.</li>
-            <li>Verify your executing environment has valid AWS credentials or is linked via OpenID Connect (OIDC).</li>
-            <li>Run <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">npm install pg {activeSnippetTab === "v3" ? "@aws-sdk/rds-signer" : "aws-sdk"}</code> inside your test project folder.</li>
-            <li>Execute the script using <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">node script.js</code> to establish a passwordless handshake!</li>
-          </ol>
+          {activeSnippetTab === "mcp" ? (
+            <ol className="list-decimal pl-4 space-y-1">
+              <li>Open your Claude Desktop configuration file (<code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">claude_desktop_config.json</code>).</li>
+              <li>Add the <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">aws-mcp-server</code> block inside the <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">mcpServers</code> object.</li>
+              <li>Provide your secure <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">AWS_REGION</code> and credentials environment variables.</li>
+              <li>Restart Claude Desktop to unlock real-time tools for Amazon RDS databases, Amazon S3 Buckets, Bedrock Models, and DynamoDB.</li>
+            </ol>
+          ) : (
+            <ol className="list-decimal pl-4 space-y-1">
+              <li>Ensure your AWS RDS cluster has IAM Authentication enabled.</li>
+              <li>Verify your executing environment has valid AWS credentials or is linked via OpenID Connect (OIDC).</li>
+              <li>Run <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">npm install pg {activeSnippetTab === "v3" ? "@aws-sdk/rds-signer" : "aws-sdk"}</code> inside your test project folder.</li>
+              <li>Execute the script using <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">node script.js</code> to establish a passwordless handshake!</li>
+            </ol>
+          )}
         </div>
       </div>
     </div>
@@ -729,3 +757,20 @@ Default output format [None]: json
 
 # Verify configured profile
 aws sts get-caller-identity`;
+
+const mcpCode = `{
+  "mcpServers": {
+    "aws-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@aws-mcp/server"
+      ],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "AWS_ACCESS_KEY_ID": "YOUR_AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY": "YOUR_AWS_SECRET_ACCESS_KEY"
+      }
+    }
+  }
+}`;

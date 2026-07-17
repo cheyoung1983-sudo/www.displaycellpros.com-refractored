@@ -15,20 +15,57 @@ const PORT = 3000;
 // Middleware
 app.use(express.json());
 
+// Normalize API routes for serverless rewrites (e.g., when /api/ is stripped by hosting gateways)
+app.use((req, res, next) => {
+  const apiPaths = [
+    "tax-lookup",
+    "generate-quote",
+    "verify-b2b",
+    "service-directory",
+    "pos-sync-logs",
+    "pos-sync-log",
+    "create-ticket",
+    "triage",
+    "complex-diagnostics",
+    "analyze-image",
+    "rds-status",
+    "movies"
+  ];
+  
+  const pathParts = req.url.split("?")[0].split("/");
+  const firstSegment = pathParts[1];
+  
+  if (firstSegment && apiPaths.includes(firstSegment) && !req.url.startsWith("/api/")) {
+    const originalUrl = req.url;
+    req.url = "/api" + originalUrl;
+    console.log(`[Route Rewrite] Adjusted request URL for compatibility: ${originalUrl} -> ${req.url}`);
+  }
+  next();
+});
+
 // Initialize Gemini SDK with defensive validation
 let ai: GoogleGenAI | null = null;
 const API_KEY = process.env.GEMINI_API_KEY;
 
 if (API_KEY && API_KEY !== "MY_GEMINI_API_KEY") {
   try {
-    ai = new GoogleGenAI({
-      apiKey: API_KEY,
+    const isOAuthOrFederatedToken = !API_KEY.startsWith("AIza");
+    const sdkOptions: any = {
       httpOptions: {
         headers: {
           "User-Agent": "aistudio-build",
         },
       },
-    });
+    };
+
+    if (isOAuthOrFederatedToken) {
+      console.log("Detected Google OAuth/Federated access token for Gemini API. Initializing with Bearer Authorization header.");
+      sdkOptions.httpOptions.headers["Authorization"] = `Bearer ${API_KEY}`;
+    } else {
+      sdkOptions.apiKey = API_KEY;
+    }
+
+    ai = new GoogleGenAI(sdkOptions);
     console.log("Gemini API successfully initialized on server. Verifying credentials asynchronously...");
     
     // Perform background credential verification to avoid active 401 unauthenticated errors at runtime
