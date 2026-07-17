@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="da70337f-032f-42ca-a81d-6e461a55f3f5" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com" value="3Ge7uiX6OhEM2DvZl9li3El9LJD" />
+    </persistenceIdMap>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="237155" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;cheyoung1983-sudo&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/cheyoung1983-sudo/www.displaycellpros.com-refractored.git&quot;,
+    &quot;accountId&quot;: &quot;d71e7289-72a7-4990-b0e1-3d0898f7f718&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.7189328982105512" />
+      <entry key="MS500" value="3.1239159374757626" />
+      <entry key="S2" value="3.7438209111183296" />
+      <entry key="S5" value="3.8941061227812486" />
+      <entry key="S10" value="3.9464639648705773" />
+      <entry key="S30" value="3.982021958962563" />
+      <entry key="S60" value="3.9909942795678144" />
+      <entry key="M2" value="3.9954929562873334" />
+      <entry key="M5" value="3.9981961773833343" />
+      <entry key="M10" value="3.9990979210786124" />
+      <entry key="M15" value="3.999398576798309" />
+      <entry key="M30" value="3.9996992697704172" />
+      <entry key="H1" value="3.999849630227707" />
+      <entry key="H2" value="3.999924813949439" />
+      <entry key="H4" value="3.9999624066836104" />
+      <entry key="D1" value="3.999993734406836" />
+      <entry key="W1" value="3.9999991049142722" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.5208065649089506" />
+      <entry key="MS500" value="2.969995153665743" />
+      <entry key="S2" value="3.6870016815759707" />
+      <entry key="S5" value="3.8694420552256577" />
+      <entry key="S10" value="3.933787970074229" />
+      <entry key="S30" value="3.9777181230767544" />
+      <entry key="S60" value="3.9888324166851428" />
+      <entry key="M2" value="3.994409528618343" />
+      <entry key="M5" value="3.9977622059378146" />
+      <entry key="M10" value="3.9988808351857483" />
+      <entry key="M15" value="3.999253830601769" />
+      <entry key="M30" value="3.9996268855361787" />
+      <entry key="H1" value="3.9998134353262245" />
+      <entry key="H2" value="3.999906715802559" />
+      <entry key="H4" value="3.999953357436131" />
+      <entry key="D1" value="3.9999922261747503" />
+      <entry key="W1" value="3.9999988894519527" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="3Ge7uiX6OhEM2DvZl9li3El9LJD" />
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_id" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="BACKGROUND" />
+        <option name="worktreeMode" value="WORKSPACE" />
+      </template>
+    </option>
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "settings.editor.selected.configurable": "templates.modelproviders.configurable",
+    "show.migrate.to.gradle.popup": "false"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="da70337f-032f-42ca-a81d-6e461a55f3f5" name="Changes" comment="" />
+      <created>1784320407215</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1784320407215</updated>
+    </task>
+    <servers />
+  </component>
+</project>
