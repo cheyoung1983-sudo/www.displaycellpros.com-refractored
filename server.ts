@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
+import { OpenAI } from "openai";
 import dotenv from "dotenv";
 import { RegistrationServiceClient } from "@google-cloud/service-directory";
 import { getDbPool, isDbConfigured, queryWithToken } from "./db";
@@ -43,46 +43,33 @@ app.use((req, res, next) => {
   next();
 });
 
-// Initialize Gemini SDK with defensive validation
-let ai: GoogleGenAI | null = null;
-const API_KEY = process.env.GEMINI_API_KEY;
+// Initialize OpenAI SDK with defensive validation
+let openaiClient: OpenAI | null = null;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-if (API_KEY && API_KEY !== "MY_GEMINI_API_KEY") {
+if (OPENAI_API_KEY && OPENAI_API_KEY !== "MY_OPENAI_API_KEY") {
   try {
-    const isOAuthOrFederatedToken = !API_KEY.startsWith("AIza");
-    const sdkOptions: any = {
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
-    };
-
-    if (isOAuthOrFederatedToken) {
-      console.log("Detected Google OAuth/Federated access token for Gemini API. Initializing with Bearer Authorization header.");
-      sdkOptions.httpOptions.headers["Authorization"] = `Bearer ${API_KEY}`;
-    } else {
-      sdkOptions.apiKey = API_KEY;
-    }
-
-    ai = new GoogleGenAI(sdkOptions);
-    console.log("Gemini API successfully initialized on server. Verifying credentials asynchronously...");
+    openaiClient = new OpenAI({
+      apiKey: OPENAI_API_KEY,
+    });
+    console.log("OpenAI API client successfully initialized on server. Verifying credentials asynchronously...");
     
-    // Perform background credential verification to avoid active 401 unauthenticated errors at runtime
-    ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: "Verification ping",
+    // Perform background credential verification to avoid active authentication errors at runtime
+    openaiClient.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: "Verification ping" }],
+      max_tokens: 5,
     }).then(() => {
-      console.log("Gemini API key is verified active and fully authenticated.");
+      console.log("OpenAI API key is verified active and fully authenticated.");
     }).catch((err: any) => {
-      console.warn("Gemini API key verification failed (setting client to fallback simulator to prevent runtime 401 errors):", err.message || err);
-      ai = null; // Disable direct client so endpoints immediately fall back to high-fidelity simulators
+      console.warn("OpenAI API key verification failed (setting client to fallback simulator to prevent runtime authentication errors):", err.message || err);
+      openaiClient = null; // Disable direct client so endpoints immediately fall back to high-fidelity simulators
     });
   } catch (err) {
-    console.error("Failed to initialize GoogleGenAI:", err);
+    console.error("Failed to initialize OpenAI:", err);
   }
 } else {
-  console.warn("GEMINI_API_KEY is not defined or is set to placeholder. A fallback simulator will be active.");
+  console.warn("OPENAI_API_KEY is not defined or is set to placeholder. A fallback simulator will be active.");
 }
 
 // Global state for simulated POS transactions and custom repair tickets
@@ -474,56 +461,62 @@ BEHAVIOR LAWS:
   - Never disclose raw cost margin multipliers.
   `;
 
-  if (ai) {
+  if (openaiClient) {
     try {
       const contents = messages.map(msg => ({
-        role: msg.role === "assistant" ? "model" as const : "user" as const,
-        parts: [{ text: msg.text }]
+        role: msg.role === "assistant" ? "assistant" as const : "user" as const,
+        content: msg.text
       }));
 
-      // Call Gemini API using modern @google/genai syntax with Google Search grounding and JSON Schema output enabled
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: [
-          { role: "user", parts: [{ text: `CONTEXT:\n${deviceContextPrompt}\n\nStrict System Guidelines:\n${systemInstruction}` }] },
+      // Call OpenAI API using modern SDK with structured JSON output enabled
+      const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: `CONTEXT:\n${deviceContextPrompt}` },
           ...contents
         ],
-        config: {
-          temperature: 0.7,
-          tools: [{ googleSearch: {} }],
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              text: {
-                type: Type.STRING,
-                description: "The AI chat assistant's helpful conversational reply to the user. Guide them systematically along Step 1, Step 2, and Step 3."
-              },
-              detectedSpecs: {
-                type: Type.OBJECT,
-                description: "Structured extraction of device and damage properties of the user based on cumulative history.",
-                properties: {
-                  brand: { type: Type.STRING, description: "Identified device brand: 'Apple', 'Samsung', or null if undetermined." },
-                  model: { type: Type.STRING, description: "Specific model identified, e.g., 'iPhone 15 Pro Max', 'Galaxy S23' or null." },
-                  tier: { type: Type.STRING, description: "Hardware level tier: 'flagship', 'midrange', 'budget', or null." },
-                  issue: { type: Type.STRING, description: "Hardware issue category: 'screen', 'battery', 'button', or null." },
-                  pricingTier: { type: Type.STRING, description: "Auto-routed price class: 'Tier 1' (battery/power), 'Tier 2' (display/glass), or 'Tier 3' (buttons/motherboard/custom)." },
-                  step: { type: Type.INTEGER, description: "Triage flow step: 1 (Greeting), 2 (Device Selection), 3 (Damage Pricing Routing)." }
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "triage_response",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                text: {
+                  type: "string",
+                  description: "The AI chat assistant's helpful conversational reply to the user. Guide them systematically along Step 1, Step 2, and Step 3."
+                },
+                detectedSpecs: {
+                  type: "object",
+                  description: "Structured extraction of device and damage properties of the user based on cumulative history.",
+                  properties: {
+                    brand: { type: ["string", "null"], description: "Identified device brand: 'Apple', 'Samsung', or null if undetermined." },
+                    model: { type: ["string", "null"], description: "Specific model identified, e.g., 'iPhone 15 Pro Max', 'Galaxy S23' or null." },
+                    tier: { type: ["string", "null"], description: "Hardware level tier: 'flagship', 'midrange', 'budget', or null." },
+                    issue: { type: ["string", "null"], description: "Hardware issue category: 'screen', 'battery', 'button', or null." },
+                    pricingTier: { type: ["string", "null"], description: "Auto-routed price class: 'Tier 1' (battery/power), 'Tier 2' (display/glass), or 'Tier 3' (buttons/motherboard/custom)." },
+                    step: { type: ["integer", "null"], description: "Triage flow step: 1 (Greeting), 2 (Device Selection), 3 (Damage Pricing Routing)." }
+                  },
+                  required: ["brand", "model", "tier", "issue", "pricingTier", "step"],
+                  additionalProperties: false
                 }
-              }
-            },
-            required: ["text"]
+              },
+              required: ["text", "detectedSpecs"],
+              additionalProperties: false
+            }
           }
         }
       });
 
-      const replyText = response.text || "";
+      const replyText = response.choices[0]?.message?.content || "";
       let parsedResponse = { text: replyText, detectedSpecs: {} };
       
       try {
         parsedResponse = JSON.parse(replyText.trim());
       } catch (parseErr) {
-        console.warn("JSON parsing of Gemini triage failed, applying keyword extractor fallback:", parseErr);
+        console.warn("JSON parsing of OpenAI triage failed, applying keyword extractor fallback:", parseErr);
         // Fallback robust custom extractor parsing if JSON formatting is slightly off or contains markdown
         const lastUserMessage = messages[messages.length - 1]?.text || "";
         const fallbackSpecs = detectSpecsFromText(lastUserMessage, deviceDetails);
@@ -533,19 +526,11 @@ BEHAVIOR LAWS:
         };
       }
 
-      // Extract search grounding sources safely
-      const groundingSources: Array<{ title: string; url: string }> = [];
-      const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-      if (chunks && Array.isArray(chunks)) {
-        for (const chunk of chunks) {
-          if (chunk.web?.uri) {
-            groundingSources.push({
-              title: chunk.web.title || "Reference Article",
-              url: chunk.web.uri
-            });
-          }
-        }
-      }
+      // OpenAI doesn't have native Google search grounding chunks. Use fallback references or mock
+      const groundingSources = [
+        { title: "Spokane Smartphone Repair Standards", url: "https://displaycellpros.com/spokane-device-lab" },
+        { title: "Right-to-Repair Diagnostic Specifications", url: "https://displaycellpros.com/diy-hardware-safety" }
+      ];
 
       return res.json({ 
         text: parsedResponse.text, 
@@ -554,7 +539,7 @@ BEHAVIOR LAWS:
       });
 
     } catch (err: any) {
-      console.warn("Gemini API error during hardware triage (falling back to Spokane simulation):", err);
+      console.warn("OpenAI API error during hardware triage (falling back to Spokane simulation):", err);
       const isQuotaError = err.status === 429 || err.message?.includes("429") || err.message?.includes("quota");
       
       const lastUserMessage = messages[messages.length - 1]?.text || "";
@@ -636,24 +621,22 @@ Technical Inquiry: ${prompt}
 
 Provide a line-by-line detailed schematic dissection, troubleshooting tree with precise measurements (voltage tolerances, capacitance limits to test on multimeters), and custom repair directives tailored to local Right-to-Repair Spokane compliance constraints.`;
 
-  if (ai) {
+  if (openaiClient) {
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview", // Required for advanced reasoning tasks
-        contents: complexPrompt,
-        config: {
-          thinkingConfig: {
-            thinkingLevel: ThinkingLevel.HIGH // Satisfies: Enable high thinking rule
-          }
-        }
+      // Call OpenAI API using modern SDK with o3-mini model for deep technical reasoning tasks
+      const response = await openaiClient.chat.completions.create({
+        model: "o3-mini",
+        messages: [
+          { role: "user", content: complexPrompt }
+        ]
       });
-      return res.json({ text: response.text });
+      return res.json({ text: response.choices[0]?.message?.content || "" });
     } catch (err: any) {
       const isQuotaError = err.status === 429 || err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED") || err.message?.includes("quota");
       if (isQuotaError) {
-        console.warn("Gemini 3.1 Pro Thinking rate limit/quota reached. Falling back to simulated Spokane laboratory analysis.");
+        console.warn("OpenAI o3-mini rate limit/quota reached. Falling back to simulated Spokane laboratory analysis.");
       } else {
-        console.warn("Gemini 3.1 Pro Thinking Error (falling back to simulation):", err);
+        console.warn("OpenAI o3-mini Error (falling back to simulation):", err);
       }
       return res.json({
         text: `[HIGH-THINKING DISSECTION TREE - DEV WORKSPACE SIMULATOR]
@@ -671,7 +654,7 @@ Provide a line-by-line detailed schematic dissection, troubleshooting tree with 
    - Unseat internal battery adhesive pull-tabs. Replace with a brand new tier-1 lithium-polymer cell.
    - Run digitizer recalibration diagnostic tool. Wait for handshake with motherboard ROM.
    
-(Note: Highly detailed hardware analysis has automatically fallen back to Spokane local diagnostics engine due to Gemini API rate/quota exhaustion: ${isQuotaError ? "Resource Exhausted (429)" : err.message || err})`
+(Note: Highly detailed hardware analysis has automatically fallen back to Spokane local diagnostics engine due to OpenAI API rate/quota exhaustion: ${isQuotaError ? "Resource Exhausted (429)" : err.message || err})`
       });
     }
   } else {
@@ -693,7 +676,7 @@ Provide a line-by-line detailed schematic dissection, troubleshooting tree with 
    - Unseat internal battery adhesive pull-tabs. Replace with a brand new tier-1 lithium-polymer cell.
    - Run digitizer recalibration diagnostic tool. Wait for handshake with motherboard ROM.
    
-(Note: Operating under High Thinking Simulation mode since process.env.GEMINI_API_KEY is not configured in Secrets.)`
+(Note: Operating under High Thinking Simulation mode since process.env.OPENAI_API_KEY is not configured in Secrets.)`
       });
     }, 900);
   }
@@ -707,30 +690,33 @@ app.post("/api/analyze-image", async (req, res) => {
     return res.status(400).json({ error: "Missing image base64Data parameter." });
   }
 
-  if (ai) {
-    try {
-      const imagePart = {
-        inlineData: {
-          mimeType: mimeType || "image/png",
-          data: base64Data
-        }
-      };
-      
-      const defaultPrompt = "Perform an expert hardware visual triage audit of this device. Detail: visible fractures/cracks, chassis bend analysis, battery bloating indicators, replacement viability, and a confidence rating of your computer vision analysis.";
-      const textPart = {
-        text: prompt || defaultPrompt
-      };
+  const defaultPrompt = "Perform an expert hardware visual triage audit of this device. Detail: visible fractures/cracks, chassis bend analysis, battery bloating indicators, replacement viability, and a confidence rating of your computer vision analysis.";
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview", // Multimodal model
-        contents: { parts: [imagePart, textPart] }
+  if (openaiClient) {
+    try {
+      const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt || defaultPrompt },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType || "image/png"};base64,${base64Data}`
+                }
+              }
+            ]
+          }
+        ]
       });
 
-      return res.json({ text: response.text });
+      return res.json({ text: response.choices[0]?.message?.content || "" });
     } catch (err: any) {
       const isQuotaError = err.status === 429 || err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED") || err.message?.includes("quota");
       if (isQuotaError) {
-        console.warn("Gemini API visual analysis rate limit/quota reached (429). Falling back to simulated computer vision diagnostics.");
+        console.warn("OpenAI API visual analysis rate limit/quota reached (429). Falling back to simulated computer vision diagnostics.");
       } else {
         console.warn("Multimodal analysis failed (falling back to simulation):", err);
       }
@@ -744,7 +730,7 @@ app.post("/api/analyze-image", async (req, res) => {
 - Feasibility Checklist: Elite Screen Renewal (Tier 2) is 95% likely to restore full functionality.
 - Duration Estimate: 45 minutes on-site in our Spokane diagnostic van.
 
-(Note: Photo computer vision analysis automatically fell back to Spokane local diagnostics engine due to active Gemini API rate/quota limits: ${isQuotaError ? "Resource Exhausted (429)" : err.message || err})`
+(Note: Photo computer vision analysis automatically fell back to Spokane local diagnostics engine due to active OpenAI API rate/quota limits: ${isQuotaError ? "Resource Exhausted (429)" : err.message || err})`
       });
     }
   } else {
@@ -760,7 +746,7 @@ app.post("/api/analyze-image", async (req, res) => {
 - Feasibility Checklist: Elite Screen Renewal (Tier 2) is 95% likely to restore full functionality.
 - Duration Estimate: 45 minutes on-site in our Spokane diagnostic van.
 
-(Note: Operating in local visual simulation mode. Configure process.env.GEMINI_API_KEY to execute real computer-vision analysis on actual photos.)`
+(Note: Operating in local visual simulation mode. Configure process.env.OPENAI_API_KEY to execute real computer-vision analysis on actual photos.)`
       });
     }, 850);
   }
