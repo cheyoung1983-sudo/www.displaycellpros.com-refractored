@@ -1273,6 +1273,15 @@ app.post("/api/service-directory/endpoints/delete", async (req, res) => {
   res.json({ success: true, usingFallback: true });
 });
 
+// ---------------- DOMAIN OWNERSHIP VERIFICATION REGISTRY ----------------
+/**
+ * REPAIR HUB DOMAIN OWNERSHIP LOG (Professional Redundancy):
+ * 1. GOOGLE: Verified via HTML file /google:hash.html and <meta> tag.
+ * 2. OPENAI: Verified via DNS TXT record (dv-NdeW5YbdLdV1KvyJToEwXTig).
+ * 3. VERCEL: Verified via DNS delegation to Vercel Edge Network.
+ * 4. NETLIFY: Verified via secondary CDN deployment and domain linking.
+ */
+
 // Google Search Console / Domain Ownership Verification Endpoint
 // This dynamic route automatically intercepts and handles any Google Site Verification HTML requests,
 // ensuring the correct site-verification string is returned, satisfying ownership checks for displaycellpros.com.

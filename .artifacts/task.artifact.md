@@ -1,11 +1,12 @@
-# Tasks - Secret Management & Identity Proof
+# Tasks - Multi-Provider Domain Verification
 
-- [x] Update .pgpass Guide with Dynamic Secrets (`RdsDiagnosticPanel.tsx`)
-    - [x] Replace `my_password` with `{{resolve:secretsmanager:DB_PASSWORD_SECRET:SecretString}}`
-    - [x] Add "AI Studio Implementation" note
-- [x] Enhance Admin Verification API (`server.ts`)
-    - [x] Add check for Secrets Manager permissions (infrastructure report)
-    - [x] Update identity response with "Entire Admin Rights" confirmation
+- [x] Research DNS TXT Propagation
+- [x] Refactor `OAuthDocumentationPanel.tsx` for Multi-Provider Support
+    - [x] Add `openaiVerification` and `vercelVerification` to checklist state
+    - [x] Add `netlifyVerification` to checklist state
+    - [x] Implement OpenAI, Vercel, and Netlify documentation blocks
+    - [x] Add Copy-to-Clipboard for OpenAI TXT record
+- [x] Update Backend Reference Documentation (`server.ts`)
 - [x] Verification
-    - [x] Verify UI rendering of dynamic secret string
-    - [x] Run live Admin check (manual)
+    - [x] Final DNS confirmation for OpenAI
+    - [x] UI visual check in Lab Portal for all providers

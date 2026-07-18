@@ -30,6 +30,9 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
   // Interactive checklist state
   const [checklist, setChecklist] = useState({
     siteVerification: true,
+    openaiVerification: true,
+    vercelVerification: true,
+    netlifyVerification: true,
     firebaseAuthDomain: false,
     gcpOrigins: false,
     gcpRedirectUris: false,
@@ -164,25 +167,84 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                 </button>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-slate-200 text-xs">Verify Domain Ownership</span>
+                    <span className="font-bold text-slate-200 text-xs">Verify Domain Ownership (Google)</span>
                     <span className="text-[9px] bg-emerald-950/50 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-900/30">Verified</span>
                   </div>
                   <p className="text-[11px] text-slate-400 leading-normal">
-                    Fulfill Google Trust & Safety homepage requirements. We have served <code className="text-blue-300 font-bold bg-slate-900 px-1 py-0.2 rounded">/googleb89bdda23b0fc37b.html</code> dynamically on your application routes and injected the redundant verification tag in <code className="text-blue-300 font-bold bg-slate-900 px-1 py-0.2 rounded">index.html</code>.
+                    Fulfill Google Trust & Safety homepage requirements via <code className="text-blue-300 font-bold bg-slate-900 px-1 py-0.2 rounded">googleb89bdda23b0fc37b.html</code>.
                   </p>
-                  
-                  <div className="mt-2.5 space-y-1.5 bg-slate-950 p-2 rounded border border-slate-850/60 text-[10px]">
-                    <div className="flex justify-between items-center text-slate-400">
-                      <span>Verification Target:</span>
-                      <a href="https://displaycellpros.com/googleb89bdda23b0fc37b.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline flex items-center gap-0.5">
-                        displaycellpros.com/googleb89bdda23b0fc37b.html <ExternalLink className="w-3 h-3 inline" />
-                      </a>
-                    </div>
-                    <div className="flex justify-between items-center text-slate-400">
-                      <span>Server status:</span>
-                      <span className="text-emerald-400 font-bold">200 OK (Configured)</span>
-                    </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 1b: OpenAI Domain Verification */}
+            <div className={`p-3.5 rounded-lg border transition-all ${checklist.openaiVerification ? "bg-slate-950/40 border-slate-800" : "bg-slate-950/20 border-slate-900"}`}>
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => toggleCheck("openaiVerification")}
+                  className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors ${checklist.openaiVerification ? "bg-emerald-500 border-emerald-400 text-slate-950" : "border-slate-700 hover:border-slate-500"}`}
+                >
+                  {checklist.openaiVerification && <Check className="w-3 h-3 stroke-[3]" />}
+                </button>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-slate-200 text-xs">Verify Domain Ownership (OpenAI)</span>
+                    <span className="text-[9px] bg-emerald-950/50 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-900/30">Verified</span>
                   </div>
+                  <p className="text-[11px] text-slate-400 leading-normal">
+                    OpenAI TXT record deployed for GPT/Plugin authorization.
+                  </p>
+                  <div className="mt-2.5 p-2 bg-slate-950 rounded border border-slate-850 flex justify-between items-center px-2 font-mono">
+                    <span className="text-blue-350 text-[9px] truncate max-w-[240px]">openai-domain-verification=dv-NdeW5YbdLdV1KvyJToEwXTig</span>
+                    <button
+                      onClick={() => handleCopy("openai-domain-verification=dv-NdeW5YbdLdV1KvyJToEwXTig", "oa1")}
+                      className="text-slate-500 hover:text-blue-400 flex items-center gap-1 text-[10px]"
+                    >
+                      {copiedText === "oa1" ? "Copied!" : <Copy className="w-3 h-3" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 1c: Vercel Domain Ownership */}
+            <div className={`p-3.5 rounded-lg border transition-all ${checklist.vercelVerification ? "bg-slate-950/40 border-slate-800" : "bg-slate-950/20 border-slate-900"}`}>
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => toggleCheck("vercelVerification")}
+                  className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors ${checklist.vercelVerification ? "bg-emerald-500 border-emerald-400 text-slate-950" : "border-slate-700 hover:border-slate-500"}`}
+                >
+                  {checklist.vercelVerification && <Check className="w-3 h-3 stroke-[3]" />}
+                </button>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-slate-200 text-xs">Verify Domain Ownership (Vercel)</span>
+                    <span className="text-[9px] bg-emerald-950/50 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-900/30">Active</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-normal">
+                    Domain delegation and SSL provisioning managed by Vercel Edge Network.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 1d: Netlify Domain Ownership */}
+            <div className={`p-3.5 rounded-lg border transition-all ${checklist.netlifyVerification ? "bg-slate-950/40 border-slate-800" : "bg-slate-950/20 border-slate-900"}`}>
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => toggleCheck("netlifyVerification")}
+                  className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors ${checklist.netlifyVerification ? "bg-emerald-500 border-emerald-400 text-slate-950" : "border-slate-700 hover:border-slate-500"}`}
+                >
+                  {checklist.netlifyVerification && <Check className="w-3 h-3 stroke-[3]" />}
+                </button>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-slate-200 text-xs">Verify Domain Ownership (Netlify)</span>
+                    <span className="text-[9px] bg-emerald-950/50 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-900/30">Active</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-normal">
+                    Secondary deployment redundancy and global CDN distribution via Netlify.
+                  </p>
                 </div>
               </div>
             </div>

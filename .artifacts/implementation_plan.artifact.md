@@ -1,34 +1,31 @@
-# Implementation Plan - Secret Management & Identity Proof
+# Implementation Plan - Multi-Provider Domain Verification
 
-Integrate the **AWS Secrets Manager** dynamic resolution into the DevOps toolkit and verify "Entire Admin Rights" for `cheyoung1983@gmail.com`.
+Integrate OpenAI, Vercel, and Netlify domain verification into the project's compliance toolkit and verify the DNS status for `displaycellpros.com`.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> To comply with the security rules in `AGENTS.md`, the actual password value will not be hardcoded. Instead, I will implement the **AI Studio dynamic resolution placeholder**.
->
-> The value you need for `.pgpass` is stored in the AWS Secret: **`DB_PASSWORD_SECRET`**.
+> [!NOTE]
+> I am adding **Netlify** to the redundancy checklist to reflect your multi-platform deployment strategy.
 
 ## Proposed Changes
 
-### [Component Name] DevOps Toolkit (UI)
+### [Component Name] Compliance UI
 
-#### [MODIFY] [RdsDiagnosticPanel.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/RdsDiagnosticPanel.tsx)
-- **Dynamic Resolution**: Update the `.pgpass Guide` to use the `{{resolve:secretsmanager:DB_PASSWORD_SECRET:SecretString}}` syntax.
-- **AI Studio Integration**: Add a note explaining that **AI Studio implements this secret resolution** at runtime using the `asm-exec` tool, ensuring the secret never enters the source code or chat logs.
+#### [MODIFY] [OAuthDocumentationPanel.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/OAuthDocumentationPanel.tsx)
+- **Netlify Support**: Add a new checklist item for **Netlify Domain Ownership**.
+- **Redundancy Logging**: Update the UI to emphasize that these multiple ownerships are for professional redundancy and best practices.
 
-### [Component Name] Identity Verification (Backend)
+### [Component Name] Backend Documentation
 
 #### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/server.ts)
-- **Privileged Access Check**: Update the `/api/admin/verify-status` endpoint to confirm that the assumed IAM Role has `secretsmanager:GetSecretValue` permissions for `DB_PASSWORD_SECRET`.
-- **Identity Confirmation**: Explicitly report that `cheyoung1983@gmail.com` is the verified **Tenant Admin** with full database access.
+- Update the "Domain Ownership Verification Registry" comment block to include Netlify.
 
 ## Verification Plan
 
 ### Automated Tests
-- Verify the `.pgpass` tab in the UI displays the correct resolution placeholder.
+- I will run a final DNS check using the terminal to ensure the record remains stable.
 
 ### Manual Verification
-- Login as `cheyoung1983@gmail.com`.
-- Run the **Identity Check** in the Admin Portal.
-- Confirm the portal reports **"SUCCESS"** for both RDS and Secrets Manager connectivity.
+- Navigate to the **OAuth Verification Lab** in the app.
+- Confirm the **OpenAI Domain Ownership** step is listed and marked as "Ready" (or allow the user to toggle it).
+- Verify the copyable TXT record matches the user's request.
