@@ -7,9 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="da70337f-032f-42ca-a81d-6e461a55f3f5" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="da70337f-032f-42ca-a81d-6e461a55f3f5" name="Changes" comment="Update IDE workspace configuration and settings" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,12 +33,12 @@
     &quot;assignee&quot;: &quot;cheyoung1983-sudo&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/cheyoung1983-sudo/www.displaycellpros.com-refractored.git&quot;,
-    &quot;accountId&quot;: &quot;d71e7289-72a7-4990-b0e1-3d0898f7f718&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/cheyoung1983-sudo/www.displaycellpros.com-refractored.git",
+    "accountId": "bd881d76-3260-4d09-b506-f0e6d5bf747f"
   }
-}</component>
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -155,6 +153,19 @@
       <option name="presentableId" value="Default" />
       <updated>1784320407215</updated>
     </task>
+    <task id="LOCAL-00001" summary="Update IDE workspace configuration and settings">
+      <option name="closed" value="true" />
+      <created>1784346131948</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1784346131950</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Update IDE workspace configuration and settings" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update IDE workspace configuration and settings" />
   </component>
 </project>
