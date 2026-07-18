@@ -3,35 +3,10 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { OpenAI } from "openai";
-import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
-import { RegistrationServiceClient } from "@google-cloud/service-directory";
 import { getDbPool, isDbConfigured, queryWithToken } from "./db";
-import admin from "firebase-admin";
-import { getAuth } from "firebase-admin/auth";
 
 dotenv.config();
-
-// Initialize Firebase Admin SDK
-let isAdminInitialized = false;
-try {
-  const firebaseConfigPath = path.join(process.cwd(), "firebase-applet-config.json");
-  if (fs.existsSync(firebaseConfigPath)) {
-    const config = JSON.parse(fs.readFileSync(firebaseConfigPath, "utf8"));
-    admin.initializeApp({
-      projectId: config.projectId,
-    });
-    isAdminInitialized = true;
-    console.log(`[Firebase Admin] SDK initialized successfully with project ID: ${config.projectId}`);
-  } else {
-    // Attempt standard auto-init or ADC fallback
-    admin.initializeApp();
-    isAdminInitialized = true;
-    console.log("[Firebase Admin] SDK initialized via default credentials (ADC).");
-  }
-} catch (err: any) {
-  console.warn("[Firebase Admin] Initialization warning (falling back to lightweight simulation if credentials unavailable):", err.message || err);
-}
 
 // Initialize Express
 export const app = express();

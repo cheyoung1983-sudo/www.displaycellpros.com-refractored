@@ -60,10 +60,7 @@ import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
 import CacheManagement from "./components/CacheManagement";
 import QrScannerModal from "./components/QrScannerModal";
 import { TicketTemplate } from "./types";
-import { signInWithPopup, onAuthStateChanged, onIdTokenChanged, getIdToken, signOut, User as FirebaseUser, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from "firebase/firestore";
-import { auth, db, googleProvider } from "./lib/firebase";
-import { handleFirestoreError, OperationType } from "./lib/firebase-errors";
+import { useAuth } from "./contexts/AuthContext";
 
 // --- DATA MODELS ---
 
@@ -235,23 +232,15 @@ export default function App() {
   });
   const [isCalculatingQuote, setIsCalculatingQuote] = useState<boolean>(false);
 
-  // --- FIREBASE SSO AUTH & FIRESTORE CLOUD STATES ---
-  const [authUser, setAuthUser] = useState<FirebaseUser | null>(null);
+  // --- VERCEL AUTH & AWS RDS CLOUD STATES ---
+  const { user: authUser, loading: isAuthChecking, logout: handleSignOut } = useAuth();
   const [firestoreTickets, setFirestoreTickets] = useState<RepairTicket[]>([]);
   const [firestoreError, setFirestoreError] = useState<string | null>(null);
-  const [isUnauthorizedDomain, setIsUnauthorizedDomain] = useState<boolean>(false);
   const [challengeCode, setChallengeCode] = useState<string>("google982a74c10a30b5e8");
 
-  // --- EMAIL/PASSWORD AUTH STATES ---
+  // --- LOGIN STATES ---
   const [formEmail, setFormEmail] = useState<string>("");
-  const [formPassword, setFormPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [isSignUpMode, setIsSignUpMode] = useState<boolean>(false);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
-  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(() => {
-    // Check if an active session flag was set in localStorage to avoid flashing login forms
-    return localStorage.getItem("displaycellpros:hasActiveSession") === "true";
-  });
 
   // --- MULTI-MODAL & ADVANCED DIAGNOSTIC SUB-MODE STATES ---
   const [diagnosticMode, setDiagnosticMode] = useState<"standard" | "thinking" | "vision">("standard");
@@ -262,35 +251,31 @@ export default function App() {
   const [isDeepDiagnosing, setIsDeepDiagnosing] = useState<boolean>(false);
   const [groundingSources, setGroundingSources] = useState<Array<{ title: string; url: string }>>([]);
 
-  // Fetch Firestore backup logs
-  const fetchFirestoreTickets = async (uid: string) => {
+  // Fetch tickets from AWS RDS via Serverless API
+  const fetchFirestoreTickets = async () => {
     try {
       setFirestoreError(null);
-      const ticketsRef = collection(db, "tickets");
-      const q = query(ticketsRef, where("userId", "==", uid));
-      const querySnapshot = await getDocs(q);
-      const fetched: RepairTicket[] = [];
-      querySnapshot.forEach((docSnap) => {
-        fetched.push(docSnap.data() as RepairTicket);
-      });
-      setFirestoreTickets(fetched);
-    } catch (err) {
-      console.error("Failed to load Firestore tickets:", err);
-      try {
-        handleFirestoreError(err, OperationType.LIST, "tickets");
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
+      const res = await fetch("/api/tickets");
+      if (res.ok) {
+        const data = await res.json();
+        setFirestoreTickets(data.tickets || []);
+      } else {
+        const err = await res.json();
+        setFirestoreError(err.error || "Failed to load backups");
       }
+    } catch (err: any) {
+      console.error("Failed to load tickets:", err);
+      setFirestoreError(err.message);
     }
   };
 
   const handleCreateFirestoreTicket = async () => {
     if (!authUser) {
-      alert("Please authenticate using your Google account to enable secure cloud backups.");
+      alert("Please login to enable secure cloud backups.");
       return;
     }
     const ticketId = "DCP-" + Math.floor(100000 + Math.random() * 900000);
-    const newTicket: RepairTicket = {
+    const newTicket = {
       id: ticketId,
       customerName: customerName || "Jane Miller",
       companyName: isCorporate ? companyName : "",
@@ -300,237 +285,54 @@ export default function App() {
       quotedPrice: quote.baseQuote.subtotal,
       tax: quote.taxInfo.calculatedTax,
       discount: quote.discountInfo.amount,
-      total: quote.grandTotal,
-      createdAt: new Date().toISOString(),
-      userId: authUser.uid
+      total: quote.grandTotal
     };
 
     try {
       setFirestoreError(null);
-      const docRef = doc(db, "tickets", ticketId);
-      await setDoc(docRef, newTicket);
-      setTicketCreationSuccess(true);
-      setTimeout(() => setTicketCreationSuccess(false), 3000);
-      fetchFirestoreTickets(authUser.uid);
-    } catch (err) {
-      console.error("Failed to sync ticket on Firestore:", err);
-      try {
-        handleFirestoreError(err, OperationType.CREATE, `tickets/${ticketId}`);
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
+      const res = await fetch("/api/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTicket)
+      });
+      if (res.ok) {
+        setTicketCreationSuccess(true);
+        setTimeout(() => setTicketCreationSuccess(false), 3000);
+        fetchFirestoreTickets();
+      } else {
+        const err = await res.json();
+        setFirestoreError(err.error || "Failed to sync ticket");
       }
+    } catch (err: any) {
+      console.error("Failed to sync ticket:", err);
+      setFirestoreError(err.message);
     }
   };
 
   const handleDeleteFirestoreTicket = async (ticketId: string) => {
-    if (!authUser) {
-      alert("Please authenticate using your Google account to perform this action.");
-      return;
-    }
+    if (!authUser) return;
     if (!confirm(`Are you sure you want to delete backup ticket ${ticketId}?`)) return;
 
     try {
       setFirestoreError(null);
-      const docRef = doc(db, "tickets", ticketId);
-      await deleteDoc(docRef);
-      addToast(
-        "Backup Deleted",
-        `Backup ticket ${ticketId} has been successfully deleted from Firestore.`,
-        "success",
-        3000
-      );
-      fetchFirestoreTickets(authUser.uid);
-    } catch (err) {
-      console.error("Failed to delete ticket from Firestore:", err);
-      try {
-        handleFirestoreError(err, OperationType.DELETE, `tickets/${ticketId}`);
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
+      const res = await fetch(`/api/tickets?id=${ticketId}`, { method: "DELETE" });
+      if (res.ok) {
+        addToast("Backup Deleted", `Ticket ${ticketId} removed.`, "success");
+        fetchFirestoreTickets();
       }
-    }
-  };
-
-  const handleEmailSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formEmail || !formPassword) {
-      addToast("Validation Error", "Please fill in all fields.", "warning", 4000);
-      return;
-    }
-    if (formPassword.length < 6) {
-      addToast("Validation Error", "Password must be at least 6 characters.", "warning", 4005);
-      return;
-    }
-    setIsAuthLoading(true);
-    setFirestoreError(null);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formEmail, formPassword);
-      const user = userCredential.user;
-      
-      // Create user profile in Firestore
-      const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, {
-        uid: user.uid,
-        displayName: user.displayName || user.email?.split("@")[0] || "Email Client",
-        email: user.email || "",
-        photoURL: "",
-        createdAt: new Date().toISOString()
-      });
-
-      addToast("Account Created", "Welcome to Display & Cell Pros! Your account is active.", "success", 5000);
-      setFormEmail("");
-      setFormPassword("");
     } catch (err: any) {
-      console.error("Email registration failed:", err);
-      const errorCode = err?.code || "";
-      const errorMessage = err?.message || "Registration failed.";
-      
-      if (errorCode === "auth/email-already-in-use") {
-        addToast("Sign-Up Error", "This email is already in use. Please sign in instead.", "error", 5000);
-      } else if (errorCode === "auth/invalid-email") {
-        addToast("Sign-Up Error", "Invalid email format. Please check and try again.", "error", 5000);
-      } else if (errorCode === "auth/weak-password") {
-        addToast("Sign-Up Error", "Password is too weak. Please use a stronger password.", "error", 5000);
-      } else if (errorCode === "auth/operation-not-allowed") {
-        addToast("Auth Error", "Email/Password sign-up is not enabled in Firebase Console. Please walk through the setup.", "error", 8000);
-        setFirestoreError("EMAIL/PASSWORD DISABLED: Please enable Email/Password provider in your Firebase Authentication settings.");
-      } else {
-        addToast("Sign-Up Error", errorMessage, "error", 5000);
-        setFirestoreError(errorMessage);
-      }
-    } finally {
-      setIsAuthLoading(false);
+      setFirestoreError(err.message);
     }
   };
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formEmail || !formPassword) {
-      addToast("Validation Error", "Please fill in all fields.", "warning", 4000);
-      return;
-    }
-    setIsAuthLoading(true);
-    setFirestoreError(null);
-    try {
-      await signInWithEmailAndPassword(auth, formEmail, formPassword);
-      addToast("Signed In", "Welcome back! Connected to Firestore.", "success", 4000);
-      setFormEmail("");
-      setFormPassword("");
-    } catch (err: any) {
-      console.error("Email sign-in failed:", err);
-      const errorCode = err?.code || "";
-      const errorMessage = err?.message || "Sign-in failed.";
-      
-      if (errorCode === "auth/wrong-password" || errorCode === "auth/user-not-found" || errorCode === "auth/invalid-credential") {
-        addToast("Sign-In Error", "Incorrect email or password.", "error", 5000);
-      } else if (errorCode === "auth/invalid-email") {
-        addToast("Sign-In Error", "Invalid email format.", "error", 5000);
-      } else if (errorCode === "auth/operation-not-allowed") {
-        addToast("Auth Error", "Email/Password provider is not enabled in Firebase Console. Please walk through the setup.", "error", 8000);
-        setFirestoreError("EMAIL/PASSWORD DISABLED: Please enable Email/Password provider in your Firebase Authentication settings.");
-      } else {
-        addToast("Sign-In Error", errorMessage, "error", 5000);
-        setFirestoreError(errorMessage);
-      }
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setIsAuthLoading(true);
-    try {
-      setFirestoreError(null);
-      setIsUnauthorizedDomain(false);
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, {
-        uid: user.uid,
-        displayName: user.displayName || "Spokane Client",
-        email: user.email || "",
-        photoURL: user.photoURL || "",
-        createdAt: new Date().toISOString()
-      });
-      addToast("Signed In", `Connected via Google Account: ${user.email}`, "success", 4000);
-    } catch (err: any) {
-      console.error("Google login failed details:", err);
-      const errorCode = err?.code || "";
-      const errorMessage = err?.message || "";
-
-      if (errorCode === "auth/popup-closed-by-user") {
-        console.warn("Google login popup closed by user.");
-        addToast(
-          "Login Cancelled",
-          "The authentication window was closed. Please try again when you are ready.",
-          "info",
-          5000
-        );
-      } else if (errorCode === "auth/unauthorized-domain" || errorMessage.includes("unauthorized-domain") || errorMessage.includes("unauthorized_client") || errorMessage.includes("domain is authorized")) {
-        setIsUnauthorizedDomain(true);
-        const currentHost = window.location.host;
-        const detailedError = `UNAUTHORIZED APP DOMAIN: The current domain (${currentHost}) is not whitelisted in your Firebase Console under Authentication > Settings > Authorized Domains.`;
-        setFirestoreError(detailedError);
-        addToast(
-          "Domain Unauthorized",
-          "This applet's URL is not whitelisted in Firebase Console. See instructions below to whitelist.",
-          "error",
-          8000
-        );
-      } else if (errorCode === "auth/popup-blocked") {
-        addToast(
-          "Popup Blocked",
-          "The Google Sign-In window was blocked by your browser's security settings. Please allow popups for this site.",
-          "warning",
-          6000
-        );
-        setFirestoreError("POPUP BLOCKED: Enable popup permissions in your browser URL bar or settings.");
-      } else if (errorCode === "auth/cancelled-popup-request") {
-        addToast(
-          "Popup Request Cancelled",
-          "A subsequent login request was initiated, cancelling this attempt.",
-          "info",
-          4000
-        );
-      } else if (errorCode === "auth/network-request-failed") {
-        addToast(
-          "Network Request Failed",
-          "Unable to reach Google Authentication services. Please check your internet connection.",
-          "error",
-          6000
-        );
-        setFirestoreError("NETWORK FAULT: Secure connection to identitytoolkit.googleapis.com failed.");
-      } else {
-        setFirestoreError(errorMessage || "Google Login failed due to an unknown authentication constraint.");
-        addToast("Authentication Error", errorMessage || "Sign-in failed.", "error", 6000);
-      }
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    setIsAuthLoading(true);
-    try {
-      await signOut(auth);
-      setAuthUser(null);
-      setFirestoreTickets([]);
-      addToast("Signed Out", "You have successfully signed out of your account.", "success", 4000);
-    } catch (err) {
-      console.error("Sign-out failed:", err);
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
-  // Firebase Auth Observer subscription
+  // Auth observer simplified for Vercel Auth
   useEffect(() => {
-    // Eager synchronous check of current session to prevent redundant login screen flashes
-    if (auth.currentUser) {
-      setAuthUser(auth.currentUser);
-      localStorage.setItem("displaycellpros:hasActiveSession", "true");
-      fetchFirestoreTickets(auth.currentUser.uid);
-      setIsAuthChecking(false);
+    if (authUser) {
+      fetchFirestoreTickets();
+    } else {
+      setFirestoreTickets([]);
     }
+  }, [authUser]);
 
     let tokenRefreshInterval: NodeJS.Timeout | number;
 
@@ -2173,13 +1975,13 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      {authUser ? `Authed: ${authUser.displayName || authUser.email}` : "Cloud Firestore Sync Registry"}
+                      {authUser ? `Authed: ${authUser.name || authUser.email}` : "Vercel-Native Sync Registry"}
                       {authUser && <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-sm font-mono uppercase tracking-wider font-extrabold border border-emerald-500/30">SECURE LINK LOCKED</span>}
                     </h3>
                     <p className="text-xs text-slate-400">
                       {authUser 
                         ? `Synchronized with user credential ${authUser.email}. Backing up active Spokane WA tickets.` 
-                        : "Login with Google to securely store repair tickets and private quote backups on durable Firestore vaults."}
+                        : "Login to securely store repair tickets and private quote backups on durable AWS RDS vaults."}
                     </p>
                   </div>
                 </div>
@@ -2192,12 +1994,21 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       Disconnect
                     </button>
                   ) : (
-                    <button 
-                      onClick={handleGoogleSignIn}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-2 transition-colors border border-blue-500/20"
-                    >
-                      Connect with Google (SSO)
-                    </button>
+                    <div className="flex gap-2">
+                       <input
+                        type="email"
+                        placeholder="email@example.com"
+                        value={formEmail}
+                        onChange={(e) => setFormEmail(e.target.value)}
+                        className="bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg text-xs font-mono focus:outline-none focus:border-blue-500"
+                      />
+                      <button
+                        onClick={() => {/* Trigger magic link logic */}}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-2 transition-colors border border-blue-500/20"
+                      >
+                        Sign In
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -2210,39 +2021,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
               </div>
             )}
 
-            {isUnauthorizedDomain && (
-              <div className="bg-slate-900 border border-amber-500/30 rounded-xl p-5 mb-6 text-slate-300 font-mono text-xs space-y-4 shadow-lg animate-in slide-in-from-top-4 duration-300">
-                <div className="flex items-center gap-2 text-amber-400 font-bold uppercase text-xs">
-                  <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 animate-pulse" />
-                  <span>ACTION REQUIRED: Firebase Authorized Domain Whitelisting</span>
-                </div>
-                <div className="space-y-2 leading-relaxed text-[11px] text-slate-400">
-                  <p>
-                    Because this app runs inside a secure, dynamically generated Cloud Run container environment, the domain must be whitelisted in your Firebase Console to authorize Google OAuth handshakes.
-                  </p>
-                  <p className="text-amber-300/90 font-bold">
-                    Follow these step-by-step instructions to authorize authentication:
-                  </p>
-                  <ol className="list-decimal pl-5 space-y-1.5 text-slate-300">
-                    <li>
-                      Go to the <a href={`https://console.firebase.google.com/project/${auth.app.options.projectId || "your-project-id"}/authentication/providers`} target="_blank" rel="noreferrer" className="text-blue-400 underline hover:text-blue-300 font-bold">Firebase Console &rarr;</a> and open your project <b>{auth.app.options.projectId || "your-project-id"}</b>.
-                    </li>
-                    <li>
-                      Navigate to <b>Authentication</b> in the left sidebar, click the <b>Settings</b> tab (top menu), and select <b>Authorized domains</b>.
-                    </li>
-                    <li>
-                      Click <b>Add domain</b> and paste: <code className="bg-slate-950 px-1.5 py-0.5 rounded text-amber-400 border border-slate-800 font-bold select-all">{window.location.host}</code>
-                    </li>
-                    <li>
-                      Click <b>Add</b>. Changes will propagate within 1&ndash;2 minutes. Then retry clicking "Connect with Google".
-                    </li>
-                  </ol>
-                  <p className="text-[10px] text-slate-500 mt-2">
-                    * Note: If you have domain-level restrictions on your Google Cloud Platform API Key, also ensure <code className="bg-slate-950 px-1 py-0.2 rounded font-bold text-slate-400">{window.location.host}</code> is whitelisted in <b>APIs & Services &gt; Credentials</b>.
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Header section representing Lab identity */}
             <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
