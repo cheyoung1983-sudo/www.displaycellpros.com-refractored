@@ -282,6 +282,9 @@ app.post("/api/generate-quote", (req, res) => {
   const calculatedTax = Math.round((subtotalAfterDiscount * taxRate) * 100) / 100;
   const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
 
+  // Generate a professional booking summary for the user to copy/paste into Google Calendar
+  const bookingSummary = `REPAIR QUOTE: ${deviceTier.toUpperCase()} ${issueType.toUpperCase()} - Total: $${grandTotal.toFixed(2)} (Ref: ${companyName || 'Retail'}-${Math.random().toString(36).substring(7).toUpperCase()})`;
+
   res.json({
     baseQuote: billing,
     taxInfo: {
@@ -298,6 +301,7 @@ app.post("/api/generate-quote", (req, res) => {
     },
     subtotal: subtotalAfterDiscount,
     grandTotal,
+    bookingSummary
   });
 });
 

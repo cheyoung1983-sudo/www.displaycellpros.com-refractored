@@ -189,7 +189,8 @@ export default function App() {
     taxInfo: { zipCode: "98101", city: "Seattle", rate: 0.1035, calculatedTax: 33.32 },
     discountInfo: { applied: true, percentage: 20, amount: 80.5, company: "AMAZON Fleet" },
     subtotal: 322,
-    grandTotal: 355.32
+    grandTotal: 355.32,
+    bookingSummary: "REPAIR QUOTE: FLAGSHIP SCREEN - Total: $355.32"
   });
   const [isCalculatingQuote, setIsCalculatingQuote] = useState<boolean>(false);
 
@@ -1136,6 +1137,7 @@ export default function App() {
             },
             subtotal: subtotalAfterDiscount,
             grandTotal,
+            bookingSummary: `REPAIR QUOTE: ${deviceTier.toUpperCase()} ${issueType.toUpperCase()} - Total: $${grandTotal.toFixed(2)} (Simulated Ref: ${companyName || 'Retail'}-${Math.random().toString(36).substring(7).toUpperCase()})`
           });
         } else {
           await new Promise((resolve) => setTimeout(resolve, delay));
@@ -1324,6 +1326,21 @@ export default function App() {
         text: "Diagnostic timeline flushed on Cloud Run. System stands ready for mobile hardware assessment guidelines." 
       }
     ]);
+  };
+
+  const handleBookAppointment = () => {
+    const summary = quote.bookingSummary || `Repair Quote for ${deviceBrand} ${deviceModel}: $${quote.grandTotal.toFixed(2)}`;
+    navigator.clipboard.writeText(summary).then(() => {
+      addToast(
+        "Quote Copied to Clipboard",
+        "Paste this estimate into the 'Notes' field on the booking page for faster check-in.",
+        "success",
+        5000
+      );
+      setTimeout(() => {
+        window.open("https://calendar.app.google/f3Mc2kDhehzCBeBW9", "_blank");
+      }, 1500);
+    });
   };
 
   // Hardware Scan Trigger
@@ -3816,10 +3833,19 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                     <button 
                       onClick={createOfficialTicket}
                       disabled={ticketCreationSuccess}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-md active:scale-98 flex items-center justify-center gap-2"
+                      className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-colors border border-slate-700"
                     >
                       <span>TRANSMIT POS WEBHook</span>
                     </button>
+
+                    <button
+                      onClick={handleBookAppointment}
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)] active:scale-95 flex items-center justify-center gap-2 border border-blue-400/20"
+                    >
+                      <Clock size={16} className="animate-pulse" />
+                      <span>Finalize & Book Now</span>
+                    </button>
+
                     <div className="text-[9.5px] text-center text-slate-500 font-mono leading-relaxed mt-1 select-none">
                       *Coordinates automatically sync with physical CellSmart monitors inside mobile van.
                     </div>
@@ -3972,6 +3998,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             setLabTab("triage");
             setIsAiOpen(false);
           }}
+          onBookAppointment={handleBookAppointment}
           deviceBrand={deviceBrand}
           deviceModel={deviceModel}
           deviceTier={deviceTier}
@@ -4227,6 +4254,7 @@ function StoreView() {
 interface AIAssistantProps {
   onClose: () => void;
   onNavigateToLab: () => void;
+  onBookAppointment: () => void;
   deviceBrand: string;
   deviceModel: string;
   deviceTier: string;
@@ -4237,7 +4265,8 @@ interface AIAssistantProps {
 function AIAssistantWidget({ 
   onClose, 
   onNavigateToLab, 
-  deviceBrand, 
+  onBookAppointment,
+  deviceBrand,
   deviceModel, 
   deviceTier, 
   issueType,
@@ -4339,10 +4368,18 @@ function AIAssistantWidget({
 
         {/* Lab Link Banner */}
         <div className="bg-blue-900/30 border-b border-blue-900/40 px-4 py-2 flex items-center justify-between text-xs text-blue-200 select-none">
-          <span className="flex items-center gap-1.5 font-medium">
-            <Terminal size={14} className="text-blue-400" />
-            Check dynamic quotes & maps:
-          </span>
+          <div className="flex flex-col">
+            <span className="flex items-center gap-1.5 font-medium">
+              <Terminal size={12} className="text-blue-400" />
+              Triage active: {deviceBrand}
+            </span>
+            <button
+              onClick={onBookAppointment}
+              className="text-[10px] text-blue-400 font-bold hover:text-white transition-colors underline decoration-blue-500/30 underline-offset-2 mt-0.5"
+            >
+              Book this estimate &rarr;
+            </button>
+          </div>
           <button 
             type="button"
             onClick={onNavigateToLab}
