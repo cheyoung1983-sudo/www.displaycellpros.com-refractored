@@ -54,8 +54,6 @@ import { RdsDiagnosticPanel } from "./components/RdsDiagnosticPanel";
 import { jsPDF } from "jspdf";
 import { OAuthDocumentationPanel } from "./components/OAuthDocumentationPanel";
 import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
-import { BackendAuthPanel } from "./components/BackendAuthPanel";
-import { AuthLoadingOverlay, AuthSkeletonCard, ProfileSkeletonCard } from "./components/AuthLoadingOverlay";
 import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
 import CacheManagement from "./components/CacheManagement";
 import QrScannerModal from "./components/QrScannerModal";
@@ -2688,8 +2686,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
                 {/* BACKEND FIREBASE AUTH INTEGRATOR PANEL */}
                 {labTab === "backend-auth" && (
-                  <BackendAuthPanel authUser={authUser} />
-                )}
+                                  )}
 
                 {/* 1. TRIAGE CHAT MODULE */}
                 {labTab === "triage" && (
