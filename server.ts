@@ -595,38 +595,6 @@ BEHAVIOR LAWS:
     next(err);
   }
 });
-    let simulatedReply = "";
-
-    if (fallbackSpecs.step === 1) {
-      simulatedReply = "Hi there! Welcome to Display & Cell Pros. 🚐💨 We deliver Seattle & Spokane's top mobile raw hardware lab right to your driveway! Differentiating screen, swollen battery, and tactile button issues on-site. What brand of phone are you looking to fix today—Apple or Samsung?";
-    } else if (fallbackSpecs.step === 2) {
-      simulatedReply = `Fantastic! Let's get your ${fallbackSpecs.brand || "device"} details configured. We carry a full matrix of factory glass and chemical cell variants. What specific model is that (e.g. S24 Ultra, iPhone 14 Pro Max, SE, etc.)?`;
-    } else {
-      if (fallbackSpecs.issue === "screen") {
-        simulatedReply = `DIAGNOSTIC ANALYSIS: Detected screen alignment and glass fracture parameters for your ${fallbackSpecs.brand} ${fallbackSpecs.model}. This is routed safely to our **Tier 2 Pricing (Elite Display Renewal - starts at $139)**! Our mobile laboratory carries custom laser-sealed display overlays to replace this on-site in under 45 minutes. A live subtotal has synced in the quote panel below!`;
-      } else if (fallbackSpecs.issue === "battery") {
-        simulatedReply = `DIAGNOSTIC ANALYSIS: Rapid capacity degradation and cycle saturation identified on your ${fallbackSpecs.brand} ${fallbackSpecs.model}. This is routed to our **Tier 1 Pricing (Core Power & Port Restoration - $69-$97)**! Let's get this chemical risk resolved. We inspect safety seals and swap cells curbside. The quote has computed in the table below!`;
-      } else if (fallbackSpecs.issue === "button") {
-        simulatedReply = `DIAGNOSTIC ANALYSIS: Tactile resistance failure on your ${fallbackSpecs.brand} ${fallbackSpecs.model}. Sticky buttons are routed to our **Tier 3 Pricing (Specialized Diagnostics - Custom Quote)**! We will perform mechanical spring micro-calibrations and clean contact traces with professional solvents inside our custom work van. Quote is ready for review below!`;
-      } else {
-        simulatedReply = `Excellent. We have registered your ${fallbackSpecs.brand} ${fallbackSpecs.model} (${fallbackSpecs.tier || "standard"} performance tier). Please tell our laboratory engineers what physical hardware behaviors you are observing (touch lag, cracks, rapid drain, or sticky keys) to route you to the correct Tier 1, Tier 2, or Tier 3 pricing structure automatically!`;
-      }
-    }
-
-    const mockGroundingSources = [
-      { title: "Spokane Smartphone Repair Standards", url: "https://displaycellpros.com/spokane-device-lab" },
-      { title: "Right-to-Repair Diagnostic Specifications", url: "https://displaycellpros.com/diy-hardware-safety" }
-    ];
-
-    setTimeout(() => {
-      return res.json({ 
-        text: simulatedReply + "\n\n(Note: Clean diagnostic state synchronization active under Full-Stack Simulation mode.)",
-        detectedSpecs: fallbackSpecs,
-        groundingSources: mockGroundingSources
-      });
-    }, 605);
-  }
-});
 
 // Deep "Thinking Level" High Reasoning diagnostic endpoint
 app.post("/api/complex-diagnostics", async (req, res) => {
@@ -1337,52 +1305,6 @@ app.post("/api/service-directory/endpoints/delete", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
-      address,
-      port: Number(port),
-      annotations: annotations || {}
-    });
-  }
-
-  res.json({
-    success: true,
-    usingFallback: true,
-    endpoint: {
-      name: endpointPathName,
-      address,
-      port: Number(port),
-      annotations: annotations || {}
-    }
-  });
-});
-
-// 10. Delete Endpoint (POST)
-app.post("/api/service-directory/endpoints/delete", async (req, res) => {
-  const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: "Endpoint full path 'name' is required." });
-  }
-
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        await client.deleteEndpoint({ name });
-        lastGcpError = null;
-        return res.json({ success: true, usingFallback: false });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Endpoint delete. Reason: ${err.message}`);
-      }
-    }
-  }
-
-  // Virtual layer delete
-  for (const srv in localEndpoints) {
-    localEndpoints[srv] = localEndpoints[srv].filter(ep => ep.name !== name);
-  }
-
-  res.json({ success: true, usingFallback: true });
 });
 
 // ---------------- DOMAIN OWNERSHIP VERIFICATION REGISTRY ----------------

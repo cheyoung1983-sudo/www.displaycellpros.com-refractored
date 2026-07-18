@@ -4038,11 +4038,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
       )}
 
       {/* Global Toast Notifications */}
-      <ToastContainer toasts={toasts} onClose={removeToast} />
-    </div>
-  );
-}
-
       {/* Global Toast Notifications */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
 
