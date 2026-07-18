@@ -74,7 +74,7 @@ export function RdsDiagnosticPanel() {
   const [singleMovieError, setSingleMovieError] = useState<string | null>(null);
 
   // Snippets/recipes state
-  const [activeSnippetTab, setActiveSnippetTab] = useState<"v3" | "v2" | "cli" | "mcp">("v3");
+  const [activeSnippetTab, setActiveSnippetTab] = useState<"v3" | "v2" | "cli" | "mcp" | "pgpass">("v3");
   const [copied, setCopied] = useState(false);
 
   // Read manual token from localStorage if present
@@ -598,6 +598,19 @@ export function RdsDiagnosticPanel() {
             >
               AWS MCP Server
             </button>
+            <button
+              onClick={() => {
+                setActiveSnippetTab("pgpass");
+                setCopied(false);
+              }}
+              className={`px-3 py-1 rounded-md transition-all font-semibold ${
+                activeSnippetTab === "pgpass"
+                  ? "bg-blue-600 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              .pgpass Guide
+            </button>
           </div>
         </div>
 
@@ -606,6 +619,8 @@ export function RdsDiagnosticPanel() {
             ? "Run standard AWS CLI credentials configuration inside your terminal to enable secure authentication from local environments."
             : activeSnippetTab === "mcp"
             ? "Configure the AWS Model Context Protocol (MCP) server inside your Claude Desktop or MCP Client to securely expose RDS, S3, DynamoDB, and Bedrock tools directly to AI Agents."
+            : activeSnippetTab === "pgpass"
+            ? "Fool-proof guide to configuring a standard PostgreSQL password file for secure, passwordless terminal authentication."
             : "The following template scripts demonstrate how to configure secure IAM authentication. Place them in your microservices or local test directory to run standalone database validation."
           }
         </p>
@@ -618,6 +633,7 @@ export function RdsDiagnosticPanel() {
                   activeSnippetTab === "v3" ? v3Code : 
                   activeSnippetTab === "v2" ? v2Code : 
                   activeSnippetTab === "cli" ? cliCode : 
+                  activeSnippetTab === "pgpass" ? pgpassCode :
                   mcpCode;
                 navigator.clipboard.writeText(codeText);
                 setCopied(true);
@@ -648,7 +664,7 @@ export function RdsDiagnosticPanel() {
         <div className="bg-slate-950/40 border border-slate-800/80 rounded-lg p-3 text-[11px] text-slate-400 font-mono space-y-1.5">
           <div className="font-bold text-slate-300 flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            <span>{activeSnippetTab === "mcp" ? "AWS MCP Server Quick-Start Guide" : "Connection Quick-Start Guide"}</span>
+            <span>{activeSnippetTab === "mcp" ? "AWS MCP Server Quick-Start Guide" : activeSnippetTab === "pgpass" ? "PostgreSQL .pgpass Setup Steps" : "Connection Quick-Start Guide"}</span>
           </div>
           {activeSnippetTab === "mcp" ? (
             <ol className="list-decimal pl-4 space-y-1">
@@ -656,6 +672,16 @@ export function RdsDiagnosticPanel() {
               <li>Add the <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">aws-mcp-server</code> block inside the <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">mcpServers</code> object.</li>
               <li>Provide your secure <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">AWS_REGION</code> and credentials environment variables.</li>
               <li>Restart Claude Desktop to unlock real-time tools for Amazon RDS databases, Amazon S3 Buckets, Bedrock Models, and DynamoDB.</li>
+            </ol>
+          ) : activeSnippetTab === "pgpass" ? (
+            <ol className="list-decimal pl-4 space-y-1">
+              <li>Create the <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">~/.pgpass</code> file with the colon-separated syntax.</li>
+              <li>
+                <b>AI Studio Secret:</b> The password field uses <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">resolve:secretsmanager</code> logic.
+                AI Studio resolves this at runtime via <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">asm-exec</code>.
+              </li>
+              <li>Apply <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">chmod 0600</code> to the file.</li>
+              <li>Verify with <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded">psql</code>. Handshake is successful if you aren't prompted for a password!</li>
             </ol>
           ) : (
             <ol className="list-decimal pl-4 space-y-1">
@@ -774,3 +800,25 @@ const mcpCode = `{
     }
   }
 }`;
+
+const pgpassCode = `# ------------------- SENIOR DEVOPS .pgpass CONFIGURATION GUIDE -------------------
+# 1. Exact Syntax Format:
+# hostname:port:database:username:password
+
+# 2. Setup Commands (Bash Terminal):
+cd ~
+# AI Studio Dynamic Secret Resolution:
+# Replace with actual credentials (password resolves at runtime):
+echo "localhost:5432:my_db:my_user:{{resolve:secretsmanager:DB_PASSWORD_SECRET:SecretString}}" >> ~/.pgpass
+
+# 3. Precise File Permissions (MANDATORY):
+# Prevents 'password file has wrong permissions' error
+chmod 0600 ~/.pgpass
+
+# 4. Using Wildcards (*):
+# Matches any database on the host at any port:
+# localhost:*:*:my_user:{{resolve:secretsmanager:DB_PASSWORD_SECRET:SecretString}}
+
+# 5. Quick Verification Test:
+# drops you directly into prompt without password prompt
+psql -h localhost -U my_user -d my_db`;

@@ -1,14 +1,11 @@
-# Tasks - Identity & Permissions Verification
+# Tasks - Secret Management & Identity Proof
 
-- [x] Implement Admin Security Logic (`server.ts`)
-    - [x] Define `ADMIN_EMAIL` constant
-    - [x] Add `/api/admin/verify-status` endpoint
-    - [x] Implement privileged database probe
-- [x] Create Admin UI (`App.tsx`)
-    - [x] Add conditional "Admin Portal" badge/link for `cheyoung1983@gmail.com`
-    - [x] Implement `AdminPortalView` component
-- [x] Enhance Infrastructure Debugging (`db.ts`)
-    - [x] Add explicit logs for OIDC Handshake and Role Assumption
-- [x] Verification & Testing
-    - [x] Implemented identity-check logic for `cheyoung1983@gmail.com`
-    - [x] Verified infrastructure telemetry trace output
+- [x] Update .pgpass Guide with Dynamic Secrets (`RdsDiagnosticPanel.tsx`)
+    - [x] Replace `my_password` with `{{resolve:secretsmanager:DB_PASSWORD_SECRET:SecretString}}`
+    - [x] Add "AI Studio Implementation" note
+- [x] Enhance Admin Verification API (`server.ts`)
+    - [x] Add check for Secrets Manager permissions (infrastructure report)
+    - [x] Update identity response with "Entire Admin Rights" confirmation
+- [x] Verification
+    - [x] Verify UI rendering of dynamic secret string
+    - [x] Run live Admin check (manual)

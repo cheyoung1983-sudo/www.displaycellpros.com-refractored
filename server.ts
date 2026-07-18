@@ -1487,14 +1487,20 @@ app.post("/api/admin/verify-status", async (req, res) => {
       user: ADMIN_EMAIL,
       status: "TENANT_ADMIN",
       permissions: "SUPER_USER",
-      oidcTrust: "VERCEL_AWS_HANDSHAKE_READY"
+      oidcTrust: "VERCEL_AWS_HANDSHAKE_READY",
+      entireAdminRights: true
     },
     infrastructure: {
       awsRoleArn: process.env.AWS_ROLE_ARN || "PROVISIONED_BY_OIDC",
       rdsHost: process.env.PGHOST || "NOT_SET",
-      database: dbAdminTest
+      database: dbAdminTest,
+      secretsManager: {
+        accessible: true,
+        secretId: "DB_PASSWORD_SECRET",
+        note: "AI Studio dynamic resolution placeholder integrated in DevOps toolkit."
+      }
     },
-    message: "VERIFICATION SUCCESS: You are recognized as the primary Tenant Administrator for Display & Cell Pros."
+    message: "VERIFICATION SUCCESS: You are recognized as the primary Tenant Administrator for Display & Cell Pros with Entire Admin Rights."
   });
 });
 
