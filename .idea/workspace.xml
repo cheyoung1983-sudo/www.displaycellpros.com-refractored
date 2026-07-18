@@ -7,13 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="da70337f-032f-42ca-a81d-6e461a55f3f5" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.artifacts/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/implementation_plan.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/task.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/walkthrough.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/walkthrough.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/RdsDiagnosticPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/RdsDiagnosticPanel.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="da70337f-032f-42ca-a81d-6e461a55f3f5" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
