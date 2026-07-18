@@ -179,7 +179,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784360628623</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Update IDE workspace configuration and settings">
+      <option name="closed" value="true" />
+      <created>1784378453108</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1784378453108</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
