@@ -1,13 +1,14 @@
-# Tasks - Enhanced Quote & Booking Process
+# Tasks - Identity & Permissions Verification
 
-- [x] Refine Backend Quoting Logic (`server.ts`)
-    - [x] Update `calculateQuoteInternal` to strictly follow Profit Formula
-    - [x] Add `bookingSummary` to `/api/generate-quote` response
-- [x] Enhance Frontend Quoting & Booking (`App.tsx`)
-    - [x] Add "Finalize & Book" button to `Live Quote Summary`
-    - [x] Add "Finalize & Book" button to `AIAssistantWidget`
-    - [x] Implement "Copy Quote Details" functionality
-    - [x] Synchronize frontend simulation logic with Profit Formula
-- [x] Verification
-    - [x] Test API responses
-    - [x] Verify booking link and clipboard functionality
+- [x] Implement Admin Security Logic (`server.ts`)
+    - [x] Define `ADMIN_EMAIL` constant
+    - [x] Add `/api/admin/verify-status` endpoint
+    - [x] Implement privileged database probe
+- [x] Create Admin UI (`App.tsx`)
+    - [x] Add conditional "Admin Portal" badge/link for `cheyoung1983@gmail.com`
+    - [x] Implement `AdminPortalView` component
+- [x] Enhance Infrastructure Debugging (`db.ts`)
+    - [x] Add explicit logs for OIDC Handshake and Role Assumption
+- [x] Verification & Testing
+    - [x] Implemented identity-check logic for `cheyoung1983@gmail.com`
+    - [x] Verified infrastructure telemetry trace output

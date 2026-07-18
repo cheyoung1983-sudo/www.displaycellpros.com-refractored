@@ -8,3 +8,5 @@ coverage/
 !.env.example
 *.exe
 *.exe-20260717165912
+
+.vercel

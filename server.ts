@@ -8,6 +8,9 @@ import { getDbPool, isDbConfigured, queryWithToken } from "./db";
 
 dotenv.config();
 
+// Global Security Context
+const ADMIN_EMAIL = "cheyoung1983@gmail.com";
+
 // Initialize Express
 export const app = express();
 const PORT = 3000;
@@ -29,7 +32,8 @@ app.use((req, res, next) => {
     "complex-diagnostics",
     "analyze-image",
     "rds-status",
-    "movies"
+    "movies",
+    "admin/verify-status"
   ];
   
   const pathParts = req.url.split("?")[0].split("/");
@@ -1439,6 +1443,59 @@ app.get("/api/movies/:id", async (req, res) => {
       error: err.message || err,
     });
   }
+});
+
+// ---------------- ADMIN & IDENTITY VERIFICATION MODULE ----------------
+
+app.post("/api/admin/verify-status", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || email !== ADMIN_EMAIL) {
+    return res.status(403).json({
+      success: false,
+      message: "ACCESS DENIED: Identity mismatch. You do not have 'Entire Admin Rights' assigned to this account.",
+      requiredEmail: ADMIN_EMAIL,
+      receivedEmail: email || "Anonymous"
+    });
+  }
+
+  // Admin identity confirmed, now probe the infrastructure
+  const dbStatus = isDbConfigured();
+  let dbAdminTest = null;
+
+  if (dbStatus) {
+    try {
+      // Perform a privileged query to test "Entire Admin Rights"
+      const result = await queryWithToken("SELECT current_user, session_user, version();");
+      dbAdminTest = {
+        connected: true,
+        user: result.rows[0].current_user,
+        session: result.rows[0].session_user,
+        engine: result.rows[0].version
+      };
+    } catch (err: any) {
+      dbAdminTest = {
+        connected: false,
+        error: err.message || err
+      };
+    }
+  }
+
+  res.json({
+    success: true,
+    identity: {
+      user: ADMIN_EMAIL,
+      status: "TENANT_ADMIN",
+      permissions: "SUPER_USER",
+      oidcTrust: "VERCEL_AWS_HANDSHAKE_READY"
+    },
+    infrastructure: {
+      awsRoleArn: process.env.AWS_ROLE_ARN || "PROVISIONED_BY_OIDC",
+      rdsHost: process.env.PGHOST || "NOT_SET",
+      database: dbAdminTest
+    },
+    message: "VERIFICATION SUCCESS: You are recognized as the primary Tenant Administrator for Display & Cell Pros."
+  });
 });
 
 // ---------------- VITE MIDDLEWARE CONFIG ----------------

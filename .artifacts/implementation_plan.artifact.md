@@ -1,41 +1,37 @@
-# Implementation Plan - Enhanced Quote & Booking Process
+# Implementation Plan - Identity & Permissions Verification
 
-Implement a stable and functional quote process following the "Profit Formula" business logic and integrate it with the official Google Calendar booking link.
+Verify the "Tenant User" status and "Admin Rights" for `cheyoung1983@gmail.com` and ensure the OIDC/RDS integration is fully functional.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> The "Profit Formula" is identified as the logic currently in `server.ts` (`calculateQuoteInternal`), which uses parts cost + labor + overhead multipliers. If there is a different formula document I should follow, please let me know.
+> [!WARNING]
+> To truly verify "Admin Rights" tied to your email, I would need to implement an **Identity-Aware Authorization** check. Currently, anyone who can reach the API uses the same IAM role.
 
 ## Proposed Changes
 
-### [Component Name] Backend (Server)
+### [Component Name] Security Refinement
 
 #### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/server.ts)
-- Refactor `calculateQuoteInternal` to be more robust and strictly follow the "Profit Formula" components: `Raw Parts Cost + (Labor Hours * Hourly Rate) * Operational Overhead Multiplier`.
-- Ensure the `/api/generate-quote` endpoint returns all necessary metadata for the booking transition.
-
-### [Component Name] Frontend (React)
+- Add a new endpoint `/api/admin/verify-status`.
+- This endpoint will check the authenticated user's email (if provided via a Firebase ID Token) against the "Admin Email" (`cheyoung1983@gmail.com`).
+- It will return the current **IAM Identity** (via `sts:GetCallerIdentity`) and **RDS Connection Status** to confirm admin capabilities.
 
 #### [MODIFY] [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
-- **Official Quote Integration**: Ensure the `Live Quote Summary` always reflects the backend calculation and handles loading/error states gracefully.
-- **Booking Call-to-Action**:
-    - Add a prominent "Finalize Quote & Book Appointment" button to the `Live Quote Summary` panel.
-    - Add a similar button to the `AIAssistantWidget` once a quote is determined.
-- **Booking Flow**:
-    - When the booking button is clicked, summarize the quote details (e.g., "iPhone 14 Pro Max - Screen Repair - $355.32").
-    - Provide a "Copy Quote Details" helper to make it easy for the user to paste into the Google Calendar "Notes" field.
-    - Open the link: `https://calendar.app.google/f3Mc2kDhehzCBeBW9`.
-- **Stability Improvements**:
-    - Add validation to the ZIP code and device selection inputs to prevent calculation errors.
-    - Synchronize the frontend "Local Simulation" logic with the backend "Profit Formula" to ensure consistency if the API is unreachable.
+- Add an "Admin View" that only appears if `authUser.email === 'cheyoung1983@gmail.com'`.
+- This view will display the results of the `/api/admin/verify-status` check.
+
+### [Component Name] Infrastructure Validation
+
+#### [MODIFY] [db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/db.ts)
+- Enhance logging to explicitly output which **OIDC Issuer** is being used (Vercel vs Local) to ensure the trust relationship is correct.
 
 ## Verification Plan
 
 ### Automated Tests
-- I will verify the calculation logic by testing various combinations of `issueType` and `deviceTier` via the API.
+- I will mock a login for `cheyoung1983@gmail.com` and verify the UI shows the "Admin" badge.
+- I will trigger the `/api/admin/verify-status` endpoint and analyze the response for AWS IAM Role details.
 
 ### Manual Verification
-- Verify that clicking "Book Appointment" correctly opens the Google Calendar link.
-- Verify that the quote breakdown is accurate and matches the expected "Profit Formula" output.
-- Test the ZIP code lookup and B2B discount application.
+- You will need to login with your Google account.
+- Check if the "Admin Portal" or similar indicator appears.
+- Click "Run Identity Check" to see the live AWS role being used.

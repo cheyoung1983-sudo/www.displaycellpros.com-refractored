@@ -107,6 +107,7 @@ export default function App() {
   });
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const [isAdminPortalOpen, setIsAdminPortalOpen] = useState<boolean>(false);
 
   // --- DIAGNOSTIC HUB STATES ---
   const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "usb" | "verification" | "postgres">("triage");
@@ -1885,6 +1886,16 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 <NavButton active={activeTab === "store"} onClick={() => setActiveTab("store")}>Store</NavButton>
                 <NavButton active={activeTab === "privacy"} onClick={() => setActiveTab("privacy")}>Privacy & Consent</NavButton>
                 
+                {authUser?.email === "cheyoung1983@gmail.com" && (
+                  <button
+                    onClick={() => setIsAdminPortalOpen(true)}
+                    className="px-3 py-2 rounded-md text-sm font-black text-amber-400 bg-amber-950/20 border border-amber-500/30 hover:bg-amber-900/40 transition-all uppercase flex items-center gap-1.5 shadow-[0_0_10px_rgba(251,191,36,0.1)]"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    Admin
+                  </button>
+                )}
+
                 {/* Diagnostics Embedded Laboratory Link */}
                 <button
                   id="tab-diagnostics-lab"
@@ -4028,6 +4039,150 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
       {/* Global Toast Notifications */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
+    </div>
+  );
+}
+
+      {/* Global Toast Notifications */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+
+      {/* Admin Identity Verification Portal */}
+      {isAdminPortalOpen && (
+        <AdminPortalView
+          email={authUser?.email || ""}
+          onClose={() => setIsAdminPortalOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// --- ADMIN PORTAL VIEW COMPONENT ---
+
+function AdminPortalView({ email, onClose }: { email: string; onClose: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+
+  const runAdminCheck = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/verify-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      setResult(data);
+    } catch (err: any) {
+      setResult({ success: false, message: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    runAdminCheck();
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="bg-slate-900 border border-amber-500/30 shadow-2xl rounded-2xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden">
+        <div className="bg-amber-950/20 border-b border-amber-900/30 p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="w-8 h-8 text-amber-400" />
+            <div>
+              <h2 className="text-xl font-black text-white tracking-tight uppercase">Tenant Administrator Portal</h2>
+              <p className="text-xs text-amber-200/60 font-mono">Verifying entire admin rights for: {email}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <RefreshCw className="w-10 h-10 text-amber-500 animate-spin" />
+              <p className="text-amber-200 font-mono text-xs animate-pulse tracking-widest uppercase">Executing IAM OIDC Handshake & Database Probe...</p>
+            </div>
+          ) : result ? (
+            <div className="space-y-6">
+              {/* Success Badge */}
+              <div className={`p-4 rounded-xl border flex items-start gap-4 ${result.success ? "bg-emerald-950/30 border-emerald-500/30" : "bg-red-950/30 border-red-500/30"}`}>
+                {result.success ? <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" /> : <AlertCircle className="w-6 h-6 text-red-400 shrink-0" />}
+                <div>
+                  <h3 className={`font-bold text-sm uppercase tracking-wide ${result.success ? "text-emerald-400" : "text-red-400"}`}>
+                    {result.success ? "Tenant Verified" : "Access Denied"}
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed font-mono">{result.message}</p>
+                </div>
+              </div>
+
+              {result.success && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest font-mono">IAM Identity</span>
+                    <div className="space-y-1.5 font-mono text-xs text-slate-400">
+                      <div className="flex justify-between border-b border-slate-900 pb-1">
+                        <span>Role:</span>
+                        <span className="text-slate-200 text-right truncate max-w-[120px]" title={result.infrastructure.awsRoleArn}>
+                          {result.infrastructure.awsRoleArn.split('/').pop()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-900 pb-1">
+                        <span>Trust:</span>
+                        <span className="text-blue-400 font-bold">{result.identity.oidcTrust}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Level:</span>
+                        <span className="text-emerald-400 font-bold">{result.identity.permissions}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest font-mono">AWS RDS Admin Test</span>
+                    <div className="space-y-1.5 font-mono text-xs text-slate-400">
+                      <div className="flex justify-between border-b border-slate-900 pb-1">
+                        <span>DB User:</span>
+                        <span className="text-slate-200">{result.infrastructure.database?.user || "N/A"}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-900 pb-1">
+                        <span>Session:</span>
+                        <span className="text-slate-200">{result.infrastructure.database?.session || "N/A"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Engine:</span>
+                        <span className="text-slate-200 truncate max-w-[120px]">{result.infrastructure.database?.engine || "N/A"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Raw Payload for Debugging */}
+              <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-[10px] text-slate-500">
+                <span className="block mb-2 uppercase tracking-widest font-bold">Verification Telemetry Trace:</span>
+                <pre className="overflow-x-auto whitespace-pre-wrap max-h-48 scrollbar-thin text-blue-300/80 leading-relaxed">
+                  {JSON.stringify(result, null, 2)}
+                </pre>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="bg-slate-850 p-4 border-t border-slate-800 flex justify-end gap-3">
+          <button
+            onClick={runAdminCheck}
+            disabled={loading}
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-lg active:scale-95 transition-all flex items-center gap-2"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            Run Identity Check
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

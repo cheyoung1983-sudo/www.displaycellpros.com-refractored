@@ -31,7 +31,7 @@ export function getDbPool(): Pool {
   let passwordOption: any;
 
   if (roleArn) {
-    console.log(`[Database] Configuring AWS IAM OIDC Authentication using role: ${roleArn}`);
+    console.log(`[Database Identity] DETECTED OIDC ENVIRONMENT: assume-role -> ${roleArn}`);
     const signer = new Signer({
       hostname: host,
       port: port,
@@ -42,7 +42,10 @@ export function getDbPool(): Pool {
         clientConfig: { region: region },
       }),
     });
-    passwordOption = () => signer.getAuthToken();
+    passwordOption = async () => {
+      console.log(`[Database Handshake] EXECUTING IAM OIDC TOKEN ACQUISITION FOR ROLE: ${roleArn}`);
+      return await signer.getAuthToken();
+    };
   } else {
     console.log("[Database] No AWS_ROLE_ARN detected. Defaulting to standard password authentication.");
     passwordOption = process.env.PGPASSWORD || "";
