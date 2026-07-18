@@ -1,0 +1,28 @@
+# Tasks - Full Vercel Serverless Migration & Google Removal
+
+- [ ] Dependency & Environment Cleanup
+    - [ ] Uninstall Google/Firebase packages
+    - [ ] Install `@auth/core`, `@auth/pg-adapter`, `resend`
+- [ ] AWS RDS Schema Setup
+    - [ ] Create `users`, `accounts`, `sessions`, `verification_token` tables
+    - [ ] Create `tickets` table in AWS RDS
+- [ ] Shared Serverless Infrastructure
+    - [ ] Create `api/lib/db-client.ts` (bridging existing `db.ts` for serverless)
+    - [ ] Create `api/lib/auth-utils.ts` for session verification
+- [ ] Auth.js Integration
+    - [ ] Implement `api/auth/[...nextauth].ts` with GitHub & Email providers
+- [ ] Migrating Endpoints to `/api`
+    - [ ] `api/health.ts`
+    - [ ] `api/generate-quote.ts` (Profit Formula)
+    - [ ] `api/tax-lookup.ts`
+    - [ ] `api/triage.ts` (OpenAI implementation)
+    - [ ] `api/getStreamUserToken.ts` (New service)
+    - [ ] `api/tickets.ts` (New RDS ticket storage)
+- [ ] Frontend Refactoring (`src/App.tsx`)
+    - [ ] Remove all Firebase Client logic
+    - [ ] Implement Auth.js session handling
+    - [ ] Redirect backup logic to `/api/tickets`
+- [ ] Final Configuration & Cleanup
+    - [ ] Update `vercel.json` rewrites
+    - [ ] Delete `server.ts`
+    - [ ] Final build verification
