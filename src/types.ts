@@ -51,5 +51,4 @@ export interface QuoteResponse {
   };
   subtotal: number;
   grandTotal: number;
-  bookingSummary?: string;
 }

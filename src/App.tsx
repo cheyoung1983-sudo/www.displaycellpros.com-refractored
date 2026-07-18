@@ -42,7 +42,9 @@ import {
   QrCode,
   Copy,
   Usb,
-  Mail
+  Mail,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { RepairTicket, POSLog, QuoteResponse } from "./types";
 import { Toast, ToastContainer, ToastType } from "./components/ToastNotification";
@@ -52,7 +54,9 @@ import { RdsDiagnosticPanel } from "./components/RdsDiagnosticPanel";
 import { jsPDF } from "jspdf";
 import { OAuthDocumentationPanel } from "./components/OAuthDocumentationPanel";
 import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
-import { signInWithPopup, onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
+import { BackendAuthPanel } from "./components/BackendAuthPanel";
+import { AuthLoadingOverlay, AuthSkeletonCard, ProfileSkeletonCard } from "./components/AuthLoadingOverlay";
+import { signInWithPopup, onAuthStateChanged, onIdTokenChanged, getIdToken, signOut, User as FirebaseUser, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./lib/firebase";
 import { handleFirestoreError, OperationType } from "./lib/firebase-errors";
@@ -107,7 +111,6 @@ export default function App() {
   });
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const [isAdminPortalOpen, setIsAdminPortalOpen] = useState<boolean>(false);
 
   // --- DIAGNOSTIC HUB STATES ---
   const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "usb" | "verification" | "postgres">("triage");
@@ -190,8 +193,7 @@ export default function App() {
     taxInfo: { zipCode: "98101", city: "Seattle", rate: 0.1035, calculatedTax: 33.32 },
     discountInfo: { applied: true, percentage: 20, amount: 80.5, company: "AMAZON Fleet" },
     subtotal: 322,
-    grandTotal: 355.32,
-    bookingSummary: "REPAIR QUOTE: FLAGSHIP SCREEN - Total: $355.32"
+    grandTotal: 355.32
   });
   const [isCalculatingQuote, setIsCalculatingQuote] = useState<boolean>(false);
 
@@ -201,6 +203,17 @@ export default function App() {
   const [firestoreError, setFirestoreError] = useState<string | null>(null);
   const [isUnauthorizedDomain, setIsUnauthorizedDomain] = useState<boolean>(false);
   const [challengeCode, setChallengeCode] = useState<string>("google982a74c10a30b5e8");
+
+  // --- EMAIL/PASSWORD AUTH STATES ---
+  const [formEmail, setFormEmail] = useState<string>("");
+  const [formPassword, setFormPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isSignUpMode, setIsSignUpMode] = useState<boolean>(false);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
+  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(() => {
+    // Check if an active session flag was set in localStorage to avoid flashing login forms
+    return localStorage.getItem("displaycellpros:hasActiveSession") === "true";
+  });
 
   // --- MULTI-MODAL & ADVANCED DIAGNOSTIC SUB-MODE STATES ---
   const [diagnosticMode, setDiagnosticMode] = useState<"standard" | "thinking" | "vision">("standard");
@@ -299,7 +312,94 @@ export default function App() {
     }
   };
 
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formEmail || !formPassword) {
+      addToast("Validation Error", "Please fill in all fields.", "warning", 4000);
+      return;
+    }
+    if (formPassword.length < 6) {
+      addToast("Validation Error", "Password must be at least 6 characters.", "warning", 4005);
+      return;
+    }
+    setIsAuthLoading(true);
+    setFirestoreError(null);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, formEmail, formPassword);
+      const user = userCredential.user;
+      
+      // Create user profile in Firestore
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        uid: user.uid,
+        displayName: user.displayName || user.email?.split("@")[0] || "Email Client",
+        email: user.email || "",
+        photoURL: "",
+        createdAt: new Date().toISOString()
+      });
+
+      addToast("Account Created", "Welcome to Display & Cell Pros! Your account is active.", "success", 5000);
+      setFormEmail("");
+      setFormPassword("");
+    } catch (err: any) {
+      console.error("Email registration failed:", err);
+      const errorCode = err?.code || "";
+      const errorMessage = err?.message || "Registration failed.";
+      
+      if (errorCode === "auth/email-already-in-use") {
+        addToast("Sign-Up Error", "This email is already in use. Please sign in instead.", "error", 5000);
+      } else if (errorCode === "auth/invalid-email") {
+        addToast("Sign-Up Error", "Invalid email format. Please check and try again.", "error", 5000);
+      } else if (errorCode === "auth/weak-password") {
+        addToast("Sign-Up Error", "Password is too weak. Please use a stronger password.", "error", 5000);
+      } else if (errorCode === "auth/operation-not-allowed") {
+        addToast("Auth Error", "Email/Password sign-up is not enabled in Firebase Console. Please walk through the setup.", "error", 8000);
+        setFirestoreError("EMAIL/PASSWORD DISABLED: Please enable Email/Password provider in your Firebase Authentication settings.");
+      } else {
+        addToast("Sign-Up Error", errorMessage, "error", 5000);
+        setFirestoreError(errorMessage);
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formEmail || !formPassword) {
+      addToast("Validation Error", "Please fill in all fields.", "warning", 4000);
+      return;
+    }
+    setIsAuthLoading(true);
+    setFirestoreError(null);
+    try {
+      await signInWithEmailAndPassword(auth, formEmail, formPassword);
+      addToast("Signed In", "Welcome back! Connected to Firestore.", "success", 4000);
+      setFormEmail("");
+      setFormPassword("");
+    } catch (err: any) {
+      console.error("Email sign-in failed:", err);
+      const errorCode = err?.code || "";
+      const errorMessage = err?.message || "Sign-in failed.";
+      
+      if (errorCode === "auth/wrong-password" || errorCode === "auth/user-not-found" || errorCode === "auth/invalid-credential") {
+        addToast("Sign-In Error", "Incorrect email or password.", "error", 5000);
+      } else if (errorCode === "auth/invalid-email") {
+        addToast("Sign-In Error", "Invalid email format.", "error", 5000);
+      } else if (errorCode === "auth/operation-not-allowed") {
+        addToast("Auth Error", "Email/Password provider is not enabled in Firebase Console. Please walk through the setup.", "error", 8000);
+        setFirestoreError("EMAIL/PASSWORD DISABLED: Please enable Email/Password provider in your Firebase Authentication settings.");
+      } else {
+        addToast("Sign-In Error", errorMessage, "error", 5000);
+        setFirestoreError(errorMessage);
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
+    setIsAuthLoading(true);
     try {
       setFirestoreError(null);
       setIsUnauthorizedDomain(false);
@@ -313,6 +413,7 @@ export default function App() {
         photoURL: user.photoURL || "",
         createdAt: new Date().toISOString()
       });
+      addToast("Signed In", `Connected via Google Account: ${user.email}`, "success", 4000);
     } catch (err: any) {
       console.error("Google login failed details:", err);
       const errorCode = err?.code || "";
@@ -364,30 +465,85 @@ export default function App() {
         setFirestoreError(errorMessage || "Google Login failed due to an unknown authentication constraint.");
         addToast("Authentication Error", errorMessage || "Sign-in failed.", "error", 6000);
       }
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
   const handleSignOut = async () => {
+    setIsAuthLoading(true);
     try {
       await signOut(auth);
       setAuthUser(null);
       setFirestoreTickets([]);
+      addToast("Signed Out", "You have successfully signed out of your account.", "success", 4000);
     } catch (err) {
       console.error("Sign-out failed:", err);
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
   // Firebase Auth Observer subscription
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setAuthUser(user);
-      if (user) {
-        fetchFirestoreTickets(user.uid);
-      } else {
-        setFirestoreTickets([]);
+    // Eager synchronous check of current session to prevent redundant login screen flashes
+    if (auth.currentUser) {
+      setAuthUser(auth.currentUser);
+      localStorage.setItem("displaycellpros:hasActiveSession", "true");
+      fetchFirestoreTickets(auth.currentUser.uid);
+      setIsAuthChecking(false);
+    }
+
+    let tokenRefreshInterval: NodeJS.Timeout | number;
+
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      try {
+        setAuthUser(user);
+        if (user) {
+          localStorage.setItem("displaycellpros:hasActiveSession", "true");
+          await fetchFirestoreTickets(user.uid);
+
+          // Force-refresh token on initial load/state-change to ensure validity
+          try {
+            await getIdToken(user, true);
+            console.log("[Firebase Auth] Token refreshed via getIdToken(true)");
+          } catch (refreshErr) {
+            console.warn("[Firebase Auth] Proactive token refresh failed on initialization:", refreshErr);
+          }
+
+          // Set up interval to refresh the token every 45 minutes to prevent expiration
+          if (tokenRefreshInterval) clearInterval(tokenRefreshInterval);
+          tokenRefreshInterval = setInterval(async () => {
+            try {
+              const currentUser = auth.currentUser;
+              if (currentUser) {
+                await getIdToken(currentUser, true);
+                console.log("[Firebase Auth] Background proactive token refresh executed.");
+              }
+            } catch (refreshErr) {
+              console.error("[Firebase Auth] Background token refresh failed:", refreshErr);
+            }
+          }, 45 * 60 * 1000); // 45 minutes
+        } else {
+          localStorage.removeItem("displaycellpros:hasActiveSession");
+          setFirestoreTickets([]);
+          if (tokenRefreshInterval) {
+            clearInterval(tokenRefreshInterval);
+          }
+        }
+      } catch (err) {
+        console.error("Auth change error during backup sync:", err);
+      } finally {
+        setIsAuthChecking(false);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      if (tokenRefreshInterval) {
+        clearInterval(tokenRefreshInterval);
+      }
+    };
   }, []);
 
   // Hardware Diagnostic Chat Console State
@@ -1138,7 +1294,6 @@ export default function App() {
             },
             subtotal: subtotalAfterDiscount,
             grandTotal,
-            bookingSummary: `REPAIR QUOTE: ${deviceTier.toUpperCase()} ${issueType.toUpperCase()} - Total: $${grandTotal.toFixed(2)} (Simulated Ref: ${companyName || 'Retail'}-${Math.random().toString(36).substring(7).toUpperCase()})`
           });
         } else {
           await new Promise((resolve) => setTimeout(resolve, delay));
@@ -1327,21 +1482,6 @@ export default function App() {
         text: "Diagnostic timeline flushed on Cloud Run. System stands ready for mobile hardware assessment guidelines." 
       }
     ]);
-  };
-
-  const handleBookAppointment = () => {
-    const summary = quote.bookingSummary || `Repair Quote for ${deviceBrand} ${deviceModel}: $${quote.grandTotal.toFixed(2)}`;
-    navigator.clipboard.writeText(summary).then(() => {
-      addToast(
-        "Quote Copied to Clipboard",
-        "Paste this estimate into the 'Notes' field on the booking page for faster check-in.",
-        "success",
-        5000
-      );
-      setTimeout(() => {
-        window.open("https://calendar.app.google/f3Mc2kDhehzCBeBW9", "_blank");
-      }, 1500);
-    });
   };
 
   // Hardware Scan Trigger
@@ -1886,16 +2026,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 <NavButton active={activeTab === "store"} onClick={() => setActiveTab("store")}>Store</NavButton>
                 <NavButton active={activeTab === "privacy"} onClick={() => setActiveTab("privacy")}>Privacy & Consent</NavButton>
                 
-                {authUser?.email === "cheyoung1983@gmail.com" && (
-                  <button
-                    onClick={() => setIsAdminPortalOpen(true)}
-                    className="px-3 py-2 rounded-md text-sm font-black text-amber-400 bg-amber-950/20 border border-amber-500/30 hover:bg-amber-900/40 transition-all uppercase flex items-center gap-1.5 shadow-[0_0_10px_rgba(251,191,36,0.1)]"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    Admin
-                  </button>
-                )}
-
                 {/* Diagnostics Embedded Laboratory Link */}
                 <button
                   id="tab-diagnostics-lab"
@@ -1983,42 +2113,57 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
         {/* --- DEEP DIAGNOSTIC HUB MAIN PANEL VIEWS --- */}
         {activeTab === "lab" && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
-            {/* Google Authentication Status bar */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                  <User className="w-5 h-5" />
+            {/* Google Authentication Status bar or skeleton loader */}
+            {isAuthChecking ? (
+              <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-md animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-700/60 border border-slate-700 flex items-center justify-center">
+                    <User className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="h-4 w-48 bg-slate-700 rounded" />
+                    <div className="h-3 w-72 bg-slate-700/50 rounded" />
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    {authUser ? `Authed: ${authUser.displayName || authUser.email}` : "Cloud Firestore Sync Registry"}
-                    {authUser && <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-sm font-mono uppercase tracking-wider font-extrabold border border-emerald-500/30">SECURE LINK LOCKED</span>}
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    {authUser 
-                      ? `Synchronized with user credential ${authUser.email}. Backing up active Spokane WA tickets.` 
-                      : "Login with Google to securely store repair tickets and private quote backups on durable Firestore vaults."}
-                  </p>
+                <div className="h-9 w-40 bg-slate-700 rounded-lg shrink-0" />
+              </div>
+            ) : (
+              <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-md">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      {authUser ? `Authed: ${authUser.displayName || authUser.email}` : "Cloud Firestore Sync Registry"}
+                      {authUser && <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-sm font-mono uppercase tracking-wider font-extrabold border border-emerald-500/30">SECURE LINK LOCKED</span>}
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      {authUser 
+                        ? `Synchronized with user credential ${authUser.email}. Backing up active Spokane WA tickets.` 
+                        : "Login with Google to securely store repair tickets and private quote backups on durable Firestore vaults."}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {authUser ? (
+                    <button 
+                      onClick={handleSignOut}
+                      className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg border border-slate-600 transition-colors"
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={handleGoogleSignIn}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-2 transition-colors border border-blue-500/20"
+                    >
+                      Connect with Google (SSO)
+                    </button>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {authUser ? (
-                  <button 
-                    onClick={handleSignOut}
-                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg border border-slate-600 transition-colors"
-                  >
-                    Disconnect
-                  </button>
-                ) : (
-                  <button 
-                    onClick={handleGoogleSignIn}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-2 transition-colors border border-blue-500/20"
-                  >
-                    Connect with Google (SSO)
-                  </button>
-                )}
-              </div>
-            </div>
+            )}
 
             {firestoreError && (
               <div className="bg-red-950/40 border border-red-950/50 p-3 rounded-lg text-xs text-red-300 font-mono flex items-center gap-2 mb-4 leading-relaxed">
@@ -2505,6 +2650,23 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         DB
                       </span>
                     </button>
+
+                    <button
+                      onClick={() => setLabTab("backend-auth")}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
+                        labTab === "backend-auth" 
+                          ? "bg-blue-600 text-white shadow-md" 
+                          : "text-slate-300 hover:bg-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                        <span>Backend Auth SDK</span>
+                      </div>
+                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-emerald-950/40 text-emerald-400 font-bold">
+                        SECURE
+                      </span>
+                    </button>
                   </nav>
                 </div>
 
@@ -2643,6 +2805,11 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 {/* AWS RDS POSTGRESQL DIAGNOSTIC PANEL */}
                 {labTab === "postgres" && (
                   <RdsDiagnosticPanel />
+                )}
+
+                {/* BACKEND FIREBASE AUTH INTEGRATOR PANEL */}
+                {labTab === "backend-auth" && (
+                  <BackendAuthPanel authUser={authUser} />
                 )}
 
                 {/* 1. TRIAGE CHAT MODULE */}
@@ -3072,7 +3239,9 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         )}
                       </div>
 
-                      {authUser ? (
+                      {isAuthChecking ? (
+                        <AuthSkeletonCard />
+                      ) : authUser ? (
                         firestoreTickets.length === 0 ? (
                           <div className="bg-slate-900 border border-slate-850 rounded-lg p-5 text-center font-mono text-[11px] text-slate-400">
                             [System notice: No ticket backups stored for user {authUser.displayName || authUser.email} in Cloud Firestore yet. Run 'Back up Quote' in the standard sidebar panel to generate persistent data.]
@@ -3122,14 +3291,104 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                           </div>
                         )
                       ) : (
-                        <div className="bg-slate-900/65 border border-slate-800 rounded-xl p-5 text-center font-mono text-xs text-slate-400 leading-relaxed">
-                          <p className="font-sans mb-3 text-xs">Unlock persistent multi-device sync, cloud billing pipelines, and custom Spokane service backups.</p>
-                          <button
-                            onClick={handleGoogleSignIn}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-[10.5px] font-bold uppercase tracking-wider rounded-lg shadow-md font-mono inline-flex items-center gap-1.5"
-                          >
-                            Connect to Firestore via Google Sign-In
-                          </button>
+                        <div className="bg-slate-900/65 border border-slate-800 rounded-xl p-5 font-mono text-xs text-slate-400 leading-relaxed">
+                          <p className="font-sans mb-4 text-center text-xs">Unlock persistent multi-device sync, cloud billing pipelines, and custom Spokane service backups.</p>
+                          
+                          {/* Email & Password Authentication Form */}
+                          <form onSubmit={isSignUpMode ? handleEmailSignUp : handleEmailSignIn} className="space-y-3 mb-4 bg-slate-950 p-4 rounded-lg border border-slate-850/80">
+                            <div className="text-[10px] font-bold text-blue-450 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                              <Mail className="w-3.5 h-3.5 text-blue-400 font-bold" />
+                              <span>{isSignUpMode ? "Create New Account" : "Sign In with Email"}</span>
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="authEmail" className="block text-[9px] text-slate-500 uppercase font-bold mb-1 font-mono">Email Address</label>
+                              <input
+                                id="authEmail"
+                                type="email"
+                                value={formEmail}
+                                onChange={(e) => setFormEmail(e.target.value)}
+                                placeholder="name@example.com"
+                                className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-[1px] focus:outline-blue-500 font-mono"
+                                required
+                                disabled={isAuthLoading}
+                              />
+                            </div>
+
+                            <div>
+                              <label htmlFor="authPassword" className="block text-[9px] text-slate-500 uppercase font-bold mb-1 font-mono">Password</label>
+                              <div className="relative">
+                                <input
+                                  id="authPassword"
+                                  type={showPassword ? "text" : "password"}
+                                  value={formPassword}
+                                  onChange={(e) => setFormPassword(e.target.value)}
+                                  placeholder="••••••••"
+                                  className="w-full bg-slate-900 border border-slate-800 rounded pl-2.5 pr-10 py-1.5 text-xs text-slate-200 focus:outline-[1px] focus:outline-blue-500 font-mono"
+                                  required
+                                  minLength={6}
+                                  disabled={isAuthLoading}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:outline-none flex items-center justify-center p-1 rounded hover:bg-slate-800 transition-colors"
+                                  title={showPassword ? "Hide password" : "Show password"}
+                                >
+                                  {showPassword ? (
+                                    <EyeOff className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <Eye className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
+                            <button
+                              type="submit"
+                              disabled={isAuthLoading}
+                              className="w-full mt-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                            >
+                              {isAuthLoading ? (
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Check className="w-3.5 h-3.5" />
+                              )}
+                              <span>{isSignUpMode ? "Register Account" : "Sign In"}</span>
+                            </button>
+
+                            <div className="text-center mt-2.5 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsSignUpMode(!isSignUpMode);
+                                  setShowPassword(false);
+                                }}
+                                className="text-[10px] text-slate-400 hover:text-blue-400 underline font-sans transition-colors"
+                              >
+                                {isSignUpMode ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+                              </button>
+                            </div>
+                          </form>
+
+                          {/* Divider */}
+                          <div className="relative flex py-2 items-center">
+                            <div className="flex-grow border-t border-slate-850"></div>
+                            <span className="flex-shrink mx-3 text-[9px] text-slate-500 font-bold uppercase tracking-widest">OR</span>
+                            <div className="flex-grow border-t border-slate-850"></div>
+                          </div>
+
+                          {/* Google Sign In Option */}
+                          <div className="mt-3 text-center">
+                            <button
+                              type="button"
+                              onClick={handleGoogleSignIn}
+                              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-500 text-[10.5px] font-bold uppercase tracking-wider rounded-lg shadow-md font-mono inline-flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <Globe className="w-3.5 h-3.5" />
+                              Connect via Google SSO
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -3844,19 +4103,10 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                     <button 
                       onClick={createOfficialTicket}
                       disabled={ticketCreationSuccess}
-                      className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-colors border border-slate-700"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-md active:scale-98 flex items-center justify-center gap-2"
                     >
                       <span>TRANSMIT POS WEBHook</span>
                     </button>
-
-                    <button
-                      onClick={handleBookAppointment}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)] active:scale-95 flex items-center justify-center gap-2 border border-blue-400/20"
-                    >
-                      <Clock size={16} className="animate-pulse" />
-                      <span>Finalize & Book Now</span>
-                    </button>
-
                     <div className="text-[9.5px] text-center text-slate-500 font-mono leading-relaxed mt-1 select-none">
                       *Coordinates automatically sync with physical CellSmart monitors inside mobile van.
                     </div>
@@ -4009,7 +4259,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             setLabTab("triage");
             setIsAiOpen(false);
           }}
-          onBookAppointment={handleBookAppointment}
           deviceBrand={deviceBrand}
           deviceModel={deviceModel}
           deviceTier={deviceTier}
@@ -4038,146 +4287,10 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
       )}
 
       {/* Global Toast Notifications */}
-      {/* Global Toast Notifications */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
-
-      {/* Admin Identity Verification Portal */}
-      {isAdminPortalOpen && (
-        <AdminPortalView
-          email={authUser?.email || ""}
-          onClose={() => setIsAdminPortalOpen(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-// --- ADMIN PORTAL VIEW COMPONENT ---
-
-function AdminPortalView({ email, onClose }: { email: string; onClose: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
-
-  const runAdminCheck = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/verify-status", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      setResult(data);
-    } catch (err: any) {
-      setResult({ success: false, message: err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    runAdminCheck();
-  }, []);
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-slate-900 border border-amber-500/30 shadow-2xl rounded-2xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden">
-        <div className="bg-amber-950/20 border-b border-amber-900/30 p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="w-8 h-8 text-amber-400" />
-            <div>
-              <h2 className="text-xl font-black text-white tracking-tight uppercase">Tenant Administrator Portal</h2>
-              <p className="text-xs text-amber-200/60 font-mono">Verifying entire admin rights for: {email}</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
-            <X size={24} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <RefreshCw className="w-10 h-10 text-amber-500 animate-spin" />
-              <p className="text-amber-200 font-mono text-xs animate-pulse tracking-widest uppercase">Executing IAM OIDC Handshake & Database Probe...</p>
-            </div>
-          ) : result ? (
-            <div className="space-y-6">
-              {/* Success Badge */}
-              <div className={`p-4 rounded-xl border flex items-start gap-4 ${result.success ? "bg-emerald-950/30 border-emerald-500/30" : "bg-red-950/30 border-red-500/30"}`}>
-                {result.success ? <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" /> : <AlertCircle className="w-6 h-6 text-red-400 shrink-0" />}
-                <div>
-                  <h3 className={`font-bold text-sm uppercase tracking-wide ${result.success ? "text-emerald-400" : "text-red-400"}`}>
-                    {result.success ? "Tenant Verified" : "Access Denied"}
-                  </h3>
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed font-mono">{result.message}</p>
-                </div>
-              </div>
-
-              {result.success && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-3">
-                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest font-mono">IAM Identity</span>
-                    <div className="space-y-1.5 font-mono text-xs text-slate-400">
-                      <div className="flex justify-between border-b border-slate-900 pb-1">
-                        <span>Role:</span>
-                        <span className="text-slate-200 text-right truncate max-w-[120px]" title={result.infrastructure.awsRoleArn}>
-                          {result.infrastructure.awsRoleArn.split('/').pop()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between border-b border-slate-900 pb-1">
-                        <span>Trust:</span>
-                        <span className="text-blue-400 font-bold">{result.identity.oidcTrust}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Level:</span>
-                        <span className="text-emerald-400 font-bold">{result.identity.permissions}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-3">
-                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest font-mono">AWS RDS Admin Test</span>
-                    <div className="space-y-1.5 font-mono text-xs text-slate-400">
-                      <div className="flex justify-between border-b border-slate-900 pb-1">
-                        <span>DB User:</span>
-                        <span className="text-slate-200">{result.infrastructure.database?.user || "N/A"}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-slate-900 pb-1">
-                        <span>Session:</span>
-                        <span className="text-slate-200">{result.infrastructure.database?.session || "N/A"}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Engine:</span>
-                        <span className="text-slate-200 truncate max-w-[120px]">{result.infrastructure.database?.engine || "N/A"}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Raw Payload for Debugging */}
-              <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-[10px] text-slate-500">
-                <span className="block mb-2 uppercase tracking-widest font-bold">Verification Telemetry Trace:</span>
-                <pre className="overflow-x-auto whitespace-pre-wrap max-h-48 scrollbar-thin text-blue-300/80 leading-relaxed">
-                  {JSON.stringify(result, null, 2)}
-                </pre>
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="bg-slate-850 p-4 border-t border-slate-800 flex justify-end gap-3">
-          <button
-            onClick={runAdminCheck}
-            disabled={loading}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-lg active:scale-95 transition-all flex items-center gap-2"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            Run Identity Check
-          </button>
-        </div>
-      </div>
+      
+      {/* Global Authentication Transition Overlay */}
+      <AuthLoadingOverlay isLoading={isAuthLoading} />
     </div>
   );
 }
@@ -4404,7 +4517,6 @@ function StoreView() {
 interface AIAssistantProps {
   onClose: () => void;
   onNavigateToLab: () => void;
-  onBookAppointment: () => void;
   deviceBrand: string;
   deviceModel: string;
   deviceTier: string;
@@ -4415,8 +4527,7 @@ interface AIAssistantProps {
 function AIAssistantWidget({ 
   onClose, 
   onNavigateToLab, 
-  onBookAppointment,
-  deviceBrand,
+  deviceBrand, 
   deviceModel, 
   deviceTier, 
   issueType,
@@ -4518,18 +4629,10 @@ function AIAssistantWidget({
 
         {/* Lab Link Banner */}
         <div className="bg-blue-900/30 border-b border-blue-900/40 px-4 py-2 flex items-center justify-between text-xs text-blue-200 select-none">
-          <div className="flex flex-col">
-            <span className="flex items-center gap-1.5 font-medium">
-              <Terminal size={12} className="text-blue-400" />
-              Triage active: {deviceBrand}
-            </span>
-            <button
-              onClick={onBookAppointment}
-              className="text-[10px] text-blue-400 font-bold hover:text-white transition-colors underline decoration-blue-500/30 underline-offset-2 mt-0.5"
-            >
-              Book this estimate &rarr;
-            </button>
-          </div>
+          <span className="flex items-center gap-1.5 font-medium">
+            <Terminal size={14} className="text-blue-400" />
+            Check dynamic quotes & maps:
+          </span>
           <button 
             type="button"
             onClick={onNavigateToLab}
