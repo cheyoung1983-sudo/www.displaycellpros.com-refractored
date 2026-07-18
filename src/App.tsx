@@ -57,6 +57,8 @@ import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
 import { BackendAuthPanel } from "./components/BackendAuthPanel";
 import { AuthLoadingOverlay, AuthSkeletonCard, ProfileSkeletonCard } from "./components/AuthLoadingOverlay";
 import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
+import CacheManagement from "./components/CacheManagement";
+import QrScannerModal from "./components/QrScannerModal";
 import { TicketTemplate } from "./types";
 import { signInWithPopup, onAuthStateChanged, onIdTokenChanged, getIdToken, signOut, User as FirebaseUser, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from "firebase/firestore";
@@ -115,7 +117,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // --- DIAGNOSTIC HUB STATES ---
-  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "usb" | "verification" | "postgres">("triage");
+  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "usb" | "verification" | "postgres" | "backend-auth" | "settings">("triage");
 
   // Google Cloud Service Directory state variables
   const [sdStatus, setSdStatus] = useState<{ active: boolean; usingFallback: boolean; error: string | null; message: string; mode?: string }>({
@@ -152,6 +154,8 @@ export default function App() {
   const [deviceModel, setDeviceModel] = useState<string>("iPhone 14 Pro Max");
   const [deviceTier, setDeviceTier] = useState<"flagship" | "midrange" | "budget">("flagship");
   const [issueType, setIssueType] = useState<"screen" | "battery" | "button">("screen");
+  const [deviceSerial, setDeviceSerial] = useState<string>("DSC-G6TJX0L3V9X");
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState<boolean>(false);
   
   // Device Hardware Scan state
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -2309,14 +2313,22 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       </div>
 
                       {isScanning && (
-                        <div className="mt-3 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[10px] text-emerald-400 leading-tight space-y-2.5 shadow-inner">
+                        <div className={`mt-3 bg-slate-950 border rounded-lg p-3 font-mono text-[10px] text-emerald-400 leading-tight space-y-2.5 shadow-inner transition-all duration-500 ${
+                          scanProgress >= 90 ? "border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.15)] animate-pulse" : "border-slate-800"
+                        }`}>
                           <div className="flex items-center justify-between">
-                            <span className="font-extrabold text-[8.5px] uppercase tracking-widest text-slate-400">HARDWARE PROBE ACTIVE</span>
-                            <span className="font-bold text-blue-400 animate-pulse">{scanProgress}%</span>
+                            <span className={`font-extrabold text-[8.5px] uppercase tracking-widest transition-colors duration-500 ${scanProgress >= 90 ? "text-amber-400 animate-pulse" : "text-slate-400"}`}>
+                              {scanProgress >= 90 ? "⚡ FINAL DIAGNOSTIC STEPS" : "HARDWARE PROBE ACTIVE"}
+                            </span>
+                            <span className={`font-bold animate-pulse transition-colors duration-500 ${scanProgress >= 90 ? "text-amber-400" : "text-blue-400"}`}>{scanProgress}%</span>
                           </div>
-                          <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                             <div 
-                              className="bg-emerald-400 h-full transition-all duration-300"
+                              className={`h-full transition-all duration-300 ${
+                                scanProgress >= 90 
+                                  ? "bg-gradient-to-r from-amber-500 to-orange-400 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
+                                  : "bg-emerald-400"
+                              }`}
                               style={{ width: `${scanProgress}%` }}
                             ></div>
                           </div>
@@ -2498,6 +2510,39 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-blue-500 transition-colors uppercase font-sans"
                         placeholder="E.g. Jane Miller"
                       />
+                    </div>
+
+                    {/* Device Serial input with QR Scan action */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label htmlFor="deviceSerial" className="block text-[10px] text-slate-400 font-bold uppercase font-mono">Device Serial</label>
+                        <span className="text-[8px] font-mono text-blue-450 uppercase font-black">Digital Decoded</span>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <div className="relative flex-1">
+                          <input 
+                            id="deviceSerial"
+                            name="deviceSerial"
+                            type="text" 
+                            value={deviceSerial} 
+                            onChange={(e) => setDeviceSerial(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded pl-2.5 pr-8 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-blue-500 uppercase font-bold tracking-wider"
+                            placeholder="E.g. DSC-G6TJX0L3V9X"
+                          />
+                          <div className="absolute right-2 top-2 text-[9px] text-emerald-400 font-mono font-bold select-none uppercase">
+                            OK
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsQrScannerOpen(true)}
+                          className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white border border-blue-500/20 rounded transition-all flex items-center justify-center gap-1 hover:scale-[1.02] active:scale-98 cursor-pointer shadow"
+                          title="Open high-fidelity QR Code & Barcode Scanner"
+                        >
+                          <QrCode className="w-3.5 h-3.5 text-white" />
+                          <span className="text-[9.5px] font-black uppercase font-mono tracking-wider hidden sm:inline">SCAN</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
@@ -2701,6 +2746,23 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         SECURE
                       </span>
                     </button>
+
+                    <button
+                      onClick={() => setLabTab("settings")}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
+                        labTab === "settings" 
+                          ? "bg-blue-600 text-white shadow-md" 
+                          : "text-slate-300 hover:bg-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Settings className="w-4 h-4 text-blue-450" />
+                        <span>Cache & SW Settings</span>
+                      </div>
+                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-blue-955/40 text-blue-400 font-bold">
+                        PORTAL
+                      </span>
+                    </button>
                   </nav>
                 </div>
 
@@ -2839,6 +2901,11 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 {/* AWS RDS POSTGRESQL DIAGNOSTIC PANEL */}
                 {labTab === "postgres" && (
                   <RdsDiagnosticPanel />
+                )}
+
+                {/* LAB PORTAL SERVICE WORKER & CACHE STORAGE SETTINGS */}
+                {labTab === "settings" && (
+                  <CacheManagement onAddToast={addToast} />
                 )}
 
                 {/* BACKEND FIREBASE AUTH INTEGRATOR PANEL */}
@@ -4322,6 +4389,34 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
           </span>
         </button>
       )}
+
+      {/* QR Code Label Scanner Component */}
+      <QrScannerModal
+        isOpen={isQrScannerOpen}
+        onClose={() => setIsQrScannerOpen(false)}
+        onScanSuccess={(serial, brand, model) => {
+          setDeviceSerial(serial);
+          if (brand) {
+            setDeviceBrand(brand);
+            if (brand === "Apple") {
+              setDeviceTier("flagship");
+            } else if (brand === "Samsung") {
+              setDeviceTier("flagship");
+            } else {
+              setDeviceTier("midrange");
+            }
+          }
+          if (model) {
+            setDeviceModel(model);
+          }
+          setIsQrScannerOpen(false);
+          addToast(
+            "Hardware Scan Succeeded",
+            `Serial code "${serial}" has been mapped to active diagnostics panel.`,
+            "success"
+          );
+        }}
+      />
 
       {/* Global Toast Notifications */}
       <ToastContainer toasts={toasts} onClose={removeToast} />

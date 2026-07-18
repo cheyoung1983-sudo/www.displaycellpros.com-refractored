@@ -5,7 +5,8 @@ const ASSETS_TO_PRECACHE = [
   "/",
   "/index.html",
   "/favicon.ico",
-  "/favicon.svg"
+  "/favicon.svg",
+  "/api/ticket-templates"
 ];
 
 // Install Event - Pre-cache core files
