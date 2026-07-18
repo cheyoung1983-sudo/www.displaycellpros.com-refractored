@@ -56,6 +56,8 @@ import { OAuthDocumentationPanel } from "./components/OAuthDocumentationPanel";
 import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
 import { BackendAuthPanel } from "./components/BackendAuthPanel";
 import { AuthLoadingOverlay, AuthSkeletonCard, ProfileSkeletonCard } from "./components/AuthLoadingOverlay";
+import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
+import { TicketTemplate } from "./types";
 import { signInWithPopup, onAuthStateChanged, onIdTokenChanged, getIdToken, signOut, User as FirebaseUser, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./lib/firebase";
@@ -171,6 +173,38 @@ export default function App() {
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleApplyTemplate = (template: TicketTemplate) => {
+    setDeviceBrand(template.brand);
+    // Determine default model for high-fidelity representation
+    if (template.brand === "Apple") {
+      setDeviceModel("iPhone 14 Pro Max");
+      setDeviceTier("flagship");
+    } else if (template.brand === "Samsung") {
+      setDeviceModel("Galaxy S23 Ultra");
+      setDeviceTier("flagship");
+    } else {
+      setDeviceModel("Google Pixel 8 Pro");
+      setDeviceTier("flagship");
+    }
+    
+    if (template.issueType === "screen" || template.issueType === "battery" || template.issueType === "button") {
+      setIssueType(template.issueType as "screen" | "battery" | "button");
+    } else {
+      setIssueType("screen");
+    }
+    
+    // Auto populate the customer name if it was default
+    if (customerName === "Jane Miller") {
+      setCustomerName("Diagnostic Van Client");
+    }
+    
+    addToast(
+      "Template Loaded",
+      `Pre-loaded parameters for "${template.name}" applied successfully. Ready to run physical scan.`,
+      "success"
+    );
   };
 
   // B2B Customer Verification
@@ -4178,6 +4212,9 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                     </div>
                   </div>
                 </div>
+
+                {/* Offline-Capable Diagnostic Ticket Templates */}
+                <TicketTemplatesPanel onApplyTemplate={handleApplyTemplate} />
               </aside>
             </div>
           </div>

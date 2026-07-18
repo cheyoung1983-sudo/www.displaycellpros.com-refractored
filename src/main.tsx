@@ -23,6 +23,19 @@ if (typeof window !== 'undefined') {
   });
 }
 
+// Register the Service Worker for offline Diagnostic Lab capabilities
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .then((registration) => {
+        console.log("[Service Worker] Registration successful with scope:", registration.scope);
+      })
+      .catch((error) => {
+        console.error("[Service Worker] Registration failed:", error);
+      });
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

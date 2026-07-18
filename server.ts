@@ -1019,6 +1019,43 @@ app.post("/api/create-ticket", (req, res) => {
   res.json({ success: true, ticket: newTicket, tickets: mockTickets });
 });
 
+// GET /api/ticket-templates: Serves basic repair ticket templates for off-line PWA caching
+app.get("/api/ticket-templates", (req, res) => {
+  const templates = [
+    {
+      id: "tpl-apple-screen",
+      name: "Apple Screen Replacement Template",
+      brand: "Apple",
+      issueType: "screen",
+      description: "Standard visual screen rebuild with high-purity polyurethane adhesive seals and premium oleophobic screen finish.",
+      estimatedTime: "45 mins",
+      difficulty: "Intermediate",
+      defaultPrice: 149.00
+    },
+    {
+      id: "tpl-samsung-battery",
+      name: "Samsung Battery Swap & Safety Calibration",
+      brand: "Samsung",
+      issueType: "battery",
+      description: "Chemical lithium-ion swap including back cover gasket reset and deep voltage-regulation thermal sweep.",
+      estimatedTime: "30 mins",
+      difficulty: "Easy",
+      defaultPrice: 89.00
+    },
+    {
+      id: "tpl-generic-buttons",
+      name: "Multi-Key Micro-Soldering Template",
+      brand: "Generic",
+      issueType: "button",
+      description: "Contact trace cleaning with customized isopropyl solvents and mechanical feedback leaf-spring adjustments.",
+      estimatedTime: "60 mins",
+      difficulty: "Advanced",
+      defaultPrice: 119.00
+    }
+  ];
+  res.json(templates);
+});
+
 // ---------------- BACKEND FIREBASE AUTH INTEGRATION ENDPOINTS ----------------
 
 // 1. Verify User Session Token (backend user accessibility validation)
