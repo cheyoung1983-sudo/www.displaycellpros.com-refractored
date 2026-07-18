@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { queryWithToken } from '../db';
+import { queryWithToken } from './lib/db';
 import { getAuthSession, unauthorized } from './lib/auth-utils';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
