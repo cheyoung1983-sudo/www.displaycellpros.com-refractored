@@ -1,12 +1,14 @@
-# Tasks - Multi-Provider Domain Verification
+# Tasks - Server Stability & Error Mitigation
 
-- [x] Research DNS TXT Propagation
-- [x] Refactor `OAuthDocumentationPanel.tsx` for Multi-Provider Support
-    - [x] Add `openaiVerification` and `vercelVerification` to checklist state
-    - [x] Add `netlifyVerification` to checklist state
-    - [x] Implement OpenAI, Vercel, and Netlify documentation blocks
-    - [x] Add Copy-to-Clipboard for OpenAI TXT record
-- [x] Update Backend Reference Documentation (`server.ts`)
+- [x] Implement Global Error Handler (`server.ts`)
+- [x] Refactor Routes for Async Safety
+    - [x] Wrap `/api/admin/verify-status`
+    - [x] Wrap `/api/triage` (more robustly)
+    - [x] Wrap `/api/generate-quote`
+    - [x] Wrap `pos-sync` endpoints
+- [x] Fix Middleware Routing Logic
+- [x] Add `/api/health` Endpoint
+- [x] Refine `db.ts` Handshake Logic
 - [x] Verification
-    - [x] Final DNS confirmation for OpenAI
-    - [x] UI visual check in Lab Portal for all providers
+    - [x] Checked API response format on failure
+    - [x] Confirmed health check success

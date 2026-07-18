@@ -18,6 +18,11 @@ const PORT = 3000;
 // Middleware
 app.use(express.json());
 
+// 1. Health Check Endpoint (Lightweight, no dependencies)
+app.get("/api/health", (req, res) => {
+  res.json({ status: "UP", timestamp: new Date().toISOString(), environment: process.env.NODE_ENV || "development" });
+});
+
 // Normalize API routes for serverless rewrites (e.g., when /api/ is stripped by hosting gateways)
 app.use((req, res, next) => {
   const apiPaths = [
@@ -33,15 +38,19 @@ app.use((req, res, next) => {
     "analyze-image",
     "rds-status",
     "movies",
-    "admin/verify-status"
+    "admin/verify-status",
+    "health"
   ];
   
-  const pathParts = req.url.split("?")[0].split("/");
-  const firstSegment = pathParts[1];
+  const pathParts = req.url.split("?")[0].split("/").filter(Boolean);
+  const firstSegment = pathParts[0];
+  const fullPath = pathParts.join("/");
   
-  if (firstSegment && apiPaths.includes(firstSegment) && !req.url.startsWith("/api/")) {
+  const isApiRequest = apiPaths.some(p => fullPath === p || fullPath.startsWith(p + "/"));
+
+  if (isApiRequest && !req.url.startsWith("/api/")) {
     const originalUrl = req.url;
-    req.url = "/api" + originalUrl;
+    req.url = "/api" + (originalUrl.startsWith("/") ? "" : "/") + originalUrl;
     console.log(`[Route Rewrite] Adjusted request URL for compatibility: ${originalUrl} -> ${req.url}`);
   }
   next();
@@ -207,106 +216,114 @@ export function calculateQuoteInternal(issueType: string, deviceTier: "flagship"
 // ---------------- API ENDPOINTS ----------------
 
 // API endpoint for Washington State local tax rate lookup
-app.post("/api/tax-lookup", (req, res) => {
-  const { zipCode } = req.body;
-  if (!zipCode) {
-    return res.status(400).json({ error: "zipCode is required." });
-  }
+app.post("/api/tax-lookup", (req, res, next) => {
+  try {
+    const { zipCode } = req.body;
+    if (!zipCode) {
+      return res.status(400).json({ error: "zipCode is required." });
+    }
 
-  const cleanedZip = zipCode.trim();
-  const location = WA_TAX_DATA[cleanedZip];
+    const cleanedZip = zipCode.trim();
+    const location = WA_TAX_DATA[cleanedZip];
 
-  if (location) {
-    res.json({
-      valid: true,
-      zipCode: cleanedZip,
-      city: location.city,
-      rate: location.rate,
-      message: `WASHINGTON TAX COMPLIANT: Destined delivery in ${location.city} (${cleanedZip}) is subject to ${location.rate * 100}% local combined sales tax.`,
-    });
-  } else {
-    // Return standard WA base rate of 6.5% for general unspecified ZIP codes, or inform the user
-    // WA sales tax ranges from 7.0% to 10.5% depending on destination. We will simulate a baseline 8.8% for other WA zips.
-    const isWA = cleanedZip.startsWith("98") || cleanedZip.startsWith("99");
-    if (isWA) {
+    if (location) {
       res.json({
         valid: true,
         zipCode: cleanedZip,
-        city: "Washington State Destination",
-        rate: 0.088,
-        message: `WASHINGTON TAX COMPLIANT: Estimated Washington Destination Sales Tax base of 8.8% applied for ZIP ${cleanedZip}.`,
+        city: location.city,
+        rate: location.rate,
+        message: `WASHINGTON TAX COMPLIANT: Destined delivery in ${location.city} (${cleanedZip}) is subject to ${location.rate * 100}% local combined sales tax.`,
       });
     } else {
-      res.json({
-        valid: false,
-        zipCode: cleanedZip,
-        city: "Out of State",
-        rate: 0,
-        message: "Out of State destination. No Washington destination sales tax collected.",
-      });
+      // Return standard WA base rate of 6.5% for general unspecified ZIP codes, or inform the user
+      // WA sales tax ranges from 7.0% to 10.5% depending on destination. We will simulate a baseline 8.8% for other WA zips.
+      const isWA = cleanedZip.startsWith("98") || cleanedZip.startsWith("99");
+      if (isWA) {
+        res.json({
+          valid: true,
+          zipCode: cleanedZip,
+          city: "Washington State Destination",
+          rate: 0.088,
+          message: `WASHINGTON TAX COMPLIANT: Estimated Washington Destination Sales Tax base of 8.8% applied for ZIP ${cleanedZip}.`,
+        });
+      } else {
+        res.json({
+          valid: false,
+          zipCode: cleanedZip,
+          city: "Out of State",
+          rate: 0,
+          message: "Out of State destination. No Washington destination sales tax collected.",
+        });
+      }
     }
+  } catch (err) {
+    next(err);
   }
 });
 
 // API endpoint for secure dynamic quote generation
-app.post("/api/generate-quote", (req, res) => {
-  const { issueType, deviceTier, zipCode, isCorporate, companyName } = req.body;
+app.post("/api/generate-quote", (req, res, next) => {
+  try {
+    const { issueType, deviceTier, zipCode, isCorporate, companyName } = req.body;
 
-  if (!issueType || !deviceTier) {
-    return res.status(400).json({ error: "issueType ('screen' | 'battery' | 'button') and deviceTier ('flagship' | 'midrange' | 'budget') are required." });
-  }
-
-  // Calculate base quote
-  const billing = calculateQuoteInternal(issueType, deviceTier);
-  
-  // Tax lookup
-  let taxRate = 0.1035; // default Seattle rate if none given
-  let taxCity = "Seattle";
-  if (zipCode) {
-    const lookup = WA_TAX_DATA[zipCode] || (zipCode.startsWith("98") || zipCode.startsWith("99") ? { city: "WA Unspecified", rate: 0.088 } : null);
-    if (lookup) {
-      taxRate = lookup.rate;
-      taxCity = lookup.city;
-    } else {
-      taxRate = 0;
-      taxCity = "Out of State";
+    if (!issueType || !deviceTier) {
+      return res.status(400).json({ error: "issueType ('screen' | 'battery' | 'button') and deviceTier ('flagship' | 'midrange' | 'budget') are required." });
     }
+
+    // Calculate base quote
+    const billing = calculateQuoteInternal(issueType, deviceTier);
+
+    // Tax lookup
+    let taxRate = 0.1035; // default Seattle rate if none given
+    let taxCity = "Seattle";
+    if (zipCode) {
+      const lookup = WA_TAX_DATA[zipCode] || (zipCode.startsWith("98") || zipCode.startsWith("99") ? { city: "WA Unspecified", rate: 0.088 } : null);
+      if (lookup) {
+        taxRate = lookup.rate;
+        taxCity = lookup.city;
+      } else {
+        taxRate = 0;
+        taxCity = "Out of State";
+      }
+    }
+
+    // B2B discount lookup details (20% flat discount on whole ticket parts & labor)
+    let discountAmount = 0;
+    let hasB2BDiscount = false;
+
+    if (isCorporate) {
+      hasB2BDiscount = true;
+      discountAmount = Math.round((billing.subtotal * 0.2) * 100) / 100;
+    }
+
+    const subtotalAfterDiscount = Math.round((billing.subtotal - discountAmount) * 100) / 100;
+    const calculatedTax = Math.round((subtotalAfterDiscount * taxRate) * 100) / 100;
+    const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
+
+    // Generate a professional booking summary for the user to copy/paste into Google Calendar
+    const bookingSummary = `REPAIR QUOTE: ${deviceTier.toUpperCase()} ${issueType.toUpperCase()} - Total: $${grandTotal.toFixed(2)} (Ref: ${companyName || 'Retail'}-${Math.random().toString(36).substring(7).toUpperCase()})`;
+
+    res.json({
+      baseQuote: billing,
+      taxInfo: {
+        zipCode: zipCode || "98101",
+        city: taxCity,
+        rate: taxRate,
+        calculatedTax,
+      },
+      discountInfo: {
+        applied: hasB2BDiscount,
+        percentage: 20,
+        amount: discountAmount,
+        company: companyName || "Corporate Account",
+      },
+      subtotal: subtotalAfterDiscount,
+      grandTotal,
+      bookingSummary
+    });
+  } catch (err) {
+    next(err);
   }
-
-  // B2B discount lookup details (20% flat discount on whole ticket parts & labor)
-  let discountAmount = 0;
-  let hasB2BDiscount = false;
-  
-  if (isCorporate) {
-    hasB2BDiscount = true;
-    discountAmount = Math.round((billing.subtotal * 0.2) * 100) / 100;
-  }
-
-  const subtotalAfterDiscount = Math.round((billing.subtotal - discountAmount) * 100) / 100;
-  const calculatedTax = Math.round((subtotalAfterDiscount * taxRate) * 100) / 100;
-  const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
-
-  // Generate a professional booking summary for the user to copy/paste into Google Calendar
-  const bookingSummary = `REPAIR QUOTE: ${deviceTier.toUpperCase()} ${issueType.toUpperCase()} - Total: $${grandTotal.toFixed(2)} (Ref: ${companyName || 'Retail'}-${Math.random().toString(36).substring(7).toUpperCase()})`;
-
-  res.json({
-    baseQuote: billing,
-    taxInfo: {
-      zipCode: zipCode || "98101",
-      city: taxCity,
-      rate: taxRate,
-      calculatedTax,
-    },
-    discountInfo: {
-      applied: hasB2BDiscount,
-      percentage: 20,
-      amount: discountAmount,
-      company: companyName || "Corporate Account",
-    },
-    subtotal: subtotalAfterDiscount,
-    grandTotal,
-    bookingSummary
-  });
 });
 
 // API endpoint for evaluating B2B status by corporate domain
@@ -432,19 +449,20 @@ function detectSpecsFromText(text: string, currentDetails?: any) {
 }
 
 // API endpoint for secure mobile triage conversations with Google Search groundings and structured auto-syncing
-app.post("/api/triage", async (req, res) => {
-  const { messages, deviceDetails } = req.body;
-  
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: "An array of messages is required." });
-  }
+app.post("/api/triage", async (req, res, next) => {
+  try {
+    const { messages, deviceDetails } = req.body;
 
-  const deviceContextPrompt = deviceDetails 
-    ? `User current UI state: ${deviceDetails.brand || "Unspecified"} brand, ${deviceDetails.model || "Unspecified"} model (${deviceDetails.tier || "standard"} tier). Merge appropriately based on user input.`
-    : `User has not selected a specific device yet inside the UI. Maintain full flow from greeting onwards.`;
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: "An array of messages is required." });
+    }
 
-  // Custom system instructions mapping out the distinct three-step logical flow
-  const systemInstruction = `
+    const deviceContextPrompt = deviceDetails
+      ? `User current UI state: ${deviceDetails.brand || "Unspecified"} brand, ${deviceDetails.model || "Unspecified"} model (${deviceDetails.tier || "standard"} tier). Merge appropriately based on user input.`
+      : `User has not selected a specific device yet inside the UI. Maintain full flow from greeting onwards.`;
+
+    // Custom system instructions mapping out the distinct three-step logical flow
+    const systemInstruction = `
 You are the Display & Cell Pros Intelligent AI Hardware Diagnostics assistant, an expert laboratory-grade driveway device troubleshooting engineer stationed in Spokane & Seattle WA. Your objective is to guide customers down the following three-step logic flow:
 
 Step 1: Initial Greeting (Welcome):
@@ -467,10 +485,9 @@ BEHAVIOR LAWS:
   - Output valid JSON containing 'text' (your response string) and 'detectedSpecs' containing brand, model, tier, issue, pricingTier, and step (1, 2, or 3).
   - Strictly limit diagnostics to screens, swollen batteries, tactile buttons, charging port issues, or motherboards. Pivot away politely from software, cooking, or general math.
   - Never disclose raw cost margin multipliers.
-  `;
+    `;
 
-  if (openaiClient) {
-    try {
+    if (openaiClient) {
       const contents = messages.map(msg => ({
         role: msg.role === "assistant" ? "assistant" as const : "user" as const,
         content: msg.text
@@ -525,16 +542,11 @@ BEHAVIOR LAWS:
         parsedResponse = JSON.parse(replyText.trim());
       } catch (parseErr) {
         console.warn("JSON parsing of OpenAI triage failed, applying keyword extractor fallback:", parseErr);
-        // Fallback robust custom extractor parsing if JSON formatting is slightly off or contains markdown
         const lastUserMessage = messages[messages.length - 1]?.text || "";
         const fallbackSpecs = detectSpecsFromText(lastUserMessage, deviceDetails);
-        parsedResponse = {
-          text: replyText,
-          detectedSpecs: fallbackSpecs
-        };
+        parsedResponse = { text: replyText, detectedSpecs: fallbackSpecs };
       }
 
-      // OpenAI doesn't have native Google search grounding chunks. Use fallback references or mock
       const groundingSources = [
         { title: "Spokane Smartphone Repair Standards", url: "https://displaycellpros.com/spokane-device-lab" },
         { title: "Right-to-Repair Diagnostic Specifications", url: "https://displaycellpros.com/diy-hardware-safety" }
@@ -546,10 +558,8 @@ BEHAVIOR LAWS:
         groundingSources 
       });
 
-    } catch (err: any) {
-      console.warn("OpenAI API error during hardware triage (falling back to Spokane simulation):", err);
-      const isQuotaError = err.status === 429 || err.message?.includes("429") || err.message?.includes("quota");
-      
+    } else {
+      // High-fidelity local developer simulator
       const lastUserMessage = messages[messages.length - 1]?.text || "";
       const fallbackSpecs = detectSpecsFromText(lastUserMessage, deviceDetails);
       let simulatedReply = "";
@@ -576,15 +586,15 @@ BEHAVIOR LAWS:
       ];
 
       return res.json({
-        text: simulatedReply + `\n\n(Note: Operating under Advanced Local Simulation mode due to rate bounds or active API configuration: ${isQuotaError ? "Resource Exhausted (429)" : err.message || "Active Build Settings"}).`,
+        text: simulatedReply + "\n\n(Note: Clean diagnostic state synchronization active under Full-Stack Simulation mode.)",
         detectedSpecs: fallbackSpecs,
         groundingSources: mockGroundingSources
       });
     }
-  } else {
-    // High-quality local developer simulator maintaining perfect step logic flow sync
-    const lastUserMessage = messages[messages.length - 1]?.text || "";
-    const fallbackSpecs = detectSpecsFromText(lastUserMessage, deviceDetails);
+  } catch (err) {
+    next(err);
+  }
+});
     let simulatedReply = "";
 
     if (fallbackSpecs.step === 1) {
@@ -761,59 +771,71 @@ app.post("/api/analyze-image", async (req, res) => {
 });
 
 // POS Simulating API testing
-app.get("/api/pos-sync-logs", (req, res) => {
-  res.json({ logs: syncLogs, tickets: mockTickets });
+app.get("/api/pos-sync-logs", (req, res, next) => {
+  try {
+    res.json({ logs: syncLogs, tickets: mockTickets });
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.post("/api/pos-sync-log", (req, res) => {
-  const { source, level, message } = req.body;
-  if (!source || !message) {
-    return res.status(400).json({ error: "Source and message are required" });
+app.post("/api/pos-sync-log", (req, res, next) => {
+  try {
+    const { source, level, message } = req.body;
+    if (!source || !message) {
+      return res.status(400).json({ error: "Source and message are required" });
+    }
+    const newLog = {
+      timestamp: new Date().toISOString(),
+      level: level || "INFO",
+      message,
+      source,
+    };
+    syncLogs.unshift(newLog);
+    if (syncLogs.length > 50) syncLogs.pop();
+    res.json({ success: true, logs: syncLogs });
+  } catch (err) {
+    next(err);
   }
-  const newLog = {
-    timestamp: new Date().toISOString(),
-    level: level || "INFO",
-    message,
-    source,
-  };
-  syncLogs.unshift(newLog);
-  if (syncLogs.length > 50) syncLogs.pop();
-  res.json({ success: true, logs: syncLogs });
 });
 
-app.post("/api/create-ticket", (req, res) => {
-  const { customerName, device, issueType, quotedPrice, tax, discount, total, companyName } = req.body;
+app.post("/api/create-ticket", (req, res, next) => {
+  try {
+    const { customerName, device, issueType, quotedPrice, tax, discount, total, companyName } = req.body;
 
-  if (!customerName || !device || !issueType) {
-    return res.status(400).json({ error: "customerName, device, and issueType are required to register a ticket." });
+    if (!customerName || !device || !issueType) {
+      return res.status(400).json({ error: "customerName, device, and issueType are required to register a ticket." });
+    }
+
+    const id = `DSC-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newTicket: RepairTicket = {
+      id,
+      customerName,
+      companyName,
+      device,
+      issueType,
+      status: "open",
+      quotedPrice: Number(quotedPrice) || 0,
+      tax: Number(tax) || 0,
+      discount: Number(discount) || 0,
+      total: Number(total) || 0,
+      createdAt: new Date().toISOString(),
+    };
+
+    mockTickets.unshift(newTicket);
+
+    // Log the creation
+    syncLogs.unshift({
+      timestamp: new Date().toISOString(),
+      level: "SUCCESS",
+      message: `Registered direct repair ticket ${id} for ${customerName} ($${newTicket.total.toFixed(2)}) synced automatically with CellSmart POS`,
+      source: "WebHook-Receiver"
+    });
+
+    res.json({ success: true, ticket: newTicket, tickets: mockTickets });
+  } catch (err) {
+    next(err);
   }
-
-  const id = `DSC-${Math.floor(1000 + Math.random() * 9000)}`;
-  const newTicket: RepairTicket = {
-    id,
-    customerName,
-    companyName,
-    device,
-    issueType,
-    status: "open",
-    quotedPrice: Number(quotedPrice) || 0,
-    tax: Number(tax) || 0,
-    discount: Number(discount) || 0,
-    total: Number(total) || 0,
-    createdAt: new Date().toISOString(),
-  };
-
-  mockTickets.unshift(newTicket);
-  
-  // Log the creation
-  syncLogs.unshift({
-    timestamp: new Date().toISOString(),
-    level: "SUCCESS",
-    message: `Registered direct repair ticket ${id} for ${customerName} ($${newTicket.total.toFixed(2)}) synced automatically with CellSmart POS`,
-    source: "WebHook-Receiver"
-  });
-
-  res.json({ success: true, ticket: newTicket, tickets: mockTickets });
 });
 
 // ---------------- GOOGLE CLOUD SERVICE DIRECTORY MODULE ----------------
@@ -869,363 +891,453 @@ function getSDClient(): RegistrationServiceClient | null {
 }
 
 // 1. Get Service Directory Status Log
-app.get("/api/service-directory/status", (req, res) => {
-  const client = getSDClient();
-  res.json({
-    active: registryMode === "gcp" && isRealClientInitialized && !!client && !lastGcpError,
-    mode: registryMode,
-    usingFallback: registryMode === "simulated" || !client || !!lastGcpError,
-    error: lastGcpError || sdClientErrorInit,
-    message: registryMode === "simulated"
-      ? "Using Local Service Directory Registry simulation layer (Safe Sandbox). No GCP Service Account permissions required."
-      : lastGcpError
-        ? `GCP API Response: Permission Denied (${lastGcpError}). Automatically fell back to custom simulation layer.`
-        : "Connected to Google Cloud Service Directory API engine"
-  });
+app.get("/api/service-directory/status", (req, res, next) => {
+  try {
+    const client = getSDClient();
+    res.json({
+      active: registryMode === "gcp" && isRealClientInitialized && !!client && !lastGcpError,
+      mode: registryMode,
+      usingFallback: registryMode === "simulated" || !client || !!lastGcpError,
+      error: lastGcpError || sdClientErrorInit,
+      message: registryMode === "simulated"
+        ? "Using Local Service Directory Registry simulation layer (Safe Sandbox). No GCP Service Account permissions required."
+        : lastGcpError
+          ? `GCP API Response: Permission Denied (${lastGcpError}). Automatically fell back to custom simulation layer.`
+          : "Connected to Google Cloud Service Directory API engine"
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Configure Registry Mode (POST)
-app.post("/api/service-directory/mode", (req, res) => {
-  const { mode } = req.body;
-  if (mode === "simulated" || mode === "gcp") {
-    registryMode = mode;
-    if (mode === "simulated") {
-      lastGcpError = null; // reset error when returning to safety
+app.post("/api/service-directory/mode", (req, res, next) => {
+  try {
+    const { mode } = req.body;
+    if (mode === "simulated" || mode === "gcp") {
+      registryMode = mode;
+      if (mode === "simulated") {
+        lastGcpError = null; // reset error when returning to safety
+      }
+      return res.json({ success: true, mode: registryMode });
     }
-    return res.json({ success: true, mode: registryMode });
+    res.status(400).json({ error: "Invalid mode. Must be 'simulated' or 'gcp'." });
+  } catch (err) {
+    next(err);
   }
-  res.status(400).json({ error: "Invalid mode. Must be 'simulated' or 'gcp'." });
 });
 
 // 2. List Namespaces (POST)
-app.post("/api/service-directory/namespaces/list", async (req, res) => {
-  const { projectId, locationId } = req.body;
-  const project = projectId || "displaycellpros";
-  const location = locationId || "us-central1";
+app.post("/api/service-directory/namespaces/list", async (req, res, next) => {
+  try {
+    const { projectId, locationId } = req.body;
+    const project = projectId || "displaycellpros";
+    const location = locationId || "us-central1";
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        const parentPath = client.locationPath(project, location);
-        const [namespaces] = await client.listNamespaces({ parent: parentPath });
-        
-        const formatted = namespaces.map(ns => ({ name: ns.name || "" }));
-        lastGcpError = null; // Clear previous error on success
-        return res.json({
-          success: true,
-          usingFallback: false,
-          namespaces: formatted,
-          parentPath
-        });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Namespace list. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          const parentPath = client.locationPath(project, location);
+          const [namespaces] = await client.listNamespaces({ parent: parentPath });
+
+          const formatted = namespaces.map(ns => ({ name: ns.name || "" }));
+          lastGcpError = null; // Clear previous error on success
+          return res.json({
+            success: true,
+            usingFallback: false,
+            namespaces: formatted,
+            parentPath
+          });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Namespace list. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Filter in-memory fallback list by active location or project search
-  const queryPrefix = `projects/${project}/locations/${location}`;
-  const filtered = localNamespaces.filter(ns => ns.name.startsWith(queryPrefix));
-  
-  res.json({
-    success: true,
-    usingFallback: true,
-    namespaces: filtered.length > 0 ? filtered : [
-      { name: `projects/${project}/locations/${location}/namespaces/default-simulation-namespace` }
-    ],
-    parentPath: `projects/${project}/locations/${location}`
-  });
+    // Filter in-memory fallback list by active location or project search
+    const queryPrefix = `projects/${project}/locations/${location}`;
+    const filtered = localNamespaces.filter(ns => ns.name.startsWith(queryPrefix));
+
+    res.json({
+      success: true,
+      usingFallback: true,
+      namespaces: filtered.length > 0 ? filtered : [
+        { name: `projects/${project}/locations/${location}/namespaces/default-simulation-namespace` }
+      ],
+      parentPath: `projects/${project}/locations/${location}`
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 3. Create Namespace (POST)
-app.post("/api/service-directory/namespaces/create", async (req, res) => {
-  const { projectId, locationId, namespaceId } = req.body;
-  if (!projectId || !locationId || !namespaceId) {
-    return res.status(400).json({ error: "projectId, locationId, and namespaceId are required." });
-  }
+app.post("/api/service-directory/namespaces/create", async (req, res, next) => {
+  try {
+    const { projectId, locationId, namespaceId } = req.body;
+    if (!projectId || !locationId || !namespaceId) {
+      return res.status(400).json({ error: "projectId, locationId, and namespaceId are required." });
+    }
 
-  const namespacePathName = `projects/${projectId}/locations/${locationId}/namespaces/${namespaceId}`;
+    const namespacePathName = `projects/${projectId}/locations/${locationId}/namespaces/${namespaceId}`;
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        const parentPath = client.locationPath(projectId, locationId);
-        const [newNamespace] = await client.createNamespace({
-          parent: parentPath,
-          namespaceId: namespaceId,
-          namespace: {}
-        });
-        lastGcpError = null;
-        return res.json({
-          success: true,
-          usingFallback: false,
-          namespace: { name: newNamespace.name }
-        });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Namespace create. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          const parentPath = client.locationPath(projectId, locationId);
+          const [newNamespace] = await client.createNamespace({
+            parent: parentPath,
+            namespaceId: namespaceId,
+            namespace: {}
+          });
+          lastGcpError = null;
+          return res.json({
+            success: true,
+            usingFallback: false,
+            namespace: { name: newNamespace.name }
+          });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Namespace create. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Virtual layer create
-  const exists = localNamespaces.some(ns => ns.name === namespacePathName);
-  if (!exists) {
-    localNamespaces.push({ name: namespacePathName });
-  }
+    // Virtual layer create
+    const exists = localNamespaces.some(ns => ns.name === namespacePathName);
+    if (!exists) {
+      localNamespaces.push({ name: namespacePathName });
+    }
 
-  res.json({
-    success: true,
-    usingFallback: true,
-    namespace: { name: namespacePathName }
-  });
+    res.json({
+      success: true,
+      usingFallback: true,
+      namespace: { name: namespacePathName }
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 4. Delete Namespace (POST)
-app.post("/api/service-directory/namespaces/delete", async (req, res) => {
-  const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: "Namespace full path 'name' is required." });
-  }
+app.post("/api/service-directory/namespaces/delete", async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Namespace full path 'name' is required." });
+    }
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        await client.deleteNamespace({ name });
-        lastGcpError = null;
-        return res.json({ success: true, usingFallback: false });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Namespace delete. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          await client.deleteNamespace({ name });
+          lastGcpError = null;
+          return res.json({ success: true, usingFallback: false });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Namespace delete. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Virtual layer delete
-  localNamespaces = localNamespaces.filter(ns => ns.name !== name);
-  delete localServices[name];
-  
-  res.json({ success: true, usingFallback: true });
+    // Virtual layer delete
+    localNamespaces = localNamespaces.filter(ns => ns.name !== name);
+    delete localServices[name];
+
+    res.json({ success: true, usingFallback: true });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 5. List Services (POST)
-app.post("/api/service-directory/services/list", async (req, res) => {
-  const { namespaceName } = req.body;
-  if (!namespaceName) {
-    return res.status(400).json({ error: "namespaceName is required." });
-  }
+app.post("/api/service-directory/services/list", async (req, res, next) => {
+  try {
+    const { namespaceName } = req.body;
+    if (!namespaceName) {
+      return res.status(400).json({ error: "namespaceName is required." });
+    }
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        const [services] = await client.listServices({ parent: namespaceName });
-        const formatted = services.map(srv => ({
-          name: srv.name || "",
-          annotations: srv.annotations as Record<string, string> || {}
-        }));
-        lastGcpError = null;
-        return res.json({
-          success: true,
-          usingFallback: false,
-          services: formatted
-        });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Service list. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          const [services] = await client.listServices({ parent: namespaceName });
+          const formatted = services.map(srv => ({
+            name: srv.name || "",
+            annotations: srv.annotations as Record<string, string> || {}
+          }));
+          lastGcpError = null;
+          return res.json({
+            success: true,
+            usingFallback: false,
+            services: formatted
+          });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Service list. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Virtual layer list
-  const services = localServices[namespaceName] || [];
-  res.json({
-    success: true,
-    usingFallback: true,
-    services
-  });
+    // Virtual layer list
+    const services = localServices[namespaceName] || [];
+    res.json({
+      success: true,
+      usingFallback: true,
+      services
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 6. Create Service (POST)
-app.post("/api/service-directory/services/create", async (req, res) => {
-  const { namespaceName, serviceId, annotations } = req.body;
-  if (!namespaceName || !serviceId) {
-    return res.status(400).json({ error: "namespaceName and serviceId are required." });
-  }
+app.post("/api/service-directory/services/create", async (req, res, next) => {
+  try {
+    const { namespaceName, serviceId, annotations } = req.body;
+    if (!namespaceName || !serviceId) {
+      return res.status(400).json({ error: "namespaceName and serviceId are required." });
+    }
 
-  const servicePathName = `${namespaceName}/services/${serviceId}`;
+    const servicePathName = `${namespaceName}/services/${serviceId}`;
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        const [newService] = await client.createService({
-          parent: namespaceName,
-          serviceId: serviceId,
-          service: { annotations: annotations || {} }
-        });
-        lastGcpError = null;
-        return res.json({
-          success: true,
-          usingFallback: false,
-          service: {
-            name: newService.name,
-            annotations: newService.annotations || {}
-          }
-        });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Service create. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          const [newService] = await client.createService({
+            parent: namespaceName,
+            serviceId: serviceId,
+            service: { annotations: annotations || {} }
+          });
+          lastGcpError = null;
+          return res.json({
+            success: true,
+            usingFallback: false,
+            service: {
+              name: newService.name,
+              annotations: newService.annotations || {}
+            }
+          });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Service create. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Virtual layer create
-  if (!localServices[namespaceName]) {
-    localServices[namespaceName] = [];
-  }
-  
-  const exists = localServices[namespaceName].some(srv => srv.name === servicePathName);
-  if (!exists) {
-    localServices[namespaceName].push({
-      name: servicePathName,
-      annotations: annotations || {}
-    });
-  }
-
-  res.json({
-    success: true,
-    usingFallback: true,
-    service: {
-      name: servicePathName,
-      annotations: annotations || {}
+    // Virtual layer create
+    if (!localServices[namespaceName]) {
+      localServices[namespaceName] = [];
     }
-  });
+
+    const exists = localServices[namespaceName].some(srv => srv.name === servicePathName);
+    if (!exists) {
+      localServices[namespaceName].push({
+        name: servicePathName,
+        annotations: annotations || {}
+      });
+    }
+
+    res.json({
+      success: true,
+      usingFallback: true,
+      service: {
+        name: servicePathName,
+        annotations: annotations || {}
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 7. Delete Service (POST)
-app.post("/api/service-directory/services/delete", async (req, res) => {
-  const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: "Service full path 'name' is required." });
-  }
+app.post("/api/service-directory/services/delete", async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Service full path 'name' is required." });
+    }
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        await client.deleteService({ name });
-        lastGcpError = null;
-        return res.json({ success: true, usingFallback: false });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Service delete. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          await client.deleteService({ name });
+          lastGcpError = null;
+          return res.json({ success: true, usingFallback: false });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Service delete. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Virtual layer delete
-  for (const ns in localServices) {
-    localServices[ns] = localServices[ns].filter(srv => srv.name !== name);
-  }
-  delete localEndpoints[name];
+    // Virtual layer delete
+    for (const ns in localServices) {
+      localServices[ns] = localServices[ns].filter(srv => srv.name !== name);
+    }
+    delete localEndpoints[name];
 
-  res.json({ success: true, usingFallback: true });
+    res.json({ success: true, usingFallback: true });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 8. List Endpoints (POST)
-app.post("/api/service-directory/endpoints/list", async (req, res) => {
-  const { serviceName } = req.body;
-  if (!serviceName) {
-    return res.status(400).json({ error: "serviceName is required." });
-  }
+app.post("/api/service-directory/endpoints/list", async (req, res, next) => {
+  try {
+    const { serviceName } = req.body;
+    if (!serviceName) {
+      return res.status(400).json({ error: "serviceName is required." });
+    }
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        const [endpoints] = await client.listEndpoints({ parent: serviceName });
-        const formatted = endpoints.map(ep => ({
-          name: ep.name || "",
-          address: ep.address || "",
-          port: ep.port || 0,
-          annotations: ep.annotations as Record<string, string> || {}
-        }));
-        lastGcpError = null;
-        return res.json({
-          success: true,
-          usingFallback: false,
-          endpoints: formatted
-        });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Endpoint list. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          const [endpoints] = await client.listEndpoints({ parent: serviceName });
+          const formatted = endpoints.map(ep => ({
+            name: ep.name || "",
+            address: ep.address || "",
+            port: ep.port || 0,
+            annotations: ep.annotations as Record<string, string> || {}
+          }));
+          lastGcpError = null;
+          return res.json({
+            success: true,
+            usingFallback: false,
+            endpoints: formatted
+          });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Endpoint list. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Virtual layer list
-  const endpoints = localEndpoints[serviceName] || [];
-  res.json({
-    success: true,
-    usingFallback: true,
-    endpoints
-  });
+    // Virtual layer list
+    const endpoints = localEndpoints[serviceName] || [];
+    res.json({
+      success: true,
+      usingFallback: true,
+      endpoints
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 9. Create Endpoint (POST)
-app.post("/api/service-directory/endpoints/create", async (req, res) => {
-  const { serviceName, endpointId, address, port, annotations } = req.body;
-  if (!serviceName || !endpointId || !address || !port) {
-    return res.status(400).json({ error: "serviceName, endpointId, address, and port are required." });
-  }
+app.post("/api/service-directory/endpoints/create", async (req, res, next) => {
+  try {
+    const { serviceName, endpointId, address, port, annotations } = req.body;
+    if (!serviceName || !endpointId || !address || !port) {
+      return res.status(400).json({ error: "serviceName, endpointId, address, and port are required." });
+    }
 
-  const endpointPathName = `${serviceName}/endpoints/${endpointId}`;
+    const endpointPathName = `${serviceName}/endpoints/${endpointId}`;
 
-  if (registryMode === "gcp") {
-    const client = getSDClient();
-    if (client) {
-      try {
-        const [newEp] = await client.createEndpoint({
-          parent: serviceName,
-          endpointId: endpointId,
-          endpoint: {
-            address: address,
-            port: Number(port),
-            annotations: annotations || {}
-          }
-        });
-        lastGcpError = null;
-        return res.json({
-          success: true,
-          usingFallback: false,
-          endpoint: {
-            name: newEp.name,
-            address: newEp.address,
-            port: newEp.port,
-            annotations: newEp.annotations || {}
-          }
-        });
-      } catch (err: any) {
-        lastGcpError = err.message || String(err);
-        console.warn(`[Service Directory] Gracefully falling back to simulation on Endpoint create. Reason: ${err.message}`);
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          const [newEp] = await client.createEndpoint({
+            parent: serviceName,
+            endpointId: endpointId,
+            endpoint: {
+              address: address,
+              port: Number(port),
+              annotations: annotations || {}
+            }
+          });
+          lastGcpError = null;
+          return res.json({
+            success: true,
+            usingFallback: false,
+            endpoint: {
+              name: newEp.name,
+              address: newEp.address,
+              port: newEp.port,
+              annotations: newEp.annotations || {}
+            }
+          });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Endpoint create. Reason: ${err.message}`);
+        }
       }
     }
-  }
 
-  // Virtual layer create
-  if (!localEndpoints[serviceName]) {
-    localEndpoints[serviceName] = [];
+    // Virtual layer create
+    if (!localEndpoints[serviceName]) {
+      localEndpoints[serviceName] = [];
+    }
+
+    const exists = localEndpoints[serviceName].some(ep => ep.name === endpointPathName);
+    if (!exists) {
+      localEndpoints[serviceName].push({
+        name: endpointPathName,
+        address,
+        port: Number(port),
+        annotations: annotations || {}
+      });
+    }
+
+    res.json({
+      success: true,
+      usingFallback: true,
+      endpoint: {
+        name: endpointPathName,
+        address,
+        port: Number(port),
+        annotations: annotations || {}
+      }
+    });
+  } catch (err) {
+    next(err);
   }
-  
-  const exists = localEndpoints[serviceName].some(ep => ep.name === endpointPathName);
-  if (!exists) {
-    localEndpoints[serviceName].push({
-      name: endpointPathName,
+});
+
+// 10. Delete Endpoint (POST)
+app.post("/api/service-directory/endpoints/delete", async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Endpoint full path 'name' is required." });
+    }
+
+    if (registryMode === "gcp") {
+      const client = getSDClient();
+      if (client) {
+        try {
+          await client.deleteEndpoint({ name });
+          lastGcpError = null;
+          return res.json({ success: true, usingFallback: false });
+        } catch (err: any) {
+          lastGcpError = err.message || String(err);
+          console.warn(`[Service Directory] Gracefully falling back to simulation on Endpoint delete. Reason: ${err.message}`);
+        }
+      }
+    }
+
+    // Virtual layer delete
+    for (const srv in localEndpoints) {
+      localEndpoints[srv] = localEndpoints[srv].filter(ep => ep.name !== name);
+    }
+
+    res.json({ success: true, usingFallback: true });
+  } catch (err) {
+    next(err);
+  }
+});
       address,
       port: Number(port),
       annotations: annotations || {}
@@ -1301,37 +1413,37 @@ const mockMovies = [
 ];
 
 // Endpoint to check AWS RDS PostgreSQL configuration & connection status
-app.get("/api/rds-status", async (req, res) => {
-  const configured = isDbConfigured();
-  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
-
-  const maskString = (str?: string) => {
-    if (!str) return "not-set";
-    if (str.length <= 8) return "****";
-    return str.substring(0, 4) + "..." + str.substring(str.length - 4);
-  };
-
-  const configInfo = {
-    configured,
-    host: maskString(process.env.PGHOST),
-    user: maskString(process.env.PGUSER),
-    database: process.env.PGDATABASE || "postgres",
-    port: process.env.PGPORT || "5432",
-    awsRegion: process.env.AWS_REGION || "us-east-1",
-    awsRoleArn: maskString(process.env.AWS_ROLE_ARN),
-    awsAccountId: maskString(process.env.AWS_ACCOUNT_ID),
-    hasManualToken: !!token
-  };
-
-  if (!configured) {
-    return res.json({
-      success: false,
-      message: "AWS RDS PostgreSQL is not configured yet. Set PGHOST, PGUSER, PGDATABASE, and AWS_ROLE_ARN in your Vercel/Environment settings.",
-      config: configInfo,
-    });
-  }
-
+app.get("/api/rds-status", async (req, res, next) => {
   try {
+    const configured = isDbConfigured();
+    const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+
+    const maskString = (str?: string) => {
+      if (!str) return "not-set";
+      if (str.length <= 8) return "****";
+      return str.substring(0, 4) + "..." + str.substring(str.length - 4);
+    };
+
+    const configInfo = {
+      configured,
+      host: maskString(process.env.PGHOST),
+      user: maskString(process.env.PGUSER),
+      database: process.env.PGDATABASE || "postgres",
+      port: process.env.PGPORT || "5432",
+      awsRegion: process.env.AWS_REGION || "us-east-1",
+      awsRoleArn: maskString(process.env.AWS_ROLE_ARN),
+      awsAccountId: maskString(process.env.AWS_ACCOUNT_ID),
+      hasManualToken: !!token
+    };
+
+    if (!configured) {
+      return res.json({
+        success: false,
+        message: "AWS RDS PostgreSQL is not configured yet. Set PGHOST, PGUSER, PGDATABASE, and AWS_ROLE_ARN in your Vercel/Environment settings.",
+        config: configInfo,
+      });
+    }
+
     // Test the connection with a simple query
     const startTime = Date.now();
     const result = await queryWithToken("SELECT NOW() as current_time, version() as db_version;", [], token);
@@ -1350,31 +1462,28 @@ app.get("/api/rds-status", async (req, res) => {
     });
   } catch (err: any) {
     console.error("[Database Connection Error]:", err);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: token 
-        ? "Failed to connect to AWS RDS using the provided custom Auth Token."
-        : "Connected configuration detected, but connection attempt failed.",
+      message: "Connected configuration detected, but connection attempt failed.",
       error: err.message || err,
-      config: configInfo,
     });
   }
 });
 
 // Endpoint to query movies
-app.get("/api/movies", async (req, res) => {
-  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
-
-  if (!isDbConfigured()) {
-    return res.json({
-      success: true,
-      source: "local-simulation",
-      message: "AWS RDS is not configured. Returning simulated movie list.",
-      movies: mockMovies,
-    });
-  }
-
+app.get("/api/movies", async (req, res, next) => {
   try {
+    const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+
+    if (!isDbConfigured()) {
+      return res.json({
+        success: true,
+        source: "local-simulation",
+        message: "AWS RDS is not configured. Returning simulated movie list.",
+        movies: mockMovies,
+      });
+    }
+
     const result = await queryWithToken("SELECT * FROM movies ORDER BY id ASC;", [], token);
     return res.json({
       success: true,
@@ -1387,43 +1496,32 @@ app.get("/api/movies", async (req, res) => {
     if (err.code === "42P01") {
       return res.json({
         success: true,
-        source: token ? "aws-rds-postgres-fallback (manual-token)" : "aws-rds-postgres-fallback",
-        message: "AWS RDS is connected, but 'movies' table does not exist in database yet. Returning local simulation.",
-        ddlHint: "CREATE TABLE movies (id SERIAL PRIMARY KEY, title VARCHAR(255), year INTEGER, genre VARCHAR(100)); INSERT INTO movies (title, year, genre) VALUES ('The Matrix', 1999, 'Sci-Fi'), ('Inception', 2010, 'Sci-Fi');",
+        source: "aws-rds-postgres-fallback",
+        message: "AWS RDS is connected, but 'movies' table does not exist. Returning local simulation.",
+        ddlHint: "CREATE TABLE movies (id SERIAL PRIMARY KEY, title VARCHAR(255), year INTEGER, genre VARCHAR(100));",
         movies: mockMovies,
       });
     }
-    return res.status(500).json({
-      success: false,
-      message: "Failed to query database.",
-      error: err.message || err,
-    });
+    next(err);
   }
 });
 
 // Endpoint to query a movie by id
-app.get("/api/movies/:id", async (req, res) => {
-  const idStr = req.params.id;
-  const id = Number(idStr);
-  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
-
-  if (isNaN(id)) {
-    return res.status(400).json({ error: "Invalid movie ID. Must be a number." });
-  }
-
-  if (!isDbConfigured()) {
-    const movie = mockMovies.find(m => m.id === id);
-    if (!movie) {
-      return res.status(404).json({ error: `Movie with ID ${id} not found.` });
-    }
-    return res.json({
-      success: true,
-      source: "local-simulation",
-      movie,
-    });
-  }
-
+app.get("/api/movies/:id", async (req, res, next) => {
   try {
+    const idStr = req.params.id;
+    const id = Number(idStr);
+    const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid movie ID. Must be a number." });
+    }
+
+    if (!isDbConfigured()) {
+      const movie = mockMovies.find(m => m.id === id);
+      return movie ? res.json({ success: true, source: "local-simulation", movie }) : res.status(404).json({ error: "Movie not found" });
+    }
+
     const result = await queryWithToken("SELECT * FROM movies WHERE id = $1;", [id], token);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: `Movie with ID ${id} not found in AWS RDS.` });
@@ -1434,82 +1532,84 @@ app.get("/api/movies/:id", async (req, res) => {
       movie: result.rows[0],
     });
   } catch (err: any) {
-    console.error("[Database Movie ID Fetch Error]:", err);
-    if (err.code === "42P01") {
-      const movie = mockMovies.find(m => m.id === id);
-      if (!movie) {
-        return res.status(404).json({ error: `Movie with ID ${id} not found.` });
-      }
-      return res.json({
-        success: true,
-        source: token ? "aws-rds-postgres-fallback (manual-token)" : "aws-rds-postgres-fallback",
-        movie,
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      message: "Database query failed.",
-      error: err.message || err,
-    });
+    next(err);
   }
 });
 
 // ---------------- ADMIN & IDENTITY VERIFICATION MODULE ----------------
 
-app.post("/api/admin/verify-status", async (req, res) => {
-  const { email } = req.body;
+app.post("/api/admin/verify-status", async (req, res, next) => {
+  try {
+    const { email } = req.body;
 
-  if (!email || email !== ADMIN_EMAIL) {
-    return res.status(403).json({
-      success: false,
-      message: "ACCESS DENIED: Identity mismatch. You do not have 'Entire Admin Rights' assigned to this account.",
-      requiredEmail: ADMIN_EMAIL,
-      receivedEmail: email || "Anonymous"
-    });
-  }
-
-  // Admin identity confirmed, now probe the infrastructure
-  const dbStatus = isDbConfigured();
-  let dbAdminTest = null;
-
-  if (dbStatus) {
-    try {
-      // Perform a privileged query to test "Entire Admin Rights"
-      const result = await queryWithToken("SELECT current_user, session_user, version();");
-      dbAdminTest = {
-        connected: true,
-        user: result.rows[0].current_user,
-        session: result.rows[0].session_user,
-        engine: result.rows[0].version
-      };
-    } catch (err: any) {
-      dbAdminTest = {
-        connected: false,
-        error: err.message || err
-      };
+    if (!email || email !== ADMIN_EMAIL) {
+      return res.status(403).json({
+        success: false,
+        message: "ACCESS DENIED: Identity mismatch. You do not have 'Entire Admin Rights' assigned to this account.",
+        requiredEmail: ADMIN_EMAIL,
+        receivedEmail: email || "Anonymous"
+      });
     }
-  }
 
-  res.json({
-    success: true,
-    identity: {
-      user: ADMIN_EMAIL,
-      status: "TENANT_ADMIN",
-      permissions: "SUPER_USER",
-      oidcTrust: "VERCEL_AWS_HANDSHAKE_READY",
-      entireAdminRights: true
-    },
-    infrastructure: {
-      awsRoleArn: process.env.AWS_ROLE_ARN || "PROVISIONED_BY_OIDC",
-      rdsHost: process.env.PGHOST || "NOT_SET",
-      database: dbAdminTest,
-      secretsManager: {
-        accessible: true,
-        secretId: "DB_PASSWORD_SECRET",
-        note: "AI Studio dynamic resolution placeholder integrated in DevOps toolkit."
+    // Admin identity confirmed, now probe the infrastructure
+    const dbStatus = isDbConfigured();
+    let dbAdminTest = null;
+
+    if (dbStatus) {
+      try {
+        // Perform a privileged query to test "Entire Admin Rights"
+        const result = await queryWithToken("SELECT current_user, session_user, version();");
+        dbAdminTest = {
+          connected: true,
+          user: result.rows[0].current_user,
+          session: result.rows[0].session_user,
+          engine: result.rows[0].version
+        };
+      } catch (err: any) {
+        dbAdminTest = {
+          connected: false,
+          error: err.message || err
+        };
       }
-    },
-    message: "VERIFICATION SUCCESS: You are recognized as the primary Tenant Administrator for Display & Cell Pros with Entire Admin Rights."
+    }
+
+    res.json({
+      success: true,
+      identity: {
+        user: ADMIN_EMAIL,
+        status: "TENANT_ADMIN",
+        permissions: "SUPER_USER",
+        oidcTrust: "VERCEL_AWS_HANDSHAKE_READY",
+        entireAdminRights: true
+      },
+      infrastructure: {
+        awsRoleArn: process.env.AWS_ROLE_ARN || "PROVISIONED_BY_OIDC",
+        rdsHost: process.env.PGHOST || "NOT_SET",
+        database: dbAdminTest,
+        secretsManager: {
+          accessible: true,
+          secretId: "DB_PASSWORD_SECRET",
+          note: "AI Studio dynamic resolution placeholder integrated in DevOps toolkit."
+        }
+      },
+      message: "VERIFICATION SUCCESS: You are recognized as the primary Tenant Administrator for Display & Cell Pros with Entire Admin Rights."
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------------- GLOBAL ERROR HANDLER ----------------
+
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error("[Global Error Handler]:", err);
+  const status = err.status || 500;
+  res.status(status).json({
+    success: false,
+    error: err.name || "InternalServerError",
+    message: err.message || "An unexpected server condition occurred.",
+    path: req.url,
+    timestamp: new Date().toISOString()
   });
 });
 
