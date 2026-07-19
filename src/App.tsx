@@ -649,6 +649,27 @@ export default function App() {
                       <option value="Samsung">Samsung</option>
                     </select>
                   </div>
+
+                  {authUser && !captchaToken && (
+                    <div className="pt-2">
+                      <ReCAPTCHA
+                        sitekey="6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl"
+                        onChange={(token) => setCaptchaToken(token)}
+                        theme="dark"
+                        size="compact"
+                      />
+                    </div>
+                  )}
+
+                  {authUser && (
+                    <button
+                      onClick={handleCreateFirestoreTicket}
+                      disabled={!captchaToken || ticketCreationSuccess}
+                      className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded uppercase disabled:opacity-50"
+                    >
+                      💾 Back up to AWS RDS
+                    </button>
+                  )}
                 </div>
 
                 <nav className="space-y-1">
