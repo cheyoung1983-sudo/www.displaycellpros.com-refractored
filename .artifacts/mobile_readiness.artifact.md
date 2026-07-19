@@ -6,6 +6,9 @@ This document outlines the requirements and procedures for expanding the **Displ
 
 To link a native Android application (or a Trusted Web Activity) to our Firebase backend, the application must be "self-signed" with a valid certificate. This ensures that only authorized builds can access sensitive repair data.
 
+> [!IMPORTANT]
+> **Google Sign-In Requirement**: To enable Google Sign-In for your Android apps, you **must** provide the **SHA-1 release fingerprint** for each app in the Firebase Console (Project Settings > Your apps).
+
 ### 1. Generate SHA-1 Fingerprints
 Use the Java `keytool` utility to extract the SHA-1 fingerprints from your keystore.
 
@@ -30,6 +33,12 @@ keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.k
 3. Enter your package name (e.g., `com.displaycellpros.app`).
 4. Paste the **SHA-1 fingerprint** generated above.
 5. Download `google-services.json` and place it in your app's `app/` directory.
+
+### 3. External Client ID Safelisting (Optional)
+If you need to share authentication across different Firebase projects or external OAuth clients, you can safelist their client IDs:
+1. Navigate to the **Authentication > Settings** section in your Firebase console.
+2. Look for **Authorized domains** and **OAuth client ID safelisting**.
+3. Add the client IDs from your external projects to allow them to authorize against your primary `displaycellpros-com` instance.
 
 ## Cross-Platform Identity Flow
 

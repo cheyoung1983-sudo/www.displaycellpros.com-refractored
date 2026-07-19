@@ -33,6 +33,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
     openaiAuthorized: false,
     recaptchaSetup: false,
     androidSigning: false,
+    clientIdSafelisting: false,
   });
 
   const toggleCheck = (key: keyof typeof checklist) => {
@@ -241,9 +242,12 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                   {checklist.androidSigning && <Check className="w-3 h-3 stroke-[3]" />}
                 </button>
                 <div className="flex-1 space-y-1">
-                  <span className="font-bold text-slate-200 text-xs uppercase tracking-tight">Android Self-Signing Verification</span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-200 text-xs uppercase tracking-tight">Android Self-Signing Verification</span>
+                    <span className="text-[8px] bg-blue-900/40 text-blue-300 px-1.5 py-0.2 rounded border border-blue-800/30 font-bold uppercase tracking-widest">Mandatory for Google SSO</span>
+                  </div>
                   <p className="text-[10.5px] text-slate-400 leading-normal">
-                    Register your app's <b>SHA-1 fingerprint</b> in the Firebase Console to enable native mobile authentication.
+                    To enable Google Sign-In for Android, you must provide the <b>SHA-1 release fingerprint</b> in <b>Project Settings &gt; Your apps</b>.
                   </p>
 
                   <div className="mt-3 space-y-2">
@@ -271,6 +275,38 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                           className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[9px] text-slate-300 font-mono outline-none focus:border-blue-500"
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Task 6: External Client ID Safelisting (Optional) */}
+            <div className={`p-3.5 rounded-lg border transition-all ${checklist.clientIdSafelisting ? "bg-slate-950/40 border-slate-800 shadow-inner" : "bg-slate-950/20 border-slate-900"}`}>
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => toggleCheck("clientIdSafelisting")}
+                  className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors ${checklist.clientIdSafelisting ? "bg-emerald-500 border-emerald-400 text-slate-950" : "border-slate-700 hover:border-slate-500"}`}
+                >
+                  {checklist.clientIdSafelisting && <Check className="w-3 h-3 stroke-[3]" />}
+                </button>
+                <div className="flex-1 space-y-1">
+                  <span className="font-bold text-slate-200 text-xs uppercase tracking-tight">External Client ID Safelisting</span>
+                  <p className="text-[10.5px] text-slate-400 leading-normal">
+                    (Optional) Safelist client IDs from external projects to enable cross-platform resource sharing or multi-tenant SSO handshakes.
+                  </p>
+
+                  <div className="mt-2.5">
+                    <label className="text-[8px] font-bold text-slate-500 uppercase mb-1 block">External Project Client ID</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="1046067704682-..."
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-[9px] text-blue-400 font-mono focus:outline-none focus:border-blue-600"
+                      />
+                      <button className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors border border-slate-700">
+                        Whitelist
+                      </button>
                     </div>
                   </div>
                 </div>

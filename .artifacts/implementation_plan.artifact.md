@@ -17,6 +17,7 @@ Elevate the project's professional posture by establishing a "Mobile Readiness" 
 - Add a new **"Mobile Readiness (Android/iOS)"** section to the checklist.
 - Include placeholders for tracking **SHA-1 (Debug)** and **SHA-1 (Release)** fingerprints.
 - Document the `keytool` command provided in your instructions for easy technician access.
+- **[New]** Add **"External Client ID Safelisting"** as an optional task for cross-project authentication.
 
 ### 2. Cross-Platform Identity Consolidation
 
