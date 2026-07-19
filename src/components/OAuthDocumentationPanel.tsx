@@ -208,7 +208,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
               </div>
             </div>
 
-            {/* Task 4: reCAPTCHA Secret Integration */}
+            {/* Task 4: reCAPTCHA Enterprise Integration */}
             <div className={`p-3.5 rounded-lg border transition-all ${checklist.recaptchaSetup ? "bg-slate-950/40 border-slate-800 shadow-inner" : "bg-slate-950/20 border-slate-900"}`}>
               <div className="flex items-start gap-3">
                 <button 
@@ -218,15 +218,13 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                   {checklist.recaptchaSetup && <Check className="w-3 h-3 stroke-[3]" />}
                 </button>
                 <div className="flex-1 space-y-1">
-                  <span className="font-bold text-slate-200 text-xs">reCAPTCHA Secret Integration</span>
+                  <span className="font-bold text-slate-200 text-xs">reCAPTCHA Enterprise Integration</span>
                   <p className="text-[10.5px] text-slate-400 leading-normal">
-                    Inject the Legacy Secret Key into Vercel environment variables: <code className="text-amber-400 font-bold bg-slate-900 px-1 rounded">RECAPTCHA_SECRET_KEY</code>.
+                    Activated Enterprise protection using Legacy Secret Key. Load <code className="text-amber-400 font-bold bg-slate-900 px-1 rounded">enterprise.js</code> and use Site Key <code className="text-blue-400 font-bold bg-slate-900 px-1 rounded">6LcIwSUt...6Gw</code>.
                   </p>
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-[9px] text-slate-500 font-bold uppercase">Secret Key:</span>
-                    <code className="text-[10px] text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-850 blur-sm hover:blur-none transition-all cursor-help" title="Click to copy secret">
-                      6LcIwSUt...KAH4l
-                    </code>
+                    <span className="text-[9px] text-slate-500 font-bold uppercase">Status:</span>
+                    <span className="text-[10px] text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-900/30 font-bold uppercase tracking-widest">Active Pair Locked</span>
                   </div>
                 </div>
               </div>

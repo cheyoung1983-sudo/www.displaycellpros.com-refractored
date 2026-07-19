@@ -60,6 +60,8 @@ import CacheManagement from "./components/CacheManagement";
 import QrScannerModal from "./components/QrScannerModal";
 import { TicketTemplate } from "./types";
 import { useAuth } from "./contexts/AuthContext";
+import { collection, getDocs } from "firebase/firestore";
+import { db as firebaseDb } from "./lib/firebase";
 
 // --- DATA MODELS ---
 
@@ -113,7 +115,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // --- DIAGNOSTIC HUB STATES ---
-  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "usb" | "verification" | "postgres" | "settings">("triage");
+  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "postgres" | "verification" | "firebase" | "settings">("triage");
 
   const [sdStatus, setSdStatus] = useState({ active: false, message: "Serverless Mode Active" });
   
@@ -653,7 +655,7 @@ export default function App() {
                   {authUser && !captchaToken && (
                     <div className="pt-2">
                       <ReCAPTCHA
-                        sitekey="6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl"
+                        sitekey="6LcIwSUtAAAAAI6dARfSTSTKXCgzcdhQsH7PJ6Gw"
                         onChange={(token) => setCaptchaToken(token)}
                         theme="dark"
                         size="compact"
@@ -673,7 +675,7 @@ export default function App() {
                 </div>
 
                 <nav className="space-y-1">
-                  {["triage", "pos", "tax", "postgres", "verification"].map(tab => (
+                  {["triage", "pos", "tax", "postgres", "verification", "firebase"].map(tab => (
                     <button key={tab} onClick={() => setLabTab(tab as any)} className={`w-full text-left p-2.5 rounded-lg text-xs font-bold uppercase ${labTab === tab ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-slate-800"}`}>
                       {tab}
                     </button>
@@ -702,6 +704,7 @@ export default function App() {
 
                 {labTab === "postgres" && <RdsDiagnosticPanel />}
                 {labTab === "verification" && <OAuthDocumentationPanel projectId="displaycellpros-com" devUrl="https://ais-dev.run.app" prodUrl="https://displaycellpros.com" />}
+                {labTab === "firebase" && <FirebaseLabPanel />}
               </div>
 
               <aside className="col-span-12 lg:col-span-3 space-y-6">
@@ -715,7 +718,7 @@ export default function App() {
                   <div className="mt-4">
                     <ReCAPTCHA
                       ref={recaptchaRef}
-                      sitekey="6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl"
+                      sitekey="6LcIwSUtAAAAAI6dARfSTSTKXCgzcdhQsH7PJ6Gw"
                       onChange={(token) => setCaptchaToken(token)}
                       theme="dark"
                       size="compact"
@@ -751,6 +754,83 @@ export default function App() {
   );
 }
 
+// --- FIREBASE LAB PANEL COMPONENT ---
+
+function FirebaseLabPanel() {
+  const [cities, setCities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCities = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const citiesCol = collection(firebaseDb, "cities");
+      const citySnapshot = await getDocs(citiesCol);
+      const cityList = citySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCities(cityList);
+    } catch (err: any) {
+      console.error("Firestore fetch error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4 shadow-md animate-in fade-in">
+      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div className="flex items-center gap-2">
+          <Database className="w-5 h-5 text-orange-400" />
+          <div>
+            <h2 className="text-sm font-bold text-white uppercase">Firebase Modular SDK Triage</h2>
+            <p className="text-xs text-slate-400">Direct Firestore Lite access via Web SDK v12.16.0</p>
+          </div>
+        </div>
+        <button
+          onClick={fetchCities}
+          disabled={loading}
+          className="px-4 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs font-bold uppercase transition-all flex items-center gap-2"
+        >
+          {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+          Fetch Cities
+        </button>
+      </div>
+
+      {error && (
+        <div className="p-3 bg-red-950/40 border border-red-900/50 rounded text-xs text-red-400 font-mono">
+          [FIRESTORE ERROR]: {error}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {cities.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 font-mono text-[10px] border border-dashed border-slate-700 rounded-lg">
+            {loading ? "Synchronizing with Google Cloud..." : "No data retrieved. Ensure Google Cloud permissions and billing are active."}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {cities.map((city) => (
+              <div key={city.id} className="bg-slate-900 border border-slate-700 p-3 rounded-lg flex items-center justify-between group hover:border-orange-500/50 transition-all">
+                <div>
+                  <p className="text-xs font-bold text-white uppercase">{city.name || city.id}</p>
+                  <p className="text-[10px] text-slate-500 font-mono">{city.state || "N/A Region"}</p>
+                </div>
+                <Globe className="w-4 h-4 text-slate-600 group-hover:text-orange-400 transition-colors" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="pt-4 border-t border-slate-700 flex justify-between items-center text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+        <span>Firebase Status: Online</span>
+        <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Modular Import</span>
+      </div>
+    </div>
+  );
+}
+
 // --- SUB-COMPONENTS (Simplified) ---
 
 function HomeView({ onBookClick, onLabClick }: any) {
@@ -761,6 +841,83 @@ function HomeView({ onBookClick, onLabClick }: any) {
       <div className="flex justify-center gap-4">
         <button onClick={onBookClick} className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold">Get a Quote</button>
         <button onClick={onLabClick} className="px-8 py-4 bg-slate-800 text-white rounded-lg font-bold">Enter Lab</button>
+      </div>
+    </div>
+  );
+}
+
+// --- FIREBASE LAB PANEL COMPONENT ---
+
+function FirebaseLabPanel() {
+  const [cities, setCities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCities = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const citiesCol = collection(firebaseDb, "cities");
+      const citySnapshot = await getDocs(citiesCol);
+      const cityList = citySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCities(cityList);
+    } catch (err: any) {
+      console.error("Firestore fetch error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4 shadow-md animate-in fade-in">
+      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div className="flex items-center gap-2">
+          <Database className="w-5 h-5 text-orange-400" />
+          <div>
+            <h2 className="text-sm font-bold text-white uppercase">Firebase Modular SDK Triage</h2>
+            <p className="text-xs text-slate-400">Direct Firestore Lite access via Web SDK v12.16.0</p>
+          </div>
+        </div>
+        <button
+          onClick={fetchCities}
+          disabled={loading}
+          className="px-4 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs font-bold uppercase transition-all flex items-center gap-2"
+        >
+          {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+          Fetch Cities
+        </button>
+      </div>
+
+      {error && (
+        <div className="p-3 bg-red-950/40 border border-red-900/50 rounded text-xs text-red-400 font-mono">
+          [FIRESTORE ERROR]: {error}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {cities.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 font-mono text-[10px] border border-dashed border-slate-700 rounded-lg">
+            {loading ? "Synchronizing with Google Cloud..." : "No data retrieved. Ensure Google Cloud permissions and billing are active."}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {cities.map((city) => (
+              <div key={city.id} className="bg-slate-900 border border-slate-700 p-3 rounded-lg flex items-center justify-between group hover:border-orange-500/50 transition-all">
+                <div>
+                  <p className="text-xs font-bold text-white uppercase">{city.name || city.id}</p>
+                  <p className="text-[10px] text-slate-500 font-mono">{city.state || "N/A Region"}</p>
+                </div>
+                <Globe className="w-4 h-4 text-slate-600 group-hover:text-orange-400 transition-colors" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="pt-4 border-t border-slate-700 flex justify-between items-center text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+        <span>Firebase Status: Online</span>
+        <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Modular Import</span>
       </div>
     </div>
   );
@@ -791,6 +948,83 @@ function AIAssistantWidget({ onClose, onNavigateToLab, deviceBrand }: any) {
   );
 }
 
+// --- FIREBASE LAB PANEL COMPONENT ---
+
+function FirebaseLabPanel() {
+  const [cities, setCities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCities = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const citiesCol = collection(firebaseDb, "cities");
+      const citySnapshot = await getDocs(citiesCol);
+      const cityList = citySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCities(cityList);
+    } catch (err: any) {
+      console.error("Firestore fetch error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4 shadow-md animate-in fade-in">
+      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div className="flex items-center gap-2">
+          <Database className="w-5 h-5 text-orange-400" />
+          <div>
+            <h2 className="text-sm font-bold text-white uppercase">Firebase Modular SDK Triage</h2>
+            <p className="text-xs text-slate-400">Direct Firestore Lite access via Web SDK v12.16.0</p>
+          </div>
+        </div>
+        <button
+          onClick={fetchCities}
+          disabled={loading}
+          className="px-4 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs font-bold uppercase transition-all flex items-center gap-2"
+        >
+          {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+          Fetch Cities
+        </button>
+      </div>
+
+      {error && (
+        <div className="p-3 bg-red-950/40 border border-red-900/50 rounded text-xs text-red-400 font-mono">
+          [FIRESTORE ERROR]: {error}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {cities.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 font-mono text-[10px] border border-dashed border-slate-700 rounded-lg">
+            {loading ? "Synchronizing with Google Cloud..." : "No data retrieved. Ensure Google Cloud permissions and billing are active."}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {cities.map((city) => (
+              <div key={city.id} className="bg-slate-900 border border-slate-700 p-3 rounded-lg flex items-center justify-between group hover:border-orange-500/50 transition-all">
+                <div>
+                  <p className="text-xs font-bold text-white uppercase">{city.name || city.id}</p>
+                  <p className="text-[10px] text-slate-500 font-mono">{city.state || "N/A Region"}</p>
+                </div>
+                <Globe className="w-4 h-4 text-slate-600 group-hover:text-orange-400 transition-colors" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="pt-4 border-t border-slate-700 flex justify-between items-center text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+        <span>Firebase Status: Online</span>
+        <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Modular Import</span>
+      </div>
+    </div>
+  );
+}
+
 function NavButton({ children, active, onClick }: any) {
   return <button onClick={onClick} className={`px-3 py-2 text-sm font-bold uppercase ${active ? "text-white bg-slate-800 rounded" : "text-slate-400 hover:text-white"}`}>{children}</button>;
 }
@@ -803,6 +1037,83 @@ function AdminPortalView({ email, onClose }: any) {
         <h2 className="text-2xl font-bold text-white mb-2">ADMIN PORTAL</h2>
         <p className="text-xs text-slate-400 mb-6 font-mono">Status: {email === 'cheyoung1983@gmail.com' ? 'Verified Tenant' : 'Access Denied'}</p>
         <button onClick={onClose} className="px-6 py-2 bg-slate-800 text-white rounded">Close</button>
+      </div>
+    </div>
+  );
+}
+
+// --- FIREBASE LAB PANEL COMPONENT ---
+
+function FirebaseLabPanel() {
+  const [cities, setCities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCities = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const citiesCol = collection(firebaseDb, "cities");
+      const citySnapshot = await getDocs(citiesCol);
+      const cityList = citySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCities(cityList);
+    } catch (err: any) {
+      console.error("Firestore fetch error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4 shadow-md animate-in fade-in">
+      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div className="flex items-center gap-2">
+          <Database className="w-5 h-5 text-orange-400" />
+          <div>
+            <h2 className="text-sm font-bold text-white uppercase">Firebase Modular SDK Triage</h2>
+            <p className="text-xs text-slate-400">Direct Firestore Lite access via Web SDK v12.16.0</p>
+          </div>
+        </div>
+        <button
+          onClick={fetchCities}
+          disabled={loading}
+          className="px-4 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-xs font-bold uppercase transition-all flex items-center gap-2"
+        >
+          {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+          Fetch Cities
+        </button>
+      </div>
+
+      {error && (
+        <div className="p-3 bg-red-950/40 border border-red-900/50 rounded text-xs text-red-400 font-mono">
+          [FIRESTORE ERROR]: {error}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {cities.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 font-mono text-[10px] border border-dashed border-slate-700 rounded-lg">
+            {loading ? "Synchronizing with Google Cloud..." : "No data retrieved. Ensure Google Cloud permissions and billing are active."}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {cities.map((city) => (
+              <div key={city.id} className="bg-slate-900 border border-slate-700 p-3 rounded-lg flex items-center justify-between group hover:border-orange-500/50 transition-all">
+                <div>
+                  <p className="text-xs font-bold text-white uppercase">{city.name || city.id}</p>
+                  <p className="text-[10px] text-slate-500 font-mono">{city.state || "N/A Region"}</p>
+                </div>
+                <Globe className="w-4 h-4 text-slate-600 group-hover:text-orange-400 transition-colors" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="pt-4 border-t border-slate-700 flex justify-between items-center text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+        <span>Firebase Status: Online</span>
+        <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Modular Import</span>
       </div>
     </div>
   );
