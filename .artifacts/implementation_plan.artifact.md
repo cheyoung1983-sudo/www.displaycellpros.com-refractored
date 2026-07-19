@@ -1,42 +1,41 @@
-# Implementation Plan - Firebase Email Link Authentication
+# Implementation Plan - Professional Compliance & Mobile Readiness
 
-Integrate Firebase passwordless (Email Link) authentication as a secure, low-friction identity method alongside the existing Vercel architecture.
+Elevate the project's professional posture by establishing a "Mobile Readiness" framework, documenting Android/iOS app signing requirements, and consolidating all cross-platform verification steps (SHA-1, reCAPTCHA, and Redundancy) into the Compliance Lab.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Action Required in Firebase Console**:
-> 1. Enable **Email/Password** provider.
-> 2. Enable **Email link (passwordless sign-in)**.
-> 3. Add your production domain (`displaycellpros.com`) and dev URLs to **Authorized Domains**.
+> [!NOTE]
+> **Native Android Shell**: Since our current architecture is a Vite/React web app, these Android signing steps (SHA-1) are preparations for a **Native Android Shell** (e.g., via Trusted Web Activities or Capacitor) or for linking a future native mobile app to the same Firebase backend.
+>
+> **Keystore Safety**: Never commit your `.keystore` or `.jks` files to this repository. Only track the public SHA-1 fingerprints.
 
 ## Proposed Changes
 
-### 1. Auth Context Enhancement
+### 1. Mobile Readiness Framework
 
-#### [MODIFY] [AuthContext.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/contexts/AuthContext.tsx)
-- Integrate Firebase `onAuthStateChanged` to track real user sessions.
-- Implement `sendSignInLink(email: string)` using `sendSignInLinkToEmail`.
-- Implement `completeSignIn()` logic to handle incoming links on page load using `isSignInWithEmailLink` and `signInWithEmailLink`.
-- Update `logout` to use Firebase `signOut`.
+#### [MODIFY] [OAuthDocumentationPanel.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/OAuthDocumentationPanel.tsx)
+- Add a new **"Mobile Readiness (Android/iOS)"** section to the checklist.
+- Include placeholders for tracking **SHA-1 (Debug)** and **SHA-1 (Release)** fingerprints.
+- Document the `keytool` command provided in your instructions for easy technician access.
 
-### 2. Frontend UI Integration
+### 2. Cross-Platform Identity Consolidation
 
 #### [MODIFY] [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
-- Update the Login Form in the Lab to support the Email Link flow.
-- Add "Magic Link" status indicators (e.g., "Link sent! Check your inbox").
-- Ensure the reCAPTCHA protection is applied before sending the authentication link.
+- Update the **Compliance Lab** tab to clearly distinguish between **Web-Native** (Auth.js) and **Mobile-Native** (Firebase SHA-1) identity requirements.
 
-### 3. Verification Handler
+### 3. Release Checklist Documentation
 
-#### [NEW] [AuthHandler.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/AuthHandler.tsx)
-- A transparent component that runs on application boot to check for the sign-in link in the URL and finalize authentication.
+#### [NEW] [mobile_readiness.artifact.md](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.artifacts/mobile_readiness.artifact.md)
+- Create a dedicated guide summarizing:
+    - How to generate the SHA-1 fingerprints using `keytool` (per your instructions).
+    - How to register the Android app in the `displaycellpros-com` Firebase console.
+    - Integration steps for linking the web backend to a native mobile client.
 
 ## Verification Plan
 
 ### Automated Tests
-- Build verification to ensure `firebase/auth` modular imports are correctly handled.
+- Build verification to ensure no breaking changes in the Documentation component.
 
 ### Manual Verification
-- **Request Flow**: Enter email -> complete reCAPTCHA -> Receive "Link Sent" message.
-- **Completion Flow**: Click link in email -> App opens -> Automatically signed in -> "Welcome [email]" appears in Lab.
+- **Compliance Check**: Open the Lab Portal and verify the new "Mobile Readiness" checklist is visible.
+- **Copy-Paste Test**: Verify the `keytool` command is easy to copy for future use.

@@ -32,6 +32,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
     netlifyOwnership: false,
     openaiAuthorized: false,
     recaptchaSetup: false,
+    androidSigning: false,
   });
 
   const toggleCheck = (key: keyof typeof checklist) => {
@@ -225,6 +226,52 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-[9px] text-slate-500 font-bold uppercase">Status:</span>
                     <span className="text-[10px] text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-900/30 font-bold uppercase tracking-widest">Active Pair Locked</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Task 5: Mobile Readiness (Android Signing) */}
+            <div className={`p-3.5 rounded-lg border transition-all ${checklist.androidSigning ? "bg-slate-950/40 border-slate-800 shadow-inner" : "bg-slate-950/20 border-slate-900"}`}>
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => toggleCheck("androidSigning")}
+                  className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors ${checklist.androidSigning ? "bg-emerald-500 border-emerald-400 text-slate-950" : "border-slate-700 hover:border-slate-500"}`}
+                >
+                  {checklist.androidSigning && <Check className="w-3 h-3 stroke-[3]" />}
+                </button>
+                <div className="flex-1 space-y-1">
+                  <span className="font-bold text-slate-200 text-xs uppercase tracking-tight">Android Self-Signing Verification</span>
+                  <p className="text-[10.5px] text-slate-400 leading-normal">
+                    Register your app's <b>SHA-1 fingerprint</b> in the Firebase Console to enable native mobile authentication.
+                  </p>
+
+                  <div className="mt-3 space-y-2">
+                    <div className="bg-slate-950 p-2 rounded border border-slate-850/60 font-mono text-[9px] text-slate-500">
+                      <span className="text-blue-400 font-bold block mb-1"># EXTRACT SHA-1 (WINDOWS):</span>
+                      <code className="select-all block break-all">
+                        keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore
+                      </code>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[8px] font-bold text-slate-500 uppercase">SHA-1 (DEBUG)</label>
+                        <input
+                          type="text"
+                          placeholder="DA:39:A3:EE:..."
+                          className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[9px] text-slate-300 font-mono outline-none focus:border-blue-500"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[8px] font-bold text-slate-500 uppercase">SHA-1 (RELEASE)</label>
+                        <input
+                          type="text"
+                          placeholder="DA:39:A3:EE:..."
+                          className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[9px] text-slate-300 font-mono outline-none focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
