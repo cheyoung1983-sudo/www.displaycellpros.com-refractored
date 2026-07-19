@@ -1,15 +1,21 @@
 import { Signer } from "@aws-sdk/rds-signer";
 import { awsCredentialsProvider } from "@vercel/oidc-aws-credentials-provider";
-import { attachDatabasePool } from "@vercel/functions";
+import { db as vercelDb } from "@vercel/postgres";
 import { Pool, Client } from "pg";
 
 let pool: Pool | null = null;
 
 /**
  * Returns the initialized PostgreSQL connection pool.
- * Implements lazy loading and defensive checks to prevent crashing if environment variables are not yet populated.
+ * prioritizes Vercel Postgres (Neon) if configured, otherwise falls back to AWS RDS.
  */
-export function getDbPool(): Pool {
+export function getDbPool(): any {
+  // 1. Check for Vercel Postgres (Managed Neon)
+  if (process.env.POSTGRES_URL) {
+    return vercelDb;
+  }
+
+  // 2. Fallback to AWS RDS with IAM OIDC
   if (pool) return pool;
 
   const host = process.env.PGHOST;
@@ -20,18 +26,14 @@ export function getDbPool(): Pool {
   const database = process.env.PGDATABASE || "postgres";
 
   if (!host || !user) {
-    throw new Error(
-      "PostgreSQL configuration variables (PGHOST, PGUSER) are missing. " +
-      "Please configure your environment variables in Vercel or your local .env file."
-    );
+    throw new Error("Database configuration variables are missing.");
   }
 
-  console.log(`[Database] Initializing connection pool to ${host}:${port}/${database} as user ${user}`);
+  console.log(`[Database] Initializing AWS RDS pool to ${host}`);
 
   let passwordOption: any;
 
   if (roleArn) {
-    console.log(`[Database] Configuring AWS IAM OIDC Authentication using role: ${roleArn}`);
     const signer = new Signer({
       hostname: host,
       port: port,
@@ -44,7 +46,6 @@ export function getDbPool(): Pool {
     });
     passwordOption = () => signer.getAuthToken();
   } else {
-    console.log("[Database] No AWS_ROLE_ARN detected. Defaulting to standard password authentication.");
     passwordOption = process.env.PGPASSWORD || "";
   }
 
@@ -57,54 +58,27 @@ export function getDbPool(): Pool {
     ssl: { rejectUnauthorized: false },
   });
 
-  try {
-    attachDatabasePool(pool);
-    console.log("[Database] Attached connection pool to @vercel/functions handler.");
-  } catch (err: any) {
-    console.log(`[Database] Note: attachDatabasePool is not applicable in this runtime context: ${err.message}`);
-  }
-
   return pool;
 }
 
 /**
- * Executes a PostgreSQL query.
- * If an explicit database authentication token (such as a 15-minute temporary AWS IAM sign-in token)
- * is passed, it connects via an isolated single-client instance to avoid polluting or leaking the main Pool.
+ * Executes a PostgreSQL query using the best available client.
  */
-export async function queryWithToken(sql: string, params: any[] = [], token?: string): Promise<any> {
-  const host = process.env.PGHOST;
-  const user = process.env.PGUSER;
-  const port = Number(process.env.PGPORT) || 5432;
-  const database = process.env.PGDATABASE || "postgres";
+export async function queryWithToken(sql: string, params: any[] = []): Promise<any> {
+  const db = getDbPool();
 
-  if (token) {
-    console.log(`[Database] Query executing via explicit token connection to ${host}:${port}/${database} as user ${user}`);
-    const client = new Client({
-      host,
-      user,
-      database,
-      password: token,
-      port,
-      ssl: { rejectUnauthorized: false },
-    });
-    await client.connect();
-    try {
-      const result = await client.query(sql, params);
-      return result;
-    } finally {
-      await client.end().catch((err) => console.warn("[Database] Error closing explicit connection:", err));
-    }
+  // If using Vercel Postgres (Neon)
+  if (process.env.POSTGRES_URL) {
+    return await db.query(sql, params);
   }
 
-  // Fallback to global pool
-  const standardPool = getDbPool();
-  return await standardPool.query(sql, params);
+  // Fallback to AWS RDS pool
+  return await db.query(sql, params);
 }
 
 /**
  * Safe helper to check if database configuration is complete.
  */
 export function isDbConfigured(): boolean {
-  return !!(process.env.PGHOST && process.env.PGUSER);
+  return !!(process.env.POSTGRES_URL || (process.env.PGHOST && process.env.PGUSER));
 }

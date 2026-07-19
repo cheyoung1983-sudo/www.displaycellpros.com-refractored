@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { verifyRecaptcha } from './lib/recaptcha';
 
 const WA_TAX_DATA: Record<string, { city: string; rate: number }> = {
   "98101": { city: "Seattle", rate: 0.1035 },
@@ -40,7 +41,7 @@ function calculateQuoteInternal(issueType: string, deviceTier: string) {
   };
 }
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }

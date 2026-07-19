@@ -1,9 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { OpenAI } from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
 
 function detectSpecsFromText(text: string, currentDetails?: any) {
   const specs = {
@@ -45,20 +42,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   Return valid JSON with 'text' and 'detectedSpecs'.`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemInstruction },
-        ...messages.map((m: any) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.text }))
-      ],
-      response_format: { type: "json_object" }
+    const { text } = await generateText({
+      model: openai('gpt-4o'),
+      system: systemInstruction,
+      messages: messages.map((m: any) => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
+        content: m.text
+      })),
     });
 
-    const content = response.choices[0]?.message?.content || "{}";
-    return res.status(200).json(JSON.parse(content));
+    try {
+      return res.status(200).json(JSON.parse(text));
+    } catch (parseErr) {
+      // If AI returns markdown or non-JSON, attempt extraction or return as text
+      return res.status(200).json({
+        text,
+        detectedSpecs: detectSpecsFromText(messages[messages.length - 1]?.text || "", deviceDetails)
+      });
+    }
 
   } catch (err: any) {
-    console.warn("OpenAI fallback active:", err.message);
+    console.warn("Vercel AI SDK fallback active:", err.message);
     const lastMsg = messages[messages.length - 1]?.text || "";
     const specs = detectSpecsFromText(lastMsg, deviceDetails);
     return res.status(200).json({

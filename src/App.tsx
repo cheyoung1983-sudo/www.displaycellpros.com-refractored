@@ -46,6 +46,7 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { RepairTicket, POSLog, QuoteResponse } from "./types";
 import { Toast, ToastContainer, ToastType } from "./components/ToastNotification";
 import { HardwareScanChart } from "./components/HardwareScanChart";
@@ -216,6 +217,8 @@ export default function App() {
   const [groundingSources, setGroundingSources] = useState<Array<{ title: string; url: string }>>([]);
 
   const [isAdminPortalOpen, setIsAdminPortalOpen] = useState<boolean>(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   // Fetch tickets from AWS RDS via Serverless API
   const fetchFirestoreTickets = async () => {
@@ -240,6 +243,10 @@ export default function App() {
       alert("Please login to enable secure cloud backups.");
       return;
     }
+    if (!captchaToken) {
+      alert("Please complete the bot protection check.");
+      return;
+    }
     const ticketId = "DCP-" + Math.floor(100000 + Math.random() * 900000);
     const newTicket = {
       id: ticketId,
@@ -251,7 +258,8 @@ export default function App() {
       quotedPrice: quote.baseQuote.subtotal,
       tax: quote.taxInfo.calculatedTax,
       discount: quote.discountInfo.amount,
-      total: quote.grandTotal
+      total: quote.grandTotal,
+      captchaToken
     };
 
     try {
@@ -264,6 +272,8 @@ export default function App() {
       if (res.ok) {
         setTicketCreationSuccess(true);
         setTimeout(() => setTicketCreationSuccess(false), 3000);
+        setCaptchaToken(null);
+        recaptchaRef.current?.reset();
         fetchFirestoreTickets();
       } else {
         const err = await res.json();
@@ -680,7 +690,24 @@ export default function App() {
                     <div className="flex justify-between"><span>Subtotal</span><span>${quote.subtotal.toFixed(2)}</span></div>
                     <div className="flex justify-between text-blue-400 font-bold"><span>Total</span><span>${quote.grandTotal.toFixed(2)}</span></div>
                   </div>
-                  <button onClick={handleBookAppointment} className="w-full mt-5 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded shadow-lg uppercase tracking-widest">📅 Book Now</button>
+
+                  <div className="mt-4">
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey="6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl"
+                      onChange={(token) => setCaptchaToken(token)}
+                      theme="dark"
+                      size="compact"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleBookAppointment}
+                    disabled={!captchaToken}
+                    className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded shadow-lg uppercase tracking-widest disabled:opacity-50"
+                  >
+                    📅 Book Now
+                  </button>
                 </section>
               </aside>
             </div>
