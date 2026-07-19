@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.1.0",
-    "@auth/core": "^0.34.2",
+    "@auth/core": "^0.41.2",
     "@auth/pg-adapter": "^1.7.0",
     "@aws-sdk/rds-signer": "^3.1089.0",
     "@tailwindcss/vite": "^4.1.14",
