@@ -1,9 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  onAuthStateChanged,
+  signOut,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
 interface User {
   email: string;
   name?: string;
   image?: string;
+  uid: string;
 }
 
 interface AuthContextType {
@@ -11,6 +21,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string) => Promise<void>;
   logout: () => Promise<void>;
+  sendMagicLink: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,39 +30,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // In a real Vercel/Auth.js setup, we would fetch /api/auth/session
+  // Listen for Firebase Auth state changes
   useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const res = await fetch('/api/auth/session');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.user) setUser(data.user);
-        }
-      } catch (err) {
-        console.error('Session fetch failed', err);
-      } finally {
-        setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser && firebaseUser.email) {
+        setUser({
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          image: firebaseUser.photoURL || undefined,
+          uid: firebaseUser.uid
+        });
+      } else {
+        setUser(null);
       }
-    };
-    fetchSession();
+      setLoading(false);
+    });
+
+    // Check if the page was opened via a sign-in link
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        email = window.prompt('Please provide your email for confirmation');
+      }
+      if (email) {
+        signInWithEmailLink(auth, email, window.location.href)
+          .then(() => {
+            window.localStorage.removeItem('emailForSignIn');
+          })
+          .catch((error) => {
+            console.error('Sign-in link error:', error);
+          });
+      }
+    }
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string) => {
-    // This would trigger a Magic Link or OAuth flow
-    // For the demo/migration, we'll set the user locally if the email is valid
+    // Legacy/Mock login - now replaced by sendMagicLink for real Firebase flow
     if (email) {
-      setUser({ email, name: email.split('@')[0] });
+      setUser({ email, name: email.split('@')[0], uid: 'mock-id' });
     }
   };
 
+  const sendMagicLink = async (email: string) => {
+    const actionCodeSettings = {
+      url: window.location.origin,
+      handleCodeInApp: true,
+    };
+
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    window.localStorage.setItem('emailForSignIn', email);
+  };
+
   const logout = async () => {
-    setUser(null);
-    await fetch('/api/auth/signout', { method: 'POST' });
+    await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, sendMagicLink }}>
       {children}
     </AuthContext.Provider>
   );

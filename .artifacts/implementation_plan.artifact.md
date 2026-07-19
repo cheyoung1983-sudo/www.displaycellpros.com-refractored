@@ -1,37 +1,42 @@
-# Implementation Plan - Firebase Re-Integration
+# Implementation Plan - Firebase Email Link Authentication
 
-Restore Firebase SDK integration alongside the existing Vercel/AWS architecture to support modular access to Firestore, Authentication, and other Google services.
+Integrate Firebase passwordless (Email Link) authentication as a secure, low-friction identity method alongside the existing Vercel architecture.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> This reverses the "De-Google" shift for specific services. We will now have BOTH **Firebase/Firestore** and **AWS RDS** capability, allowing for hybrid data strategies.
+> **Action Required in Firebase Console**:
+> 1. Enable **Email/Password** provider.
+> 2. Enable **Email link (passwordless sign-in)**.
+> 3. Add your production domain (`displaycellpros.com`) and dev URLs to **Authorized Domains**.
 
 ## Proposed Changes
 
-### 1. Environment Restoration
-- **Restore Firebase Keys**: Add `VITE_FIREBASE_*` variables back to `.env` to support client-side SDK initialization.
+### 1. Auth Context Enhancement
 
-### 2. Dependency Management
-- **Install Firebase**: `npm install firebase` to add the modular web SDK.
+#### [MODIFY] [AuthContext.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/contexts/AuthContext.tsx)
+- Integrate Firebase `onAuthStateChanged` to track real user sessions.
+- Implement `sendSignInLink(email: string)` using `sendSignInLinkToEmail`.
+- Implement `completeSignIn()` logic to handle incoming links on page load using `isSignInWithEmailLink` and `signInWithEmailLink`.
+- Update `logout` to use Firebase `signOut`.
 
-### 3. SDK Initialization
+### 2. Frontend UI Integration
 
-#### [NEW] [src/lib/firebase.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/firebase.ts)
-- Initialize the Firebase App object using `VITE_` environment variables.
-- Export `app`, `auth`, and `db` (Firestore) for application-wide use.
+#### [MODIFY] [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
+- Update the Login Form in the Lab to support the Email Link flow.
+- Add "Magic Link" status indicators (e.g., "Link sent! Check your inbox").
+- Ensure the reCAPTCHA protection is applied before sending the authentication link.
 
-### 4. Firestore Integration Example
+### 3. Verification Handler
 
-#### [MODIFY] [src/App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
-- Implement a `FirebaseStoreTest` component or update the Lab to show a list of items (e.g., "Cities" or "Diagnostic Templates") fetched from Firestore.
+#### [NEW] [AuthHandler.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/AuthHandler.tsx)
+- A transparent component that runs on application boot to check for the sign-in link in the URL and finalize authentication.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` to ensure the modular SDK is correctly tree-shaken by Vite.
-- Verify Firebase initialization doesn't crash on boot.
+- Build verification to ensure `firebase/auth` modular imports are correctly handled.
 
 ### Manual Verification
-- **Connection Check**: Open the Lab Portal and confirm "Firebase: Connected" status.
-- **Data Fetch**: Verify that a test collection can be retrieved from Firestore.
+- **Request Flow**: Enter email -> complete reCAPTCHA -> Receive "Link Sent" message.
+- **Completion Flow**: Click link in email -> App opens -> Automatically signed in -> "Welcome [email]" appears in Lab.
