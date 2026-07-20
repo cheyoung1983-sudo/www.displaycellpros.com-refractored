@@ -68,7 +68,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
       name: "Netlify (Redundancy)",
       status: "Active",
       purpose: "Global CDN failover and site reliability mirror.",
-      icon: <Server className="w-4 h-4 text-cyan-400" />
+      icon: <img src="https://api.netlify.com/api/v1/badges/010e7c28-bc7a-4735-b252-d4da98c9c9f3/deploy-status" alt="Netlify Status" className="w-16 h-4" />
     },
     {
       name: "OpenAI (Verification)",
