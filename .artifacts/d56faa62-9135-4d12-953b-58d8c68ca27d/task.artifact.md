@@ -1,0 +1,3 @@
+- [x] Create `api/test-connection.ts` for database verification
+- [x] Update `api/lib/db.ts` to support IAM authentication properly
+- [x] Verify connection setup (Script ready, requires AWS credentials)

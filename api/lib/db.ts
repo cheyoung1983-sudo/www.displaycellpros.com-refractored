@@ -33,20 +33,30 @@ export function getDbPool(): any {
 
   let passwordOption: any;
 
-  if (roleArn) {
-    const signer = new Signer({
+  // Use IAM authentication if Role ARN is provided or if explicit IAM flag is set
+  const useIAM = roleArn || process.env.USE_RDS_IAM === "true";
+
+  if (useIAM) {
+    const signerConfig: any = {
       hostname: host,
       port: port,
       username: user,
       region: region,
-      credentials: awsCredentialsProvider({
+    };
+
+    if (roleArn) {
+      signerConfig.credentials = awsCredentialsProvider({
         roleArn: roleArn,
         clientConfig: { region: region },
-      }),
-    });
+      });
+    }
+
+    const signer = new Signer(signerConfig);
     passwordOption = () => signer.getAuthToken();
+    console.log(`[Database] Using RDS IAM authentication`);
   } else {
     passwordOption = process.env.PGPASSWORD || "";
+    console.log(`[Database] Using standard password authentication`);
   }
 
   pool = new Pool({
