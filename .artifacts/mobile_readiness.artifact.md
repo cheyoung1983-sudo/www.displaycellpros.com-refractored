@@ -12,6 +12,10 @@ To link a native Android application (or a Trusted Web Activity) to our Firebase
 ### 1. Generate SHA-1 Fingerprints
 Use the Java `keytool` utility to extract the SHA-1 fingerprints from your keystore.
 
+> [!TIP]
+> **Troubleshooting 'keytool' not recognized**: If you get a "term 'keytool' is not recognized" error, you can use the version bundled with Android Studio by using the full path:
+> `& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -list -v ...`
+
 > [!IMPORTANT]
 > **Keystore Security**: Keep your `.jks` or `.keystore` files in a secure offline location. Never commit them to version control.
 
@@ -23,9 +27,9 @@ keytool -list -v -alias <your-key-name> -keystore <path-to-production-keystore>
 #### Debug Fingerprint (Development)
 **Windows**:
 ```bash
-keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore
+SHA1: F8:EC:58:A4:D1:D4:AB:00:59:E6:93:45:44:1B:5A:CD:CD:86:64:0E
 ```
-*Note: Default password is `android`.*
+*Note: Generated on 2026-07-19.*
 
 ### 2. Register with Firebase
 1. Open the [Firebase Console](https://console.firebase.google.com/project/displaycellpros-com/settings/general).

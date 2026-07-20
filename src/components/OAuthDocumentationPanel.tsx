@@ -32,7 +32,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
     netlifyOwnership: false,
     openaiAuthorized: false,
     recaptchaSetup: false,
-    androidSigning: false,
+    androidSigning: true,
     clientIdSafelisting: false,
   });
 
@@ -252,10 +252,23 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
 
                   <div className="mt-3 space-y-2">
                     <div className="bg-slate-950 p-2 rounded border border-slate-850/60 font-mono text-[9px] text-slate-500">
-                      <span className="text-blue-400 font-bold block mb-1"># EXTRACT SHA-1 (WINDOWS):</span>
-                      <code className="select-all block break-all">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-blue-400 font-bold block"># EXTRACT SHA-1 (WINDOWS):</span>
+                        <span className="text-[8px] text-slate-600 font-medium italic">Hint: Use full path if keytool not found</span>
+                      </div>
+                      <code className="select-all block break-all mb-2">
                         keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore
                       </code>
+                      <div className="pt-1.5 border-t border-slate-900">
+                        <span className="text-slate-600 font-bold block mb-1"># ANDROID STUDIO FALLBACK:</span>
+                        <code className="select-all block break-all text-slate-400 opacity-60 hover:opacity-100 transition-opacity mb-2">
+                          & "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore
+                        </code>
+                        <span className="text-amber-600/80 font-bold block mb-1"># IF KEYSTORE MISSING (GENERATE):</span>
+                        <code className="select-all block break-all text-amber-400/60 opacity-80 hover:opacity-100 transition-opacity">
+                          & "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkey -v -keystore "%USERPROFILE%\.android\debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+                        </code>
+                      </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-2">
@@ -263,15 +276,15 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                         <label className="text-[8px] font-bold text-slate-500 uppercase">SHA-1 (DEBUG)</label>
                         <input
                           type="text"
-                          placeholder="DA:39:A3:EE:..."
-                          className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[9px] text-slate-300 font-mono outline-none focus:border-blue-500"
+                          defaultValue="F8:EC:58:A4:D1:D4:AB:00:59:E6:93:45:44:1B:5A:CD:CD:86:64:0E"
+                          className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[9px] text-emerald-400 font-mono outline-none focus:border-blue-500"
                         />
                       </div>
                       <div className="flex-1 space-y-1">
                         <label className="text-[8px] font-bold text-slate-500 uppercase">SHA-1 (RELEASE)</label>
                         <input
                           type="text"
-                          placeholder="DA:39:A3:EE:..."
+                          placeholder="Register production key here..."
                           className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[9px] text-slate-300 font-mono outline-none focus:border-blue-500"
                         />
                       </div>
