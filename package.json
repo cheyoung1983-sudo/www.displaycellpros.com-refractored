@@ -11,8 +11,8 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.1.0",
-    "@auth/core": "^0.34.2",
+    "@ai-sdk/openai": "^4.0.16",
+    "@auth/core": "^0.41.2",
     "@auth/pg-adapter": "^1.7.0",
     "@aws-sdk/rds-signer": "^3.1090.0",
     "@tailwindcss/vite": "^4.1.14",
@@ -22,7 +22,7 @@
     "@vercel/postgres": "^0.10.0",
     "@vercel/speed-insights": "^2.0.0",
     "@vitejs/plugin-react": "^5.0.4",
-    "ai": "^4.1.0",
+    "ai": "^7.0.31",
     "dotenv": "^17.2.3",
     "firebase": "^12.16.0",
     "jspdf": "^4.2.1",
@@ -48,5 +48,13 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.1": true,
+    "core-js@3.49.0": true,
+    "bufferutil@4.1.0": true,
+    "protobufjs@7.6.5": true,
+    "@firebase/util@1.15.1": true
   }
 }
