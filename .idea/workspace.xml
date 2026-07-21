@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts." />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts.">
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vercelignore" beforeDir="false" afterPath="$PROJECT_DIR$/.vercelignore" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,25 +28,25 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "cheyoung1983-sudo"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;cheyoung1983-sudo&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/cheyoung1983-sudo/www.displaycellpros.com-refractored.git",
-    "accountId": "bd881d76-3260-4d09-b506-f0e6d5bf747f"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/cheyoung1983-sudo/www.displaycellpros.com-refractored.git&quot;,
+    &quot;accountId&quot;: &quot;bd881d76-3260-4d09-b506-f0e6d5bf747f&quot;
   }
-}]]></component>
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3Gp0itf8zyVYcA7b8mpNiiSkzLy" />
   <component name="ProjectSessionTemplates">
     <option name="panelTemplate">
@@ -77,6 +84,7 @@
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
+    "settings.editor.selected.configurable": "com.google.gct.login2.settings.GoogleLoginApplicationSettingsConfigurableProvider",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>

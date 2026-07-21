@@ -1,6 +1,3 @@
-- `[x]` Create dynamic sitemap generator script in `scripts/generate-sitemap.ts`.
-- `[x]` Add `sitemap` script and `postbuild` hook to `package.json`.
-- `[x]` Update `public/robots.txt` with the correct production domain.
-- `[x]` Generate the initial `public/sitemap.xml` using the new script.
-- `[x]` Verify the generated XML and build process.
-- `[ ]` Create walkthrough artifact.
+- `[x]` Remove `scripts` from `.vercelignore` to allow build-time access.
+- `[x]` Verify `.vercelignore` content.
+- `[x]` Create walkthrough.

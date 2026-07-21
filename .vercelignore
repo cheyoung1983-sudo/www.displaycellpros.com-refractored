@@ -9,7 +9,6 @@ dist
 server_err.log
 server_bg.log
 server.log
-scripts
 Dockerfile
 deploy.sh
 app.yaml
