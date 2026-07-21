@@ -15,6 +15,7 @@
     "@auth/core": "^0.41.2",
     "@auth/pg-adapter": "^1.7.0",
     "@aws-sdk/rds-signer": "^3.1091.0",
+    "@google-cloud/recaptcha-enterprise": "^5.13.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/react-google-recaptcha": "^2.1.9",
     "@vercel/functions": "^3.7.5",

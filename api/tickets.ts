@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { id, customerName, device, issueType, status, quotedPrice, tax, discount, total, captchaToken } = req.body;
 
       // Verify reCAPTCHA
-      const isValidCaptcha = await verifyRecaptcha(captchaToken);
+      const isValidCaptcha = await verifyRecaptcha(captchaToken, 'SUBMIT_TICKET');
       if (!isValidCaptcha) {
         return res.status(403).json({ error: 'Bot protection check failed. Please try again.' });
       }

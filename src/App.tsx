@@ -696,7 +696,7 @@ export default function App() {
                       {!captchaToken && (
                         <div className="transform scale-[0.6] origin-right -mt-1">
                           <ReCAPTCHA
-                            sitekey="6LcIwSUtAAAAAI6dARfSTSTKXCgzcdhQsH7PJ6Gw"
+                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeqGV0tAAAAAC_MQbIkcyZa2L-LvTNhSlmxKaLo"}
                             onChange={(token) => setCaptchaToken(token)}
                             theme="dark"
                             size="compact"
@@ -727,7 +727,7 @@ export default function App() {
                   {authUser && !captchaToken && (
                     <div className="pt-2">
                       <ReCAPTCHA
-                        sitekey="6LcIwSUtAAAAAI6dARfSTSTKXCgzcdhQsH7PJ6Gw"
+                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeqGV0tAAAAAC_MQbIkcyZa2L-LvTNhSlmxKaLo"}
                         onChange={(token) => setCaptchaToken(token)}
                         theme="dark"
                         size="compact"
@@ -790,7 +790,7 @@ export default function App() {
                   <div className="mt-4">
                     <ReCAPTCHA
                       ref={recaptchaRef}
-                      sitekey="6LcIwSUtAAAAAI6dARfSTSTKXCgzcdhQsH7PJ6Gw"
+                      sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeqGV0tAAAAAC_MQbIkcyZa2L-LvTNhSlmxKaLo"}
                       onChange={(token) => setCaptchaToken(token)}
                       theme="dark"
                       size="compact"

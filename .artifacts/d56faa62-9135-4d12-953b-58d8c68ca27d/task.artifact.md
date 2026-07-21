@@ -3,3 +3,6 @@
 - [x] Setup Agent Toolkit
 - [x] Integrate `attachDatabasePool` in `api/lib/db.ts`
 - [x] Verify Installation
+- [x] Update reCAPTCHA Enterprise Keys in environment files
+- [x] Refactor `App.tsx` to use environment variables for reCAPTCHA
+- [x] Update `api/lib/recaptcha.ts` with new secret and Enterprise SDK

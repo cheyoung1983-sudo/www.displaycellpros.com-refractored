@@ -1,39 +1,49 @@
-# Implementation Plan: Refactor Database Access to Singleton Pattern
+# Implementation Plan: Upgrade to reCAPTCHA Enterprise
 
-The goal is to refactor `api/lib/db.ts` to use the latest Vercel OIDC pattern provided in your snippet. This simplifies the connection management into a singleton `pool` and provides standardized `query` and `withConnection` exports.
+The goal is to upgrade the reCAPTCHA integration from the legacy `siteverify` API to the modern **reCAPTCHA Enterprise API** using the `@google-cloud/recaptcha-enterprise` SDK. This provides better security and detailed risk assessments.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **API Change:** This change replaces `queryWithToken` and `getDbPool` with `query` and `withConnection`. I will need to update all call sites in the `api/` directory to ensure the app continues to function.
+> **Google Cloud Credentials:** The `@google-cloud/recaptcha-enterprise` library requires authentication to Google Cloud. This typically requires a Service Account Key or OIDC configured in your environment. I will implement the code, but you may need to add `GOOGLE_APPLICATION_CREDENTIALS` to your Vercel/Local environment if it's not already there.
 
 > [!NOTE]
-> **Vercel Functions Update:** The snippet uses `@vercel/functions/oidc`. I will verify if this requires an update to the `@vercel/functions` package or if it works with the current version (`3.7.5`).
+> **Key Update:** I will update the project to use the new keys you provided:
+> - Site Key: `6LeqGV0tAAAAAC_MQbIkcyZa2L-LvTNhSlmxKaLo`
+> - Project ID: `displaycellpros-com`
 
 ## Proposed Changes
 
-### [Database Library]
+### [Dependencies]
 
-#### [MODIFY] [db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/lib/db.ts)
-- Replace the entire content with the provided singleton pattern.
-- Use `import { awsCredentialsProvider } from "@vercel/functions/oidc";`.
+#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
+- Add `@google-cloud/recaptcha-enterprise` dependency.
 
-### [API Handlers]
+### [Environment Configuration]
 
-#### [MODIFY] [movies.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/movies.ts)
-- Update import from `queryWithToken` to `query`.
-- Update call site.
+#### [MODIFY] [.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env.local) & [.env](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env)
+- Set `GOOGLE_CLOUD_PROJECT_ID="displaycellpros-com"`.
+- Update `VITE_RECAPTCHA_SITE_KEY` with the new key.
 
-#### [MODIFY] [rds-status.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/rds-status.ts)
-- Update imports and call sites.
+### [Backend Integration]
+
+#### [MODIFY] [recaptcha.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/lib/recaptcha.ts)
+- Replace legacy fetch-based verification with the `RecaptchaEnterpriseServiceClient`.
+- Update `verifyRecaptcha` to accept an optional `action` name for score-based validation.
 
 #### [MODIFY] [tickets.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/tickets.ts)
-- Update imports and call sites.
+- Update the verification call to include an action name (e.g., `SUBMIT_TICKET`).
+
+### [Frontend Integration]
+
+#### [MODIFY] [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
+- Replace hardcoded `sitekey` with `import.meta.env.VITE_RECAPTCHA_SITE_KEY`.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npx tsx api/test-connection.ts` (Note: I will need to update this test script as well since it relies on the old `db.ts` structure or re-implement it to test the new exports).
+- Run `npm run dev` and check for any build-time errors.
+- (Manual) Verify the reCAPTCHA checkbox still appears and works on the login and triage pages.
 
 ### Manual Verification
-- Verify that the RDS diagnostics panel or any database-driven UI still loads correctly using `vercel dev`.
+- Test a ticket submission and check the server logs (or Vercel logs) to ensure the Enterprise assessment is being created successfully.
