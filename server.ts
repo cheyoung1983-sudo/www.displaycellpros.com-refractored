@@ -14,7 +14,7 @@ dotenv.config();
 
 // Initialize Express
 export const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // Security & Performance Middleware
 app.use(helmet({

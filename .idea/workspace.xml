@@ -4,16 +4,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="backend stability and error handling&#10;&#10;- Implement global error handler and try-catch blocks in `server.ts` to prevent unhandled rejections.&#10;- Add catch-all 404 JSON response for unhandled `/api/*` routes.&#10;- Add `/api/auth/session` mock endpoint to improve client-side compatibility.&#10;- Update `bypassPaths` and implementation plan to reflect stability and performance focus.">
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000.">
       <change beforePath="$PROJECT_DIR$/server.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -227,7 +219,31 @@
       <option name="project" value="LOCAL" />
       <updated>1784669271133</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="align Edge Config implementation with Vercel best practices&#10;&#10;- Add `dotenv-expand` and update `vite.config.ts` to correctly populate `process.env` during local development.&#10;- Refactor `middleware.ts` and `server.ts` to use defensive `has()` checks before retrieving values from Edge Config.&#10;- Update project documentation and implementation artifacts to reflect focus on Edge Config stability and performance.&#10;- Improve fallback handling for the `/welcome` route when Edge Config keys are missing.">
+      <option name="closed" value="true" />
+      <created>1784670414639</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1784670414639</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000.">
+      <option name="closed" value="true" />
+      <created>1784670436100</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1784670436100</updated>
+    </task>
+    <task id="LOCAL-00019" summary="add Vercel Container Registry (VCR) workflow to vercel-deploy.sh">
+      <option name="closed" value="true" />
+      <created>1784670455472</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1784670455472</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -248,6 +264,8 @@
     <MESSAGE value="Add Google Analytics tracking script to index.html" />
     <MESSAGE value="Add Google Search Console and Analytics tracking" />
     <MESSAGE value="backend stability and error handling&#10;&#10;- Implement global error handler and try-catch blocks in `server.ts` to prevent unhandled rejections.&#10;- Add catch-all 404 JSON response for unhandled `/api/*` routes.&#10;- Add `/api/auth/session` mock endpoint to improve client-side compatibility.&#10;- Update `bypassPaths` and implementation plan to reflect stability and performance focus." />
-    <option name="LAST_COMMIT_MESSAGE" value="backend stability and error handling&#10;&#10;- Implement global error handler and try-catch blocks in `server.ts` to prevent unhandled rejections.&#10;- Add catch-all 404 JSON response for unhandled `/api/*` routes.&#10;- Add `/api/auth/session` mock endpoint to improve client-side compatibility.&#10;- Update `bypassPaths` and implementation plan to reflect stability and performance focus." />
+    <MESSAGE value="align Edge Config implementation with Vercel best practices&#10;&#10;- Add `dotenv-expand` and update `vite.config.ts` to correctly populate `process.env` during local development.&#10;- Refactor `middleware.ts` and `server.ts` to use defensive `has()` checks before retrieving values from Edge Config.&#10;- Update project documentation and implementation artifacts to reflect focus on Edge Config stability and performance.&#10;- Improve fallback handling for the `/welcome` route when Edge Config keys are missing." />
+    <MESSAGE value="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000." />
   </component>
 </project>

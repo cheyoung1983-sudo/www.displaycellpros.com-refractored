@@ -1,39 +1,39 @@
-# Implementation Plan - Vercel Container Registry (VCR) Integration
+# Implementation Plan - CI/CD Pipeline and Windows Deployment Support
 
-The goal is to prepare the project for container-based deployment using Vercel Container Registry (VCR). This allows the application to run as a containerized Vercel Function.
+The goal is to automate the deployment process to **Vercel Container Registry (VCR)** using GitHub Actions and provide native PowerShell support for local Windows development.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> To support VCR, I am re-introducing a `Dockerfile` (optimized as `Dockerfile.vercel`).
->
-> **Note on Port Configuration**: I will update `server.ts` to listen on `process.env.PORT || 80`. Vercel's container runtime expects applications to listen on port 80 by default.
+> To enable the GitHub Actions pipeline, you will need to add the following **Repository Secrets** in your GitHub project settings (`Settings > Secrets and variables > Actions`):
+> - `VERCEL_TOKEN`: Your Vercel Access Token.
+> - `VERCEL_ORG_ID`: Your Vercel Team ID (`team_zl2oSyklLa3nDVTel7ImA4rV`).
+> - `VERCEL_PROJECT_ID`: Your Vercel Project ID (`prj_QKxT51u4q2771aPcCPGQMo1xJXYB`).
 
 ## Proposed Changes
 
-### Infrastructure & Containerization
+### CI/CD Automation
 
-#### [NEW] [Dockerfile.vercel](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/Dockerfile.vercel)
-- Create a multi-stage build for a Node.js 22 alpine image.
-- Stage 1: Build the Vite frontend and bundle the Express server.
-- Stage 2: Production runtime with minimal dependencies.
+#### [NEW] [deploy.yml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.github/workflows/deploy.yml)
+- Create a GitHub Action that triggers on push to `main`.
+- **Build Verification**: Runs `npm run build` and `npm run lint` in a clean environment.
+- **Docker Buildx**: Configures Buildx for OCI-compliant builds with `zstd` compression (optimized for Vercel cold starts).
+- **VCR Push**: Authenticates with Vercel and pushes the image to `vcr.vercel.com/dcpllc/www.displaycellpros.com-refractored/dcp-depository:latest`.
+- **Automatic Deployment**: Triggers a Vercel deployment using the newly pushed container.
 
-### Backend Updates
+### Local Windows Support
 
-#### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Update the listener to use the `PORT` environment variable, defaulting to 80 for container compatibility.
-
-### Deployment Tooling
-
-#### [MODIFY] [vercel-deploy.sh](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel-deploy.sh)
-- Add a new option for **Container-based Deployment**.
-- Include the `vercel vcr login docker` command and build recommendations.
+#### [NEW] [vercel-deploy.ps1](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel-deploy.ps1)
+- Create a native PowerShell version of the deployment script.
+- Synchronizes secrets from Vercel to local `.env.local` using the Vercel CLI.
+- Provides an interactive menu for choosing between Preview and Production deployments.
+- Replaces the need for `bash` or a local Docker installation for standard deployments.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` to ensure the bundling logic used in the Dockerfile is valid.
+- The GitHub Action itself will serve as the verification. I will review the YAML syntax for correctness.
 
 ### Manual Verification
-- The user will need to run the `docker build` and `docker push` commands from a machine with Docker installed.
-- I will provide the recommended `docker buildx` command for optimal compression and cold-start performance on Vercel.
+- The user will need to push the code and check the "Actions" tab in GitHub to see the pipeline run.
+- The user can test `.\vercel-deploy.ps1` in their PowerShell terminal.
