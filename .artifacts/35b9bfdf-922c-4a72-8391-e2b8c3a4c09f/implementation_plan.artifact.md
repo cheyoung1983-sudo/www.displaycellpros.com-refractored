@@ -1,33 +1,39 @@
-# Implementation Plan - Consolidate API for Vercel Hobby Plan
+# Implementation Plan - Sitemap Best Practices
 
-The goal is to resolve the Vercel Hobby plan limit of 12 serverless functions by consolidating all API endpoints into a single Express application entry point.
+The goal is to implement a robust, standard-compliant sitemap for the Display & Cell Pros application, ensuring correct domain names, logical routes for SEO, and automated generation.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> I am merging all standalone serverless functions (Stream Chat tokens, persistent Tickets, etc.) into the main `server.ts` file. This ensures the entire backend runs as a single function, staying well within the Hobby plan limits while maintaining all existing features.
+> [!NOTE]
+> The current `sitemap.xml` uses an incorrect domain (`displayandcellpros.com`). I will update this to the correct production domain (`www.displaycellpros.com`) found in the project's environment configuration.
 
 ## Proposed Changes
 
-### Backend Consolidation
+### Configuration & Scripts
 
-#### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Add `GET /api/tickets` endpoint with database persistence support.
-- Add `POST /api/getStreamUserToken` endpoint for Stream Chat integration.
-- Update `POST /api/create-ticket` to use the database when configured.
-- Add mock session handling to mirror the current `auth-utils.ts` logic until a full Auth solution is integrated.
+#### [NEW] [generate-sitemap.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/scripts/generate-sitemap.ts)
+- Create a TypeScript script to generate `public/sitemap.xml` dynamically.
+- Uses `APP_URL` from environment variables.
+- Includes logical routes identified from the application logic: `/`, `/services`, `/b2b`, `/store`, `/privacy`, and `/lab`.
+- Automatically sets `lastmod` to the current date and defines reasonable `changefreq` and `priority` values.
 
-### Filesystem Reorganization
+#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)
+- Add a `sitemap` script: `tsx scripts/generate-sitemap.ts`.
+- Add a `postbuild` hook to ensure the sitemap is updated after every production build.
 
-#### [DELETE/MOVE] `api/*.ts` (except `index.ts`)
-- Move redundant standalone functions to `api/_legacy/` to prevent Vercel from provisioning them as separate entry points.
-- Move utility scripts (`setup-db.ts`, `test-connection.ts`) to the `scripts/` directory.
+### Public Assets
+
+#### [MODIFY] [robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/robots.txt)
+- Update the `Sitemap` directive to point to the correct canonical URL.
+
+#### [MODIFY] [sitemap.xml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/sitemap.xml)
+- Correct the domain name and structure (the automated script will manage this file going forward).
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint` to verify combined logic and dependencies.
-- Verify `vercel.json` rewrites still point to the single entry point.
+- Run `npm run sitemap` and verify the generated `public/sitemap.xml` file for valid XML syntax and correct URLs.
+- Run `npm run build` to verify the `postbuild` hook executes correctly.
 
 ### Manual Verification
-- Review the consolidated `server.ts` to ensure no business logic from the standalone functions was lost.
+- Review the `robots.txt` file to ensure it correctly references the new sitemap URL.

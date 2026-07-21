@@ -1,29 +1,34 @@
-# Walkthrough - API Consolidation and Hobby Plan Optimization
+# Walkthrough - Sitemap Implementation
 
-I have consolidated the backend API into a single Express application to resolve Vercel's Hobby plan limit of 12 serverless functions.
+I have implemented a dynamic sitemap generation system for the Display & Cell Pros application to improve SEO and ensure canonical consistency.
 
 ## Changes Made
 
-### Backend Consolidation
-- **[server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)**:
-    - Integrated **Stream Chat** token generation logic directly into the main Express app (`POST /api/getStreamUserToken`).
-    - Enhanced **Ticket Management** with database persistence support. If a database is configured, tickets are now stored and retrieved from PostgreSQL; otherwise, the app gracefully falls back to mock data.
-    - Integrated **reCAPTCHA Enterprise** verification directly into the ticket creation flow.
-    - Added a mock session helper to maintain feature parity with the previous standalone auth utilities.
+### Dynamic Sitemap Generation
+- **[scripts/generate-sitemap.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/scripts/generate-sitemap.ts)**:
+    - Created a TypeScript script that automatically generates `public/sitemap.xml`.
+    - It uses the `APP_URL` from your environment variables to ensure all links are canonical.
+    - It includes all logical routes of your application (`/`, `/services`, `/b2b`, `/store`, `/privacy`, and `/lab`) with optimized priorities and change frequencies.
 
-### Filesystem Cleanup & Optimization
-- **API Entry Point**: Consolidated all `api/*.ts` entry points into a single file: `api/index.ts`. This reduces the serverless function count from 11 to 1, ensuring compliance with the Vercel Hobby plan.
-- **Utility Scripts**: Moved `setup-db.ts` and `test-connection.ts` from the `api/` folder to `scripts/` and updated them to use the centralized database configuration in root `db.ts`.
-- **Removed Redundancy**: Deleted the `api/lib/` and other redundant standalone function files after successfully merging their logic into the core server.
+### Automation
+- **[package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)**:
+    - Added a `sitemap` command to run the generator script.
+    - Added a `postbuild` hook that automatically updates the sitemap after every production build, ensuring your SEO data is always fresh.
+
+### SEO Correction
+- **[public/robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/robots.txt)**:
+    - Fixed the `Sitemap` directive to point to the correct production domain (`www.displaycellpros.com`).
+- **[public/sitemap.xml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/sitemap.xml)**:
+    - Updated the initial file with the correct domain and route structure.
 
 ## Verification Results
 
-### Linting & Build
-- **`npm run lint`**: Successfully passed with zero errors. All broken imports caused by file moves have been corrected.
-- **Function Count**: Verified that only `api/index.ts` remains as a root entry point in the `api/` directory.
+### Generation Check
+- Successfully ran `npm run sitemap` which produced a valid XML file at `public/sitemap.xml`.
+- Verified that all URLs in the sitemap use the correct `https://www.displaycellpros.com` prefix.
 
-### Feature Parity
-- All previous endpoints (`tax-lookup`, `triage`, `generate-quote`, etc.) are still handled by the Express app and correctly routed by Vercel's `rewrites` configuration.
+### Build Integration
+- Verified that the `postbuild` script is correctly configured to keep the sitemap updated during deployment.
 
 > [!TIP]
-> Your project is now optimized for the Vercel Hobby plan. Any new API endpoints should be added as routes in `server.ts` rather than new files in the `api/` directory.
+> You don't need to manually edit `sitemap.xml` anymore. If you add new pages to the app, simply update the `routes` array in `scripts/generate-sitemap.ts`.

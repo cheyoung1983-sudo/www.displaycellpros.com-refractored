@@ -1,6 +1,6 @@
-- `[x]` Merge Stream Chat token logic into `server.ts`.
-- `[x]` Merge persistent Ticket DB logic into `server.ts`.
-- `[x]` Relocate/Delete redundant `api/*.ts` files to resolve 12-function limit.
-- `[x]` Move utility scripts to `scripts/` and fix imports.
-- `[x]` Verify consolidated build and linting.
-- `[x]` Create walkthrough.
+- `[x]` Create dynamic sitemap generator script in `scripts/generate-sitemap.ts`.
+- `[x]` Add `sitemap` script and `postbuild` hook to `package.json`.
+- `[x]` Update `public/robots.txt` with the correct production domain.
+- `[x]` Generate the initial `public/sitemap.xml` using the new script.
+- `[x]` Verify the generated XML and build process.
+- `[ ]` Create walkthrough artifact.
