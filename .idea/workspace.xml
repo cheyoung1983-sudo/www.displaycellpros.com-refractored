@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="remove legacy api utilities and add database scripts&#10;&#10;- Removed `auth-utils.ts`, `db.ts`, and `recaptcha.ts` from `api/lib/`.&#10;- Added `scripts/setup-db.ts` to initialize the database schema.&#10;- Added `scripts/test-connection.ts` to verify RDS connectivity and IAM authentication.">
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" afterDir="false" />
-    </list>
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="consolidate API into single server for Vercel Hobby plan optimization&#10;&#10;- Merged Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduced serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Moved database utility scripts to `scripts/`.&#10;- Updated project documentation and task tracking." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -139,7 +136,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784658520921</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="consolidate API into single server for Vercel Hobby plan optimization&#10;&#10;- Merged Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduced serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Moved database utility scripts to `scripts/`.&#10;- Updated project documentation and task tracking.">
+      <option name="closed" value="true" />
+      <created>1784658656436</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1784658656436</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -150,6 +155,7 @@
     <MESSAGE value="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS." />
     <MESSAGE value="chore: update IDEA workspace configuration and task history" />
     <MESSAGE value="remove legacy api utilities and add database scripts&#10;&#10;- Removed `auth-utils.ts`, `db.ts`, and `recaptcha.ts` from `api/lib/`.&#10;- Added `scripts/setup-db.ts` to initialize the database schema.&#10;- Added `scripts/test-connection.ts` to verify RDS connectivity and IAM authentication." />
-    <option name="LAST_COMMIT_MESSAGE" value="remove legacy api utilities and add database scripts&#10;&#10;- Removed `auth-utils.ts`, `db.ts`, and `recaptcha.ts` from `api/lib/`.&#10;- Added `scripts/setup-db.ts` to initialize the database schema.&#10;- Added `scripts/test-connection.ts` to verify RDS connectivity and IAM authentication." />
+    <MESSAGE value="consolidate API into single server for Vercel Hobby plan optimization&#10;&#10;- Merged Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduced serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Moved database utility scripts to `scripts/`.&#10;- Updated project documentation and task tracking." />
+    <option name="LAST_COMMIT_MESSAGE" value="consolidate API into single server for Vercel Hobby plan optimization&#10;&#10;- Merged Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduced serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Moved database utility scripts to `scripts/`.&#10;- Updated project documentation and task tracking." />
   </component>
 </project>
