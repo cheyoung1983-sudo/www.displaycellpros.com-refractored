@@ -1,3 +1,5 @@
-- [x] Create `api/test-connection.ts` for database verification
-- [x] Update `api/lib/db.ts` to support IAM authentication properly
-- [x] Verify connection setup (Script ready, requires AWS credentials)
+- [x] Install AWS CLI v2
+- [x] Configure AWS Region (`us-east-1`)
+- [x] Setup Agent Toolkit
+- [x] Integrate `attachDatabasePool` in `api/lib/db.ts`
+- [x] Verify Installation

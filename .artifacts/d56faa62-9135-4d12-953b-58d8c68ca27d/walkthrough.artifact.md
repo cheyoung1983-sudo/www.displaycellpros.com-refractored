@@ -10,10 +10,10 @@ Created [api/test-connection.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHu
 - It loads environment variables from `.env.local`.
 - It performs a connection test and queries the database version.
 
-### 2. Database Library Update
+### 3. Vercel Functions Optimization
 Updated [api/lib/db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/lib/db.ts).
-- Enhanced `getDbPool` to support RDS IAM authentication even when a `roleArn` is not explicitly provided (allowing for local developer credentials).
-- Added a `useIAM` flag check (via `process.env.USE_RDS_IAM === "true"` or `roleArn`).
+- Integrated `@vercel/functions#attachDatabasePool` to optimize connection management in serverless environments.
+- Wrapped the attachment in a try-catch block to maintain compatibility with local testing environments.
 
 ## How to Verify
 
@@ -34,5 +34,21 @@ npx tsx api/test-connection.ts
 > npx tsx api/test-connection.ts
 > ```
 
-### Using the Token Directly
-If you already have the token string from the AWS console (the one you pasted), you can test a connection using a standard tool like `psql` or by modifying the `password` field in a simple script. However, the `api/test-connection.ts` script is designed to automate this for your full development workflow.
+### Connection Issues?
+
+#### PAM authentication failed
+If you see `PAM authentication failed for user "postgres"`, it means your RDS instance is rejecting the IAM token. This is almost always because the user has not been granted the `rds_iam` role.
+
+**How to fix:**
+1. Connect to your database using the master password (standard authentication).
+2. Run the following SQL command:
+   ```sql
+   GRANT rds_iam TO postgres;
+   ```
+3. Ensure that **IAM Database Authentication** is enabled in the "Connectivity & security" tab of your RDS cluster in the AWS Console.
+
+#### Could not load credentials
+If you see this, ensure your terminal has the following variables set:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`

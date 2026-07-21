@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { queryWithToken } from './lib/db';
+import { query } from './lib/db';
 import { getAuthSession, unauthorized } from './lib/auth-utils';
 import { verifyRecaptcha } from './lib/recaptcha';
 
@@ -11,7 +11,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      const result = await queryWithToken(
+      const result = await query(
         'SELECT * FROM tickets WHERE "userId" IN (SELECT id FROM users WHERE email = $1) ORDER BY "createdAt" DESC',
         [session.user.email]
       );
@@ -28,11 +28,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       // Upsert user if not exists and get ID
-      await queryWithToken('INSERT INTO users (email, name) VALUES ($1, $2) ON CONFLICT (email) DO NOTHING', [session.user.email, session.user.name]);
-      const userRes = await queryWithToken('SELECT id FROM users WHERE email = $1', [session.user.email]);
+      await query('INSERT INTO users (email, name) VALUES ($1, $2) ON CONFLICT (email) DO NOTHING', [session.user.email, session.user.name]);
+      const userRes = await query('SELECT id FROM users WHERE email = $1', [session.user.email]);
       const userId = userRes.rows[0]?.id;
 
-      await queryWithToken(
+      await query(
         'INSERT INTO tickets (id, "customerName", device, "issueType", status, "quotedPrice", tax, discount, total, "userId") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
         [id, customerName, device, issueType, status, quotedPrice, tax, discount, total, userId]
       );

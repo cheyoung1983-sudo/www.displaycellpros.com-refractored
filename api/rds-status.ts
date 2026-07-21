@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { isDbConfigured, queryWithToken } from './lib/db';
+import { isDbConfigured, query } from './lib/db';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const configured = isDbConfigured();
@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const result = await queryWithToken("SELECT NOW() as time, version();");
+    const result = await query("SELECT NOW() as time, version();");
     res.status(200).json({
       success: true,
       time: result.rows[0].time,
