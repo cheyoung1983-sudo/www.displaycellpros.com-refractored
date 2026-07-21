@@ -1,40 +1,45 @@
-# Implementation Plan - Spokane Market Dominance & Pricing Strategy
+# Implementation Plan - Production Launch Best Practices
 
-The goal is to transition the application to a **Value-Based Tiered Strategy** that monetizes the "Convenience Premium" of the mobile lab and integrates a "Data Privacy Guarantee" into the customer intake flow.
+The goal is to finalize the project for production launch on Vercel by addressing the remaining gaps identified in the Production Checklist, specifically focusing on Security, Performance, and Reliability.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> I am updating the core pricing logic to use the formula from the mission briefing: *Parts Cost + Labor ($50/hr) + 80% Overhead/Profit Margin*. This will result in three distinct tiers (Budget, Professional, Authorized) for every quote.
+> [!WARNING]
+> I am implementing **Rate Limiting** on the API. While this protects against abuse, legitimate users behind a shared corporate IP might occasionally hit limits if the threshold is too low. I am setting a generous default (100 requests per 15 minutes) but this may need adjustment based on your actual traffic.
 
 ## Proposed Changes
 
-### Backend Logic (`server.ts`)
+### Backend Security & Reliability
+
+#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)
+- Add `express-rate-limit` dependency.
 
 #### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Update `calculateQuoteInternal` to return a `tiers` object (Budget, Professional, Authorized) instead of a single value.
-- Implement "Bundle-to-Win" logic:
-    - **Professional/Authorized**: Automatically include "Protective Shield" (tempered glass).
-    - **Authorized**: Highlight "Genuine Parts" status.
-- Add "Battery-Plus" upsell logic: return a discounted price for a battery repair when bundled.
-- Update AI `systemInstruction` to include the **Data Privacy Guarantee**: "Highlight the on-site security advantage—device never leaves sight, no data exported."
+- Integrate `express-rate-limit` middleware for all `/api/` routes.
+- Implement a dedicated `GET /api/health` endpoint for uptime monitoring services.
+- Add detailed request logging for better traceability in production logs.
 
-### Frontend UI (`src/App.tsx`)
+### Performance Optimization
 
-#### [MODIFY] [src/App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/src/App.tsx)
-- Update the quote state and `fetchDynamicQuote` fallback to handle the new tiered response.
-- **Redesign Quote UI**: Replace the single summary with a **Three-Tier Comparison Table**.
-    - Highlight the **Professional Tier** as the recommended "Mission Sweet Spot".
-    - Clearly list "Bundled Extras" (Tempered Glass, Lifetime Warranty) for the upper tiers.
-- Add a "Add Battery Recovery (+50% Off)" toggle to the quote panel to demonstrate the upsell strategy.
+#### [MODIFY] [index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)
+- Optimize font loading by adding `crossorigin` to preconnect hints.
+- Ensure all static assets are served with optimal caching headers (handled via Vercel config).
+
+### Operational Excellence
+
+#### [NEW] [README_PROD.md](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/README_PROD.md)
+- Create a production operations guide including:
+    - **Rollback Procedure**: How to use `vercel rollback`.
+    - **Log Analysis**: How to access and filter Vercel Log Drains.
+    - **Secret Management**: Guidelines for rotating API keys.
+    - **Uptime Monitoring**: Recommended configuration for the `/api/health` endpoint.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint` to ensure type safety with the new tiered quote structure.
-- Run `npm run build` to verify production bundling.
+- Run `npm run build` and `npm run lint` to ensure production stability.
+- Verify the `/api/health` endpoint returns a `200 OK` status locally.
 
 ### Manual Verification
-- Trigger a quote in the UI and verify that all three tiers are displayed correctly.
-- Toggle the "Battery Recovery" upsell and verify the total adjusts based on the 50% discount logic.
-- Verify the AI Assistant mentions "On-site Data Privacy" during the intake flow.
+- Review the `README_PROD.md` for operational clarity.
+- Verify that the rate limiter returns a `429 Too Many Requests` response after exceeding the threshold (simulated locally).

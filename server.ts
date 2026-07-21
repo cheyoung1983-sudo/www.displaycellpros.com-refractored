@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import compression from "compression";
 import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import { OpenAI } from "openai";
 import { StreamChat } from "stream-chat";
 import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
@@ -20,8 +21,36 @@ const PORT = Number(process.env.PORT) || 3000;
 app.use(helmet({
   contentSecurityPolicy: false, // Managed by vercel.json for static/dynamic parity
 }));
+
+// Rate Limiting - Protects against API abuse and brute-force
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Too Many Requests",
+    message: "High traffic detected from this network. Please try again in 15 minutes.",
+    code: "RATE_LIMIT_EXCEEDED"
+  },
+  skip: (req) => req.method === "GET" && !req.url.startsWith("/api/"), // Only rate limit API calls
+});
+
+// Apply rate limiter to all API routes
+app.use("/api/", limiter);
+
 app.use(compression());
 app.use(express.json());
+
+// Request Logging - Provides traceability in production logs
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`[HTTP] ${req.method} ${req.url} ${res.statusCode} - ${duration}ms`);
+  });
+  next();
+});
 
 // Edge Network Caching Policy Helper
 app.use((req, res, next) => {
@@ -265,6 +294,17 @@ export function calculateQuoteInternal(issueType: string, deviceTier: "flagship"
 }
 
 // ---------------- API ENDPOINTS ----------------
+
+// Uptime Monitoring / Health Check
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memoryUsage: process.memoryUsage(),
+    environment: process.env.NODE_ENV || "development"
+  });
+});
 
 // API endpoint for Washington State local tax rate lookup
 app.post("/api/tax-lookup", (req, res, next) => {
