@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files.">
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vercel.json" beforeDir="false" afterPath="$PROJECT_DIR$/vercel.json" afterDir="false" />
-    </list>
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,6 +33,9 @@
     "accountId": "bd881d76-3260-4d09-b506-f0e6d5bf747f"
   }
 }]]></component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 1,
   "fromUser": false
@@ -99,13 +96,31 @@
       <option name="project" value="LOCAL" />
       <updated>1784654659246</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="fix: resolve Vercel runtime configuration error&#10;&#10;- Specify Node.js version 22.x in `package.json` engines.&#10;- Remove manual `runtime` override from `vercel.json` to fix deployment validation issues.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect configuration changes.">
+      <option name="closed" value="true" />
+      <created>1784657609855</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1784657609855</updated>
+    </task>
+    <task id="LOCAL-00003" summary="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS.">
+      <option name="closed" value="true" />
+      <created>1784657903232</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1784657903232</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="migrate project from Gemini to OpenAI&#10;&#10;- Update UI strings and AI model references in `App.tsx`, replacing Gemini with OpenAI (`o3-mini` and `gpt-4o`).&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting with fenced code blocks.&#10;- Add new dependencies to `package.json`, including `@vercel/node`, `@vercel/edge`, `ai`, and `@ai-sdk/openai`.&#10;- Update `tsconfig.json` to include `vite/client` types for environment variable support.&#10;- Fix database pool initialization in `scripts/test-db.ts`.&#10;- Update `server.ts` initialization logs to reflect the OpenAI migration.&#10;- Include project-level IDE configuration files in the `.idea` directory." />
     <MESSAGE value="migrate from Gemini to OpenAI and project cleanup&#10;&#10;- Update UI strings, logs, and model references from Gemini to OpenAI (using `o3-mini` and `gpt-4o`).&#10;- Update `README.md` and environment variable instructions to use `OPENAI_API_KEY`.&#10;- Add missing dependencies for OpenAI SDK, Vercel, Firebase, and Stream Chat.&#10;- Fix database pool initialization in `scripts/test-db.ts`.&#10;- Configure `vite/client` types in `tsconfig.json` to resolve environment variable errors.&#10;- Add IDE configuration and project metadata files." />
     <MESSAGE value="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
+    <MESSAGE value="fix: resolve Vercel runtime configuration error&#10;&#10;- Specify Node.js version 22.x in `package.json` engines.&#10;- Remove manual `runtime` override from `vercel.json` to fix deployment validation issues.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect configuration changes." />
+    <MESSAGE value="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS." />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS." />
   </component>
 </project>
