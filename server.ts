@@ -45,12 +45,15 @@ app.use((req, res, next) => {
     "pos-sync-logs",
     "pos-sync-log",
     "create-ticket",
+    "tickets",
+    "getStreamUserToken",
     "triage",
     "complex-diagnostics",
     "analyze-image",
     "rds-status",
     "movies",
-    "welcome"
+    "welcome",
+    "auth"
   ];
   
   const pathParts = req.url.split("?")[0].split("/");
@@ -254,124 +257,136 @@ export function calculateQuoteInternal(issueType: string, deviceTier: "flagship"
 // ---------------- API ENDPOINTS ----------------
 
 // API endpoint for Washington State local tax rate lookup
-app.post("/api/tax-lookup", (req, res) => {
-  const { zipCode } = req.body;
-  if (!zipCode) {
-    return res.status(400).json({ error: "zipCode is required." });
-  }
+app.post("/api/tax-lookup", (req, res, next) => {
+  try {
+    const { zipCode } = req.body;
+    if (!zipCode) {
+      return res.status(400).json({ error: "zipCode is required." });
+    }
 
-  const cleanedZip = zipCode.trim();
-  const location = WA_TAX_DATA[cleanedZip];
+    const cleanedZip = zipCode.trim();
+    const location = WA_TAX_DATA[cleanedZip];
 
-  if (location) {
-    res.json({
-      valid: true,
-      zipCode: cleanedZip,
-      city: location.city,
-      rate: location.rate,
-      message: `WASHINGTON TAX COMPLIANT: Destined delivery in ${location.city} (${cleanedZip}) is subject to ${location.rate * 100}% local combined sales tax.`,
-    });
-  } else {
-    // Return standard WA base rate of 6.5% for general unspecified ZIP codes, or inform the user
-    // WA sales tax ranges from 7.0% to 10.5% depending on destination. We will simulate a baseline 8.8% for other WA zips.
-    const isWA = cleanedZip.startsWith("98") || cleanedZip.startsWith("99");
-    if (isWA) {
+    if (location) {
       res.json({
         valid: true,
         zipCode: cleanedZip,
-        city: "Washington State Destination",
-        rate: 0.088,
-        message: `WASHINGTON TAX COMPLIANT: Estimated Washington Destination Sales Tax base of 8.8% applied for ZIP ${cleanedZip}.`,
+        city: location.city,
+        rate: location.rate,
+        message: `WASHINGTON TAX COMPLIANT: Destined delivery in ${location.city} (${cleanedZip}) is subject to ${location.rate * 100}% local combined sales tax.`,
       });
     } else {
-      res.json({
-        valid: false,
-        zipCode: cleanedZip,
-        city: "Out of State",
-        rate: 0,
-        message: "Out of State destination. No Washington destination sales tax collected.",
-      });
+      // Return standard WA base rate of 6.5% for general unspecified ZIP codes, or inform the user
+      // WA sales tax ranges from 7.0% to 10.5% depending on destination. We will simulate a baseline 8.8% for other WA zips.
+      const isWA = cleanedZip.startsWith("98") || cleanedZip.startsWith("99");
+      if (isWA) {
+        res.json({
+          valid: true,
+          zipCode: cleanedZip,
+          city: "Washington State Destination",
+          rate: 0.088,
+          message: `WASHINGTON TAX COMPLIANT: Estimated Washington Destination Sales Tax base of 8.8% applied for ZIP ${cleanedZip}.`,
+        });
+      } else {
+        res.json({
+          valid: false,
+          zipCode: cleanedZip,
+          city: "Out of State",
+          rate: 0,
+          message: "Out of State destination. No Washington destination sales tax collected.",
+        });
+      }
     }
+  } catch (err) {
+    next(err);
   }
 });
 
 // API endpoint for secure dynamic quote generation
-app.post("/api/generate-quote", (req, res) => {
-  const { issueType, deviceTier, zipCode, isCorporate, companyName } = req.body;
+app.post("/api/generate-quote", (req, res, next) => {
+  try {
+    const { issueType, deviceTier, zipCode, isCorporate, companyName } = req.body;
 
-  if (!issueType || !deviceTier) {
-    return res.status(400).json({ error: "issueType ('screen' | 'battery' | 'button') and deviceTier ('flagship' | 'midrange' | 'budget') are required." });
-  }
-
-  // Calculate base quote
-  const billing = calculateQuoteInternal(issueType, deviceTier);
-  
-  // Tax lookup
-  let taxRate = 0.1035; // default Seattle rate if none given
-  let taxCity = "Seattle";
-  if (zipCode) {
-    const lookup = WA_TAX_DATA[zipCode] || (zipCode.startsWith("98") || zipCode.startsWith("99") ? { city: "WA Unspecified", rate: 0.088 } : null);
-    if (lookup) {
-      taxRate = lookup.rate;
-      taxCity = lookup.city;
-    } else {
-      taxRate = 0;
-      taxCity = "Out of State";
+    if (!issueType || !deviceTier) {
+      return res.status(400).json({ error: "issueType ('screen' | 'battery' | 'button') and deviceTier ('flagship' | 'midrange' | 'budget') are required." });
     }
+
+    // Calculate base quote
+    const billing = calculateQuoteInternal(issueType, deviceTier);
+
+    // Tax lookup
+    let taxRate = 0.1035; // default Seattle rate if none given
+    let taxCity = "Seattle";
+    if (zipCode) {
+      const lookup = WA_TAX_DATA[zipCode] || (zipCode.startsWith("98") || zipCode.startsWith("99") ? { city: "WA Unspecified", rate: 0.088 } : null);
+      if (lookup) {
+        taxRate = lookup.rate;
+        taxCity = lookup.city;
+      } else {
+        taxRate = 0;
+        taxCity = "Out of State";
+      }
+    }
+
+    // B2B discount lookup details (20% flat discount on whole ticket parts & labor)
+    let discountAmount = 0;
+    let hasB2BDiscount = false;
+
+    if (isCorporate) {
+      hasB2BDiscount = true;
+      discountAmount = Math.round((billing.subtotal * 0.2) * 100) / 100;
+    }
+
+    const subtotalAfterDiscount = Math.round((billing.subtotal - discountAmount) * 100) / 100;
+    const calculatedTax = Math.round((subtotalAfterDiscount * taxRate) * 100) / 100;
+    const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
+
+    res.json({
+      baseQuote: billing,
+      taxInfo: {
+        zipCode: zipCode || "98101",
+        city: taxCity,
+        rate: taxRate,
+        calculatedTax,
+      },
+      discountInfo: {
+        applied: hasB2BDiscount,
+        percentage: 20,
+        amount: discountAmount,
+        company: companyName || "Corporate Account",
+      },
+      subtotal: subtotalAfterDiscount,
+      grandTotal,
+    });
+  } catch (err) {
+    next(err);
   }
-
-  // B2B discount lookup details (20% flat discount on whole ticket parts & labor)
-  let discountAmount = 0;
-  let hasB2BDiscount = false;
-  
-  if (isCorporate) {
-    hasB2BDiscount = true;
-    discountAmount = Math.round((billing.subtotal * 0.2) * 100) / 100;
-  }
-
-  const subtotalAfterDiscount = Math.round((billing.subtotal - discountAmount) * 100) / 100;
-  const calculatedTax = Math.round((subtotalAfterDiscount * taxRate) * 100) / 100;
-  const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
-
-  res.json({
-    baseQuote: billing,
-    taxInfo: {
-      zipCode: zipCode || "98101",
-      city: taxCity,
-      rate: taxRate,
-      calculatedTax,
-    },
-    discountInfo: {
-      applied: hasB2BDiscount,
-      percentage: 20,
-      amount: discountAmount,
-      company: companyName || "Corporate Account",
-    },
-    subtotal: subtotalAfterDiscount,
-    grandTotal,
-  });
 });
 
 // API endpoint for evaluating B2B status by corporate domain
-app.post("/api/verify-b2b", (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.includes("@")) {
-    return res.status(400).json({ error: "Valid email address is required for Fast-Track evaluation" });
+app.post("/api/verify-b2b", (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ error: "Valid email address is required for Fast-Track evaluation" });
+    }
+
+    const domain = email.split("@")[1].toLowerCase();
+    const isCorporate = B2B_CORPORATE_DOMAINS.includes(domain);
+
+    res.json({
+      email,
+      domain,
+      isCorporate,
+      discountPercentage: isCorporate ? 20 : 0,
+      companyName: isCorporate ? domain.split(".")[0].toUpperCase() + " Fleet" : null,
+      message: isCorporate
+        ? `VERIFICATION SUCCESS: Corporate customer identified! 20% Fast-Track fleet repair discount & zero-deposit check-in is unlocked for ${domain}.`
+        : `Retail client verified. Standard warranty and retail billing rates applied to domain ${domain}.`,
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const domain = email.split("@")[1].toLowerCase();
-  const isCorporate = B2B_CORPORATE_DOMAINS.includes(domain);
-
-  res.json({
-    email,
-    domain,
-    isCorporate,
-    discountPercentage: isCorporate ? 20 : 0,
-    companyName: isCorporate ? domain.split(".")[0].toUpperCase() + " Fleet" : null,
-    message: isCorporate 
-      ? `VERIFICATION SUCCESS: Corporate customer identified! 20% Fast-Track fleet repair discount & zero-deposit check-in is unlocked for ${domain}.`
-      : `Retail client verified. Standard warranty and retail billing rates applied to domain ${domain}.`,
-  });
 });
 
 // Helper to parse specifications and flow steps from conversational text
@@ -940,41 +955,51 @@ app.post("/api/getStreamUserToken", async (req, res) => {
   }
 });
 
+// GET /api/auth/session: Mock session endpoint to prevent 500s from client-side auth libraries
+app.get("/api/auth/session", (req, res) => {
+  const session = getAuthSession(req);
+  res.json(session || {});
+});
+
 // GET /api/ticket-templates: Serves basic repair ticket templates for off-line PWA caching
-app.get("/api/ticket-templates", (req, res) => {
-  const templates = [
-    {
-      id: "tpl-apple-screen",
-      name: "Apple Screen Replacement Template",
-      brand: "Apple",
-      issueType: "screen",
-      description: "Standard visual screen rebuild with high-purity polyurethane adhesive seals and premium oleophobic screen finish.",
-      estimatedTime: "45 mins",
-      difficulty: "Intermediate",
-      defaultPrice: 149.00
-    },
-    {
-      id: "tpl-samsung-battery",
-      name: "Samsung Battery Swap & Safety Calibration",
-      brand: "Samsung",
-      issueType: "battery",
-      description: "Chemical lithium-ion swap including back cover gasket reset and deep voltage-regulation thermal sweep.",
-      estimatedTime: "30 mins",
-      difficulty: "Easy",
-      defaultPrice: 89.00
-    },
-    {
-      id: "tpl-generic-buttons",
-      name: "Multi-Key Micro-Soldering Template",
-      brand: "Generic",
-      issueType: "button",
-      description: "Contact trace cleaning with customized isopropyl solvents and mechanical feedback leaf-spring adjustments.",
-      estimatedTime: "60 mins",
-      difficulty: "Advanced",
-      defaultPrice: 119.00
-    }
-  ];
-  res.json(templates);
+app.get("/api/ticket-templates", (req, res, next) => {
+  try {
+    const templates = [
+      {
+        id: "tpl-apple-screen",
+        name: "Apple Screen Replacement Template",
+        brand: "Apple",
+        issueType: "screen",
+        description: "Standard visual screen rebuild with high-purity polyurethane adhesive seals and premium oleophobic screen finish.",
+        estimatedTime: "45 mins",
+        difficulty: "Intermediate",
+        defaultPrice: 149.00
+      },
+      {
+        id: "tpl-samsung-battery",
+        name: "Samsung Battery Swap & Safety Calibration",
+        brand: "Samsung",
+        issueType: "battery",
+        description: "Chemical lithium-ion swap including back cover gasket reset and deep voltage-regulation thermal sweep.",
+        estimatedTime: "30 mins",
+        difficulty: "Easy",
+        defaultPrice: 89.00
+      },
+      {
+        id: "tpl-generic-buttons",
+        name: "Multi-Key Micro-Soldering Template",
+        brand: "Generic",
+        issueType: "button",
+        description: "Contact trace cleaning with customized isopropyl solvents and mechanical feedback leaf-spring adjustments.",
+        estimatedTime: "60 mins",
+        difficulty: "Advanced",
+        defaultPrice: 119.00
+      }
+    ];
+    res.json(templates);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ---------------- GOOGLE CLOUD SERVICE DIRECTORY MODULE REMOVED ----------------
@@ -993,103 +1018,111 @@ const mockMovies = [
 ];
 
 // Endpoint to check AWS RDS PostgreSQL configuration & connection status
-app.get("/api/rds-status", async (req, res) => {
-  const configured = isDbConfigured();
-  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
-
-  const maskString = (str?: string) => {
-    if (!str) return "not-set";
-    if (str.length <= 8) return "****";
-    return str.substring(0, 4) + "..." + str.substring(str.length - 4);
-  };
-
-  const configInfo = {
-    configured,
-    host: maskString(process.env.PGHOST),
-    user: maskString(process.env.PGUSER),
-    database: process.env.PGDATABASE || "postgres",
-    port: process.env.PGPORT || "5432",
-    awsRegion: process.env.AWS_REGION || "us-east-1",
-    awsRoleArn: maskString(process.env.AWS_ROLE_ARN),
-    awsAccountId: maskString(process.env.AWS_ACCOUNT_ID),
-    hasManualToken: !!token
-  };
-
-  if (!configured) {
-    return res.json({
-      success: false,
-      message: "AWS RDS PostgreSQL is not configured yet. Set PGHOST, PGUSER, PGDATABASE, and AWS_ROLE_ARN in your Vercel/Environment settings.",
-      config: configInfo,
-    });
-  }
-
+app.get("/api/rds-status", async (req, res, next) => {
   try {
-    // Test the connection with a simple query
-    const startTime = Date.now();
-    const result = await queryWithToken("SELECT NOW() as current_time, version() as db_version;", [], token);
-    const queryDurationMs = Date.now() - startTime;
+    const configured = isDbConfigured();
+    const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
 
-    return res.json({
-      success: true,
-      message: token
-        ? "Successfully connected to AWS RDS PostgreSQL cluster using custom/temporary Authentication Token!"
-        : "Successfully connected to AWS RDS PostgreSQL cluster!",
-      queryDurationMs,
-      currentTime: result.rows[0].current_time,
-      dbVersion: result.rows[0].db_version,
-      config: configInfo,
-      usingManualToken: !!token
-    });
-  } catch (err: any) {
-    console.error("[Database Connection Error]:", err);
-    return res.status(500).json({
-      success: false,
-      message: token 
-        ? "Failed to connect to AWS RDS using the provided custom Auth Token."
-        : "Connected configuration detected, but connection attempt failed.",
-      error: err.message || err,
-      config: configInfo,
-    });
+    const maskString = (str?: string) => {
+      if (!str) return "not-set";
+      if (str.length <= 8) return "****";
+      return str.substring(0, 4) + "..." + str.substring(str.length - 4);
+    };
+
+    const configInfo = {
+      configured,
+      host: maskString(process.env.PGHOST),
+      user: maskString(process.env.PGUSER),
+      database: process.env.PGDATABASE || "postgres",
+      port: process.env.PGPORT || "5432",
+      awsRegion: process.env.AWS_REGION || "us-east-1",
+      awsRoleArn: maskString(process.env.AWS_ROLE_ARN),
+      awsAccountId: maskString(process.env.AWS_ACCOUNT_ID),
+      hasManualToken: !!token
+    };
+
+    if (!configured) {
+      return res.json({
+        success: false,
+        message: "AWS RDS PostgreSQL is not configured yet. Set PGHOST, PGUSER, PGDATABASE, and AWS_ROLE_ARN in your Vercel/Environment settings.",
+        config: configInfo,
+      });
+    }
+
+    try {
+      // Test the connection with a simple query
+      const startTime = Date.now();
+      const result = await queryWithToken("SELECT NOW() as current_time, version() as db_version;", [], token);
+      const queryDurationMs = Date.now() - startTime;
+
+      return res.json({
+        success: true,
+        message: token
+          ? "Successfully connected to AWS RDS PostgreSQL cluster using custom/temporary Authentication Token!"
+          : "Successfully connected to AWS RDS PostgreSQL cluster!",
+        queryDurationMs,
+        currentTime: result.rows[0].current_time,
+        dbVersion: result.rows[0].db_version,
+        config: configInfo,
+        usingManualToken: !!token
+      });
+    } catch (err: any) {
+      console.error("[Database Connection Error]:", err);
+      return res.status(500).json({
+        success: false,
+        message: token
+          ? "Failed to connect to AWS RDS using the provided custom Auth Token."
+          : "Connected configuration detected, but connection attempt failed.",
+        error: err.message || err,
+        config: configInfo,
+      });
+    }
+  } catch (err) {
+    next(err);
   }
 });
 
 // Endpoint to query movies
-app.get("/api/movies", async (req, res) => {
-  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
-
-  if (!isDbConfigured()) {
-    return res.json({
-      success: true,
-      source: "local-simulation",
-      message: "AWS RDS is not configured. Returning simulated movie list.",
-      movies: mockMovies,
-    });
-  }
-
+app.get("/api/movies", async (req, res, next) => {
   try {
-    const result = await queryWithToken("SELECT * FROM movies ORDER BY id ASC;", [], token);
-    return res.json({
-      success: true,
-      source: token ? "aws-rds-postgres (manual-token)" : "aws-rds-postgres",
-      movies: result.rows,
-    });
-  } catch (err: any) {
-    console.warn("[Database Movies Fetch Warning]:", err.message || err);
-    // Code 42P01 means table does not exist in Postgres
-    if (err.code === "42P01") {
+    const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+
+    if (!isDbConfigured()) {
       return res.json({
         success: true,
-        source: token ? "aws-rds-postgres-fallback (manual-token)" : "aws-rds-postgres-fallback",
-        message: "AWS RDS is connected, but 'movies' table does not exist in database yet. Returning local simulation.",
-        ddlHint: "CREATE TABLE movies (id SERIAL PRIMARY KEY, title VARCHAR(255), year INTEGER, genre VARCHAR(100)); INSERT INTO movies (title, year, genre) VALUES ('The Matrix', 1999, 'Sci-Fi'), ('Inception', 2010, 'Sci-Fi');",
+        source: "local-simulation",
+        message: "AWS RDS is not configured. Returning simulated movie list.",
         movies: mockMovies,
       });
     }
-    return res.status(500).json({
-      success: false,
-      message: "Failed to query database.",
-      error: err.message || err,
-    });
+
+    try {
+      const result = await queryWithToken("SELECT * FROM movies ORDER BY id ASC;", [], token);
+      return res.json({
+        success: true,
+        source: token ? "aws-rds-postgres (manual-token)" : "aws-rds-postgres",
+        movies: result.rows,
+      });
+    } catch (err: any) {
+      console.warn("[Database Movies Fetch Warning]:", err.message || err);
+      // Code 42P01 means table does not exist in Postgres
+      if (err.code === "42P01") {
+        return res.json({
+          success: true,
+          source: token ? "aws-rds-postgres-fallback (manual-token)" : "aws-rds-postgres-fallback",
+          message: "AWS RDS is connected, but 'movies' table does not exist in database yet. Returning local simulation.",
+          ddlHint: "CREATE TABLE movies (id SERIAL PRIMARY KEY, title VARCHAR(255), year INTEGER, genre VARCHAR(100)); INSERT INTO movies (title, year, genre) VALUES ('The Matrix', 1999, 'Sci-Fi'), ('Inception', 2010, 'Sci-Fi');",
+          movies: mockMovies,
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        message: "Failed to query database.",
+        error: err.message || err,
+      });
+    }
+  } catch (err) {
+    next(err);
   }
 });
 
@@ -1172,6 +1205,27 @@ app.get(["/welcome", "/api/welcome"], async (req, res) => {
       error: err.message || err
     });
   }
+});
+
+// Catch-all for unhandled /api routes to prevent Vercel 500 bridge errors
+app.all("/api/*", (req, res) => {
+  res.status(404).json({
+    error: "API Route Not Found",
+    path: req.url,
+    method: req.method
+  });
+});
+
+// Global Error Handler - Captures crashes and returns structured JSON
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error(`[Global Error Handler]: ${err.stack || err}`);
+
+  const status = err.status || 500;
+  res.status(status).json({
+    error: "Internal Server Error",
+    message: process.env.NODE_ENV === "production" ? "An unexpected error occurred." : err.message,
+    code: err.code || "INTERNAL_FAILURE"
+  });
 });
 
 // ---------------- VITE MIDDLEWARE CONFIG ----------------

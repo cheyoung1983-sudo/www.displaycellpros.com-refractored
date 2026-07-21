@@ -1,32 +1,34 @@
-# Implementation Plan - Edge Middleware for Dynamic Greeting
+# Implementation Plan - Backend Stability and Performance Mitigation
 
-The goal is to implement the `/welcome` route using Vercel Edge Middleware and Edge Config. This allows the greeting to be served directly from the network edge, reducing latency and avoiding execution of the main Express serverless function for this specific endpoint.
+The goal is to resolve recurring HTTP 500 errors on the backend and optimize frontend rendering to address render-blocking resources and layout shifts.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> Since this project is a Vite + Express hybrid (not a Next.js app), I will implement the middleware using the standard Web Fetch API (`Response`) instead of `NextResponse`. This ensures compatibility with the `@vercel/edge` runtime already in use.
+> [!NOTE]
+> I am adding a global error handler to the Express backend. This will log detailed error information to the console (visible in Vercel logs) and return a structured JSON error response instead of a generic 500 HTML page.
 
 ## Proposed Changes
 
-### Edge Configuration
-
-#### [MODIFY] [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/middleware.ts)
-- Import `get` from `@vercel/edge-config`.
-- Update `config.matcher` to include `/welcome`.
-- Add logic to intercept requests to `/welcome`.
-- Fetch the `greeting` from Edge Config and return it as a JSON response directly from the Edge.
-
-### Backend
+### Backend Stability
 
 #### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Keep the existing `/api/welcome` endpoint as a fallback for local development or non-middleware environments.
+- Add a global error handler (`app.use((err, req, res, next) => { ... })`) at the end of the middleware stack.
+- Wrap route handlers in `try-catch` blocks where async operations (like database or AI calls) occur to prevent unhandled rejections.
+- Add a catch-all route for unhandled `/api/*` requests to return a proper 404 JSON response instead of potentially crashing the Vercel bridge.
+
+### Frontend Performance
+
+#### [MODIFY] [index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)
+- Add a `preload` hint for the main CSS bundle to reduce render-blocking delay.
+- Add `display=swap` to the Google Fonts URL to prevent invisible text during font loading.
+- Implement the "Preload + Noscript" pattern for the main stylesheet to move it out of the critical path.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint` to ensure middleware changes are type-safe.
+- Run `npm run lint` to ensure no syntax errors are introduced.
+- Run `npm run build` to verify the production assets are still correctly linked.
 
 ### Manual Verification
-- Deploy to Vercel and verify that `https://www.displaycellpros.com/welcome` returns the JSON greeting.
-- Verify that standard `/api` routes still work (the middleware should correctly pass them through to the Express handler).
+- Review the Vercel deployment logs after push to confirm errors are being caught and logged.
+- Use PageSpeed Insights or Chrome DevTools Performance tab to verify reduced render-blocking time.
