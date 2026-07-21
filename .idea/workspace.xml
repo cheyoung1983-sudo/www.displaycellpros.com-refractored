@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` to automate `sitemap.xml` creation using environment variables.&#10;- Add `sitemap` and `postbuild` scripts to `package.json` for automated updates after builds.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with the correct production domain and expanded routes.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect sitemap improvements." />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -160,7 +160,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784660382978</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts.">
+      <option name="closed" value="true" />
+      <created>1784660633071</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1784660633071</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -174,6 +182,7 @@
     <MESSAGE value="consolidate API into single server for Vercel Hobby plan optimization&#10;&#10;- Merged Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduced serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Moved database utility scripts to `scripts/`.&#10;- Updated project documentation and task tracking." />
     <MESSAGE value="consolidate API into single server for Vercel optimization&#10;&#10;- Merge Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduce serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Update IDE workspace configuration and task history." />
     <MESSAGE value="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` to automate `sitemap.xml` creation using environment variables.&#10;- Add `sitemap` and `postbuild` scripts to `package.json` for automated updates after builds.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with the correct production domain and expanded routes.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect sitemap improvements." />
-    <option name="LAST_COMMIT_MESSAGE" value="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` to automate `sitemap.xml` creation using environment variables.&#10;- Add `sitemap` and `postbuild` scripts to `package.json` for automated updates after builds.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with the correct production domain and expanded routes.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect sitemap improvements." />
+    <MESSAGE value="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts." />
+    <option name="LAST_COMMIT_MESSAGE" value="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts." />
   </component>
 </project>
