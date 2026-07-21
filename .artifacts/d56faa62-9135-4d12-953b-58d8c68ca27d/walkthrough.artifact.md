@@ -38,7 +38,7 @@ Updated [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/display
 
 ### 7. SEO & Sitemap Fix
 Added [sitemap.xml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/sitemap.xml) and [robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/robots.txt) to the `public/` directory.
-- Created a valid XML sitemap for `https://displaycellpros.com`.
+- Created a valid XML sitemap for `https://displayandcellpros.com`.
 - Added a `robots.txt` file pointing to the sitemap to resolve Google Search Console "Sitemap is HTML" errors.
 
 ## Verification
