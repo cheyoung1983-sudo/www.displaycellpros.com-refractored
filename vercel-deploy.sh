@@ -41,7 +41,8 @@ echo "==========================================================================
 echo "🌐 Choose deployment target:"
 echo "1) Preview (Development/Staging)"
 echo "2) Production (Live Site)"
-read -p "Select option [1-2]: " TARGET
+echo "3) Container Registry (VCR) - Docker Build & Push"
+read -p "Select option [1-3]: " TARGET
 
 case $TARGET in
     1)
@@ -51,6 +52,25 @@ case $TARGET in
     2)
         echo "🔥 Deploying to Production..."
         vercel --prod
+        ;;
+    3)
+        echo "🐳 Initiating Vercel Container Registry (VCR) workflow..."
+        if ! command -v docker &> /dev/null; then
+            echo "❌ Docker is not installed or in PATH. Cannot proceed with VCR."
+            exit 1
+        fi
+
+        echo "🔑 Authenticating Docker with Vercel..."
+        vercel vcr login docker
+
+        IMAGE_NAME="vcr.vercel.com/dcpllc/www.displaycellpros.com-refractored/dcp-depository:latest"
+        echo "🏗️  Building and pushing optimized image: $IMAGE_NAME"
+
+        # Use Buildx with zstd compression for optimal Vercel performance
+        docker buildx build --platform linux/amd64 -f Dockerfile.vercel \
+          --output "type=image,name=$IMAGE_NAME,push=true,oci-mediatypes=true,compression=zstd,force-compression=true" .
+
+        echo "✅ Image pushed! You can now deploy using: vercel deploy --prebuilt"
         ;;
     *)
         echo "❌ Invalid option. Canceled."
