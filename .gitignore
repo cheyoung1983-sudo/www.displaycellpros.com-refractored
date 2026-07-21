@@ -7,3 +7,13 @@ coverage/
 .env*
 !.env.example
 *.exe
+
+# IDE config
+.idea/
+.vscode/
+
+# Vercel deployment metadata
+.vercel/
+
+# Lock file (choose one package manager — remove the other lock file)
+bun.lock
