@@ -1,18 +1,25 @@
-# Walkthrough - Fixing Vercel Build Module Not Found
+# Walkthrough - Edge Middleware Dynamic Greeting
 
-I have updated the Vercel configuration to resolve the `ERR_MODULE_NOT_FOUND` error during the sitemap generation build step.
+I have implemented a high-performance `/welcome` route using Vercel Edge Middleware and Edge Config.
 
 ## Changes Made
 
-### Build Configuration
-- **[.vercelignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.vercelignore)**:
-    - Removed the `scripts` directory from the ignore list.
-    - This ensures that Vercel uploads the `scripts/generate-sitemap.ts` file so it can be executed by the `tsx` command during the `postbuild` phase.
+### Edge Configuration
+- **[middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/middleware.ts)**:
+    - Integrated `@vercel/edge-config` to fetch dynamic values at the network edge.
+    - Added an interceptor for the `/welcome` and `/api/welcome` paths.
+    - The middleware now returns the `greeting` as a JSON response directly from the edge, bypassing the main serverless function.
+    - Added a fallback mechanism: if Edge Config is unavailable, it passes the request through to the Express server.
+    - Updated the `matcher` configuration to include the new route.
 
 ## Verification Results
 
-### Configuration Check
-- Verified that `.vercelignore` no longer blocks the `scripts` folder.
+### Linting
+- **`npm run lint`**: Passed successfully. The middleware implementation follows standard TypeScript and Web Fetch API patterns.
 
-> [!NOTE]
-> Please push this change to trigger a new Vercel deployment. The build should now find the sitemap generation script and complete successfully.
+### Performance Benefits
+- **Zero Cold Starts**: Since the response is generated at the edge, there is no need to wake up the Express serverless function for this route.
+- **Low Latency**: The greeting is served from the closest Vercel Edge node to the user.
+
+> [!TIP]
+> You can update the greeting instantly through the Vercel Dashboard's Edge Config UI without needing a new deployment.

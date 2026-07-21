@@ -1,46 +1,32 @@
-# Implementation Plan - PWA Enhancement and Project Cleanup
+# Implementation Plan - Edge Middleware for Dynamic Greeting
 
-The goal is to implement PWA (Progressive Web App) best practices and clean up the repository of redundant configuration files to streamline the Vercel deployment.
+The goal is to implement the `/welcome` route using Vercel Edge Middleware and Edge Config. This allows the greeting to be served directly from the network edge, reducing latency and avoiding execution of the main Express serverless function for this specific endpoint.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> I am proposing to delete several files related to Google Cloud and Firebase Functions (`Dockerfile`, `app.yaml`, `deploy.sh`, `functions/`, etc.) that are no longer used since we consolidated the backend into a single Vercel-optimized Express app. Please confirm if you want to keep these for archival purposes before I proceed.
+> Since this project is a Vite + Express hybrid (not a Next.js app), I will implement the middleware using the standard Web Fetch API (`Response`) instead of `NextResponse`. This ensures compatibility with the `@vercel/edge` runtime already in use.
 
 ## Proposed Changes
 
-### PWA Enhancements
+### Edge Configuration
 
-#### [NEW] [manifest.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/manifest.json)
-- Define app name, icons, theme colors, and display mode for "Install to Home Screen" support.
+#### [MODIFY] [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/middleware.ts)
+- Import `get` from `@vercel/edge-config`.
+- Update `config.matcher` to include `/welcome`.
+- Add logic to intercept requests to `/welcome`.
+- Fetch the `greeting` from Edge Config and return it as a JSON response directly from the Edge.
 
-#### [MODIFY] [index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)
-- Link to the `manifest.json`.
-- Add `theme-color` and `apple-touch-icon` meta tags.
+### Backend
 
-### Project Cleanup
-
-#### [DELETE] Redundant Deployment Configs
-- Delete [Dockerfile](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/Dockerfile)
-- Delete [app.yaml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app.yaml)
-- Delete [deploy.sh](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/deploy.sh)
-- Delete [metadata.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/metadata.json)
-
-#### [DELETE] Redundant Directories
-- Delete `functions/` (Legacy Firebase Functions)
-- Delete `dcp-static/` and `dcp-static-cb/` (Empty node_modules containers)
-
-### SEO & Bot Management
-
-#### [MODIFY] [robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/robots.txt)
-- Add `Disallow: /api` to prevent search engines from crawling the consolidated API entry point.
+#### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
+- Keep the existing `/api/welcome` endpoint as a fallback for local development or non-middleware environments.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` to ensure the cleanup didn't remove any files needed by the build process.
-- Validate `manifest.json` using a web manifest validator tool (conceptual).
+- Run `npm run lint` to ensure middleware changes are type-safe.
 
 ### Manual Verification
-- Verify the PWA manifest is correctly linked in the browser's developer tools.
-- Confirm the `scripts/` directory is still present and functional (sitemap generation).
+- Deploy to Vercel and verify that `https://www.displaycellpros.com/welcome` returns the JSON greeting.
+- Verify that standard `/api` routes still work (the middleware should correctly pass them through to the Express handler).

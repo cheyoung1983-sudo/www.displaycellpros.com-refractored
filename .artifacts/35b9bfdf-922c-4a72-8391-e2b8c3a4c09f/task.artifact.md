@@ -1,3 +1,3 @@
-- `[x]` Remove `scripts` from `.vercelignore` to allow build-time access.
-- `[x]` Verify `.vercelignore` content.
+- `[x]` Update `middleware.ts` to handle `/welcome` via Edge Config.
+- `[x]` Verify middleware logic and routing.
 - `[x]` Create walkthrough.
