@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="implement tiered pricing strategy and battery recovery upsell&#10;&#10;- Refactor backend pricing logic to support Budget, Professional, and Authorized tiers.&#10;- Implement battery replacement upsell logic with a 50% discount for bundled repairs.&#10;- Redesign the Live Quote UI in `App.tsx` into a three-tier &quot;Strategic Value Matrix&quot; comparison.&#10;- Update AI assistant system instructions to include a Data Privacy Guarantee.&#10;- Adjust B2B discount rate to 15% and update labor/overhead calculation formulas.&#10;- Update `src/types.ts` and project documentation to reflect the new tiered structure.">
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="Production launch best practices&#10;&#10;- Add rate limiting to API routes using `express-rate-limit`.&#10;- Implement a `/api/health` endpoint for uptime monitoring.&#10;- Add request logging middleware for improved traceability.&#10;- Create `README_PROD.md` with operational guides for rollbacks, monitoring, and secret management.&#10;- Optimize font loading in `index.html`.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -260,7 +259,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784674715665</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Production launch best practices&#10;&#10;- Add rate limiting to API routes using `express-rate-limit`.&#10;- Implement a `/api/health` endpoint for uptime monitoring.&#10;- Add request logging middleware for improved traceability.&#10;- Create `README_PROD.md` with operational guides for rollbacks, monitoring, and secret management.&#10;- Optimize font loading in `index.html`.">
+      <option name="closed" value="true" />
+      <created>1784675696520</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1784675696520</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -285,6 +292,7 @@
     <MESSAGE value="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000." />
     <MESSAGE value="implement CI/CD pipeline and Windows deployment support&#10;&#10;- Add GitHub Action workflow for automated deployment to Vercel Container Registry (VCR).&#10;- Create `vercel-deploy.ps1` for native PowerShell deployment support on Windows.&#10;- Update `server.ts` to ensure `PORT` environment variable is parsed as a number.&#10;- Update implementation plan, task list, and walkthrough documentation to reflect new automation features." />
     <MESSAGE value="implement tiered pricing strategy and battery recovery upsell&#10;&#10;- Refactor backend pricing logic to support Budget, Professional, and Authorized tiers.&#10;- Implement battery replacement upsell logic with a 50% discount for bundled repairs.&#10;- Redesign the Live Quote UI in `App.tsx` into a three-tier &quot;Strategic Value Matrix&quot; comparison.&#10;- Update AI assistant system instructions to include a Data Privacy Guarantee.&#10;- Adjust B2B discount rate to 15% and update labor/overhead calculation formulas.&#10;- Update `src/types.ts` and project documentation to reflect the new tiered structure." />
-    <option name="LAST_COMMIT_MESSAGE" value="implement tiered pricing strategy and battery recovery upsell&#10;&#10;- Refactor backend pricing logic to support Budget, Professional, and Authorized tiers.&#10;- Implement battery replacement upsell logic with a 50% discount for bundled repairs.&#10;- Redesign the Live Quote UI in `App.tsx` into a three-tier &quot;Strategic Value Matrix&quot; comparison.&#10;- Update AI assistant system instructions to include a Data Privacy Guarantee.&#10;- Adjust B2B discount rate to 15% and update labor/overhead calculation formulas.&#10;- Update `src/types.ts` and project documentation to reflect the new tiered structure." />
+    <MESSAGE value="Production launch best practices&#10;&#10;- Add rate limiting to API routes using `express-rate-limit`.&#10;- Implement a `/api/health` endpoint for uptime monitoring.&#10;- Add request logging middleware for improved traceability.&#10;- Create `README_PROD.md` with operational guides for rollbacks, monitoring, and secret management.&#10;- Optimize font loading in `index.html`." />
+    <option name="LAST_COMMIT_MESSAGE" value="Production launch best practices&#10;&#10;- Add rate limiting to API routes using `express-rate-limit`.&#10;- Implement a `/api/health` endpoint for uptime monitoring.&#10;- Add request logging middleware for improved traceability.&#10;- Create `README_PROD.md` with operational guides for rollbacks, monitoring, and secret management.&#10;- Optimize font loading in `index.html`." />
   </component>
 </project>
