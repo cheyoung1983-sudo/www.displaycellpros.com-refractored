@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes." />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="Add Google Analytics tracking script to index.html">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -185,7 +187,23 @@
       <option name="project" value="LOCAL" />
       <updated>1784663430098</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Add Google Search Console verification meta tag&#10;&#10;- Update verification comment in `index.html`&#10;- Add `google-site-verification` meta tag for domain ownership verification">
+      <option name="closed" value="true" />
+      <created>1784665950337</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1784665950337</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Add Google Analytics tracking script to index.html">
+      <option name="closed" value="true" />
+      <created>1784666032426</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1784666032426</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -202,6 +220,8 @@
     <MESSAGE value="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts." />
     <MESSAGE value="chore: enhance PWA support and clean up redundant deployment configs&#10;&#10;This change implements PWA best practices and removes legacy configuration files to streamline the project for Vercel deployment.&#10;&#10;- **PWA Enhancements**: &#10;    - Added `public/manifest.json` with app identity and icon configurations.&#10;    - Updated `index.html` with PWA meta tags, theme color, and apple-touch-icon.&#10;- **Project Cleanup**:&#10;    - Deleted legacy Google Cloud deployment files: `Dockerfile`, `app.yaml`, and `deploy.sh`.&#10;    - Removed `functions/` directory containing legacy Firebase Functions and Genkit samples.&#10;    - Deleted `metadata.json`.&#10;- **Configuration Updates**:&#10;    - Updated `.vercelignore` to allow access to the `scripts` directory during build.&#10;    - Updated `public/robots.txt` to disallow crawling of `/api` endpoints.&#10;    - Refined `.gitignore` environment variable patterns.&#10;- **Documentation**:&#10;    - Updated implementation plans and walkthrough artifacts to reflect the shift from sitemap generation to PWA and cleanup tasks." />
     <MESSAGE value="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes." />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes." />
+    <MESSAGE value="Add Google Search Console verification meta tag&#10;&#10;- Update verification comment in `index.html`&#10;- Add `google-site-verification` meta tag for domain ownership verification" />
+    <MESSAGE value="Add Google Analytics tracking script to index.html" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Google Analytics tracking script to index.html" />
   </component>
 </project>
