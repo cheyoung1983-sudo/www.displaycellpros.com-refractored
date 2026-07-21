@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: enhance PWA support and clean up redundant deployment configs&#10;&#10;This change implements PWA best practices and removes legacy configuration files to streamline the project for Vercel deployment.&#10;&#10;- **PWA Enhancements**: &#10;    - Added `public/manifest.json` with app identity and icon configurations.&#10;    - Updated `index.html` with PWA meta tags, theme color, and apple-touch-icon.&#10;- **Project Cleanup**:&#10;    - Deleted legacy Google Cloud deployment files: `Dockerfile`, `app.yaml`, and `deploy.sh`.&#10;    - Removed `functions/` directory containing legacy Firebase Functions and Genkit samples.&#10;    - Deleted `metadata.json`.&#10;- **Configuration Updates**:&#10;    - Updated `.vercelignore` to allow access to the `scripts` directory during build.&#10;    - Updated `public/robots.txt` to disallow crawling of `/api` endpoints.&#10;    - Refined `.gitignore` environment variable patterns.&#10;- **Documentation**:&#10;    - Updated implementation plans and walkthrough artifacts to reflect the shift from sitemap generation to PWA and cleanup tasks.">
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-    </list>
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -183,7 +177,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784663057112</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes.">
+      <option name="closed" value="true" />
+      <created>1784663430098</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1784663430098</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -199,6 +201,7 @@
     <MESSAGE value="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` to automate `sitemap.xml` creation using environment variables.&#10;- Add `sitemap` and `postbuild` scripts to `package.json` for automated updates after builds.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with the correct production domain and expanded routes.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect sitemap improvements." />
     <MESSAGE value="implement dynamic sitemap generation&#10;&#10;- Add `scripts/generate-sitemap.ts` and update `package.json` with `sitemap` and `postbuild` scripts.&#10;- Update `public/robots.txt` and `public/sitemap.xml` with production domain and routes.&#10;- Update project implementation plan and task artifacts." />
     <MESSAGE value="chore: enhance PWA support and clean up redundant deployment configs&#10;&#10;This change implements PWA best practices and removes legacy configuration files to streamline the project for Vercel deployment.&#10;&#10;- **PWA Enhancements**: &#10;    - Added `public/manifest.json` with app identity and icon configurations.&#10;    - Updated `index.html` with PWA meta tags, theme color, and apple-touch-icon.&#10;- **Project Cleanup**:&#10;    - Deleted legacy Google Cloud deployment files: `Dockerfile`, `app.yaml`, and `deploy.sh`.&#10;    - Removed `functions/` directory containing legacy Firebase Functions and Genkit samples.&#10;    - Deleted `metadata.json`.&#10;- **Configuration Updates**:&#10;    - Updated `.vercelignore` to allow access to the `scripts` directory during build.&#10;    - Updated `public/robots.txt` to disallow crawling of `/api` endpoints.&#10;    - Refined `.gitignore` environment variable patterns.&#10;- **Documentation**:&#10;    - Updated implementation plans and walkthrough artifacts to reflect the shift from sitemap generation to PWA and cleanup tasks." />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: enhance PWA support and clean up redundant deployment configs&#10;&#10;This change implements PWA best practices and removes legacy configuration files to streamline the project for Vercel deployment.&#10;&#10;- **PWA Enhancements**: &#10;    - Added `public/manifest.json` with app identity and icon configurations.&#10;    - Updated `index.html` with PWA meta tags, theme color, and apple-touch-icon.&#10;- **Project Cleanup**:&#10;    - Deleted legacy Google Cloud deployment files: `Dockerfile`, `app.yaml`, and `deploy.sh`.&#10;    - Removed `functions/` directory containing legacy Firebase Functions and Genkit samples.&#10;    - Deleted `metadata.json`.&#10;- **Configuration Updates**:&#10;    - Updated `.vercelignore` to allow access to the `scripts` directory during build.&#10;    - Updated `public/robots.txt` to disallow crawling of `/api` endpoints.&#10;    - Refined `.gitignore` environment variable patterns.&#10;- **Documentation**:&#10;    - Updated implementation plans and walkthrough artifacts to reflect the shift from sitemap generation to PWA and cleanup tasks." />
+    <MESSAGE value="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes." />
   </component>
 </project>
