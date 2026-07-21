@@ -1,4 +1,4 @@
-const CACHE_NAME = "dcp-diagnostic-lab-cache-v2";
+const CACHE_NAME = "dcp-diagnostic-lab-cache-v3";
 const TEMPLATE_URL = "/api/ticket-templates";
 
 const ASSETS_TO_PRECACHE = [
