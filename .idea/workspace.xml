@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files.">
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vercel.json" beforeDir="false" afterPath="$PROJECT_DIR$/vercel.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
