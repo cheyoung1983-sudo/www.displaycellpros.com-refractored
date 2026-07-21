@@ -22,7 +22,7 @@ import * as dotenvLocal from "dotenv";
 dotenv.config();
 dotenvLocal.config({ path: ".env.local", override: true });
 
-import { createPool } from "../src/db/index.ts";
+import { getDbPool } from "../db.ts";
 
 const REQUIRED_VARS = ["SQL_HOST", "SQL_USER", "SQL_DB_NAME", "AWS_REGION"] as const;
 
@@ -50,7 +50,7 @@ async function runConnectivityProbe(): Promise<void> {
   console.log(`[FORENSIC POOL] DB User    : ${process.env.SQL_USER}`);
   console.log("\nConnecting…\n");
 
-  const pool = createPool();
+  const pool = getDbPool();
 
   try {
     const client = await pool.connect();

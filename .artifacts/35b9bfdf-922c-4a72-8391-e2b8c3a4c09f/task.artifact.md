@@ -1,0 +1,8 @@
+- `[x]` Fix `README.md` formatting and update API key instructions to OpenAI.
+- `[x]` Sweep project for "Gemini" references and replace with "OpenAI" to align with "OpenAI for everything" directive.
+    - `[x]` Update `src/App.tsx` UI strings and model references.
+    - `[x]` Update `server.ts` logs and fallback comments.
+    - `[x]` Update `.env` and `.env.example` if they contain `GEMINI_API_KEY`.
+- `[x]` Fix build failure and missing dependencies (`firebase`, `@google-cloud/recaptcha-enterprise`, `@vercel/speed-insights`).
+- `[x]` Verify changes with `npm run build` and `npm run lint`.
+- `[x]` Create walkthrough.

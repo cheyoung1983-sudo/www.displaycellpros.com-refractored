@@ -2252,7 +2252,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                           Clear logs
                         </button>
                         <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-900/50 text-blue-300 tracking-wider border border-blue-800/30">
-                          GEMINI CLUSTER
+                          OPENAI CLUSTER
                         </span>
                       </div>
                     </div>
@@ -2419,11 +2419,11 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       <div className="p-5 flex-1 flex flex-col gap-4 min-h-[350px] bg-slate-900/10">
                         <div>
                           <span className="text-[10px] font-extrabold text-violet-400 uppercase tracking-widest font-mono block mb-1">
-                            🧠 COGNITIVE REASONING MATRIX (Model: gemini-3.1-pro-preview)
+                            🧠 COGNITIVE REASONING MATRIX (Model: o3-mini)
                           </span>
                           <h3 className="text-sm font-bold text-white">Advanced Electrical Schematic Diagnostic Planner</h3>
                           <p className="text-xs text-slate-400 mt-1 leading-relaxed font-sans">
-                            Queries are dispatched to the <strong className="text-violet-400 font-bold">gemini-3.1-pro-preview</strong> cluster with <strong className="text-violet-400">thinkingLevel: HIGH</strong> to construct step-by-step motherboard test steps with voltage tolerances.
+                            Queries are dispatched to the <strong className="text-violet-400 font-bold">o3-mini</strong> cluster with <strong className="text-violet-400">thinkingLevel: HIGH</strong> to construct step-by-step motherboard test steps with voltage tolerances.
                           </p>
                         </div>
 
@@ -2465,7 +2465,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       <div className="p-5 flex-1 flex flex-col gap-4 min-h-[350px] bg-slate-900/10">
                         <div>
                           <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest font-mono block mb-1">
-                            📸 MULTIMODAL COMPUTER VISION LAB (Model: gemini-3.1-pro-preview)
+                            📸 MULTIMODAL COMPUTER VISION LAB (Model: gpt-4o)
                           </span>
                           <h3 className="text-sm font-bold text-white">Visual Mechanical/Fracture Pattern Audit</h3>
                           <p className="text-xs text-slate-400 mt-1 leading-relaxed font-sans">
@@ -3511,7 +3511,7 @@ function StoreView() {
 }
 
 
-// --- EMBEDDED INTEGRATED AI ASSISTANT WIDGET (GEMINI INTERACTIVE AGENT) ---
+// --- EMBEDDED INTEGRATED AI ASSISTANT WIDGET (OPENAI INTERACTIVE AGENT) ---
 
 interface AIAssistantProps {
   onClose: () => void;
@@ -3618,7 +3618,7 @@ function AIAssistantWidget({
             </div>
             <div>
               <h3 className="text-white font-bold text-sm tracking-tight">D&CP Intelligent Assistant</h3>
-              <p className="text-[10px] text-slate-400 font-mono">Gemini L3 Triage Core Ready</p>
+              <p className="text-[10px] text-slate-400 font-mono">OpenAI L3 Triage Core Ready</p>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors p-1">
