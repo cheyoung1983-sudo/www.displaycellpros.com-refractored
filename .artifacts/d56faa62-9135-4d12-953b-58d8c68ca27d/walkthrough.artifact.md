@@ -36,8 +36,14 @@ Updated [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/display
 - Configured `tsconfig.json` with `vite/client` types to resolve `import.meta.env` errors.
 - Updated `QuoteResponse` interface in `src/types.ts` to include missing `bookingSummary` property.
 
+### 7. SEO & Sitemap Fix
+Added [sitemap.xml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/sitemap.xml) and [robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/robots.txt) to the `public/` directory.
+- Created a valid XML sitemap for `https://displaycellpros.com`.
+- Added a `robots.txt` file pointing to the sitemap to resolve Google Search Console "Sitemap is HTML" errors.
+
 ## Verification
 - **Lint Check:** Successfully ran `npm run lint` (using `tsc --noEmit`), confirming all TypeScript errors are resolved.
+- **Static Files:** Verified that `sitemap.xml` and `robots.txt` are placed in the correct directory for deployment.
 
 ### Automated Check
 - Ran `npm install` to confirm dependency resolution.

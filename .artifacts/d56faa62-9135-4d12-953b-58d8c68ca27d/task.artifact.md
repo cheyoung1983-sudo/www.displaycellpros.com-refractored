@@ -8,3 +8,6 @@
 - [x] Update `api/lib/recaptcha.ts` with new secret and Enterprise SDK
 - [x] Optimize `vite.config.ts` for HMR and API proxying
 - [x] Fix Vercel build errors (Middleware and Types)
+- [x] Create `public/sitemap.xml`
+- [x] Create `public/robots.txt`
+- [x] Verify static file serving

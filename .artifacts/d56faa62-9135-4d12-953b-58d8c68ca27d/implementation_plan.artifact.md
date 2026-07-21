@@ -1,39 +1,31 @@
-# Implementation Plan: Fix Vercel Build Errors (Non-Next.js Middleware & Missing Types)
+# Implementation Plan: Fix "Sitemap is HTML" Error
 
-The goal is to resolve the Vercel build failures by correcting the middleware implementation and providing the necessary TypeScript declarations for the API handlers.
+The goal is to resolve the Google Search Console error by providing a valid XML sitemap and a `robots.txt` file. This will help search engines correctly index the site and avoid misidentifying the sitemap as an HTML page.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Middleware Refactor:** I am switching `middleware.ts` from `next/server` (which is for Next.js only) to `@vercel/edge`. This is the correct way to handle middleware in a Vite/React project on Vercel.
-
-> [!WARNING]
-> **New Dependencies:** I will add `@vercel/node` and `@vercel/edge` to your `package.json`. These are required for TypeScript support in your API functions and Middleware.
+> **Domain Name:** I am using `https://displaycellpros.com` as the base URL for the sitemap. Please confirm if this is the correct canonical domain.
 
 ## Proposed Changes
 
-### [Dependencies]
+### [SEO Configuration]
 
-#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
-- Add `@vercel/node` to `devDependencies`.
-- Add `@vercel/edge` to `dependencies`.
+#### [NEW] [sitemap.xml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/sitemap.xml)
+- Create a standard XML sitemap in the `public/` directory.
+- Include the main landing page URL.
 
-### [Middleware]
-
-#### [MODIFY] [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/middleware.ts)
-- Replace `next/server` imports with `@vercel/edge`.
-- Update implementation to follow Edge Function standards.
-
-### [API Library]
-
-#### [MODIFY] [auth-utils.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/lib/auth-utils.ts)
-- Ensure imports from `@vercel/node` are correct (installing the package will resolve the TS error).
+#### [NEW] [robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/robots.txt)
+- Create a `robots.txt` file in the `public/` directory.
+- Allow all user agents and point to the new `sitemap.xml` URL.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint` to verify that TypeScript errors are resolved locally.
-- Run `vercel build` (locally) if Vercel CLI is configured, to simulate the cloud build.
+- None (standard static files).
 
 ### Manual Verification
-- Deploy to Vercel and verify the build log shows "Build Completed" without the `next/server` error.
+1. Run `npm run dev`.
+2. Navigate to `http://localhost:5173/sitemap.xml` and `http://localhost:5173/robots.txt` to ensure they are served correctly as static files.
+3. Use an online XML sitemap validator to check the syntax.
+4. **Action for User:** Once deployed, go to Google Search Console and re-submit `https://displaycellpros.com/sitemap.xml`.
