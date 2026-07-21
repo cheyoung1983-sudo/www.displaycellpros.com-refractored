@@ -4,6 +4,8 @@ import fs from "fs";
 import compression from "compression";
 import helmet from "helmet";
 import { OpenAI } from "openai";
+import { StreamChat } from "stream-chat";
+import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
 import dotenv from "dotenv";
 import { getDbPool, isDbConfigured, queryWithToken } from "./db";
 import { get } from "@vercel/edge-config";
@@ -106,6 +108,34 @@ interface RepairTicket {
   discount: number;
   total: number;
   createdAt: string;
+}
+
+// Security Helpers
+async function verifyRecaptcha(token: string, recaptchaAction?: string): Promise<boolean> {
+  const projectID = process.env.GOOGLE_CLOUD_PROJECT_ID || "displaycellpros-com";
+  const recaptchaKey = process.env.VITE_RECAPTCHA_SITE_KEY;
+  if (!token || !recaptchaKey) return false;
+
+  try {
+    const client = new RecaptchaEnterpriseServiceClient();
+    const projectPath = client.projectPath(projectID);
+    const [response] = await client.createAssessment({
+      assessment: { event: { token, siteKey: recaptchaKey } },
+      parent: projectPath,
+    });
+    if (!response.tokenProperties?.valid) return false;
+    if (recaptchaAction && response.tokenProperties.action !== recaptchaAction) return false;
+    return (response.riskAnalysis?.score ?? 0) >= 0.5;
+  } catch (error) {
+    console.error("reCAPTCHA Error:", error);
+    return false;
+  }
+}
+
+function getAuthSession(req: any) {
+  // Mirrored from legacy api/lib/auth-utils.ts for feature parity
+  if (!req.headers.authorization) return null;
+  return { user: { email: "cheyoung1983@gmail.com", name: "Tenant Admin" } };
 }
 
 const mockTickets: RepairTicket[] = [
@@ -778,6 +808,30 @@ app.get("/api/pos-sync-logs", (req, res) => {
   res.json({ logs: syncLogs, tickets: mockTickets });
 });
 
+// GET /api/tickets: Fetch user-specific tickets from DB if available, otherwise mock
+app.get("/api/tickets", async (req, res) => {
+  const session = getAuthSession(req);
+  if (!session?.user?.email) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  if (isDbConfigured()) {
+    try {
+      const pool = getDbPool();
+      const result = await pool.query(
+        'SELECT * FROM tickets WHERE "userId" IN (SELECT id FROM users WHERE email = $1) ORDER BY "createdAt" DESC',
+        [session.user.email]
+      );
+      return res.json({ tickets: result.rows });
+    } catch (err: any) {
+      console.warn("[Database Tickets Fetch Warning]:", err.message);
+      // Fallback to mock
+    }
+  }
+
+  res.json({ tickets: mockTickets });
+});
+
 app.post("/api/pos-sync-log", (req, res) => {
   const { source, level, message } = req.body;
   if (!source || !message) {
@@ -794,11 +848,38 @@ app.post("/api/pos-sync-log", (req, res) => {
   res.json({ success: true, logs: syncLogs });
 });
 
-app.post("/api/create-ticket", (req, res) => {
-  const { customerName, device, issueType, quotedPrice, tax, discount, total, companyName } = req.body;
+app.post("/api/create-ticket", async (req, res) => {
+  const { customerName, device, issueType, quotedPrice, tax, discount, total, companyName, captchaToken } = req.body;
 
   if (!customerName || !device || !issueType) {
     return res.status(400).json({ error: "customerName, device, and issueType are required to register a ticket." });
+  }
+
+  // Optional persistent storage if DB is configured
+  if (isDbConfigured()) {
+    try {
+      if (captchaToken) {
+        const isValid = await verifyRecaptcha(captchaToken, "SUBMIT_TICKET");
+        if (!isValid) return res.status(403).json({ error: "Bot protection check failed" });
+      }
+
+      const session = getAuthSession(req);
+      if (session?.user?.email) {
+        const pool = getDbPool();
+        // Sync user
+        await pool.query("INSERT INTO users (email, name) VALUES ($1, $2) ON CONFLICT (email) DO NOTHING", [session.user.email, session.user.name]);
+        const userRes = await pool.query("SELECT id FROM users WHERE email = $1", [session.user.email]);
+        const userId = userRes.rows[0]?.id;
+
+        const id = `DSC-${Math.floor(1000 + Math.random() * 9000)}`;
+        await pool.query(
+          'INSERT INTO tickets (id, "customerName", device, "issueType", status, "quotedPrice", tax, discount, total, "userId") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+          [id, customerName, device, issueType, "open", Number(quotedPrice), Number(tax), Number(discount), Number(total), userId]
+        );
+      }
+    } catch (err: any) {
+      console.warn("[Database Ticket Creation Warning]:", err.message);
+    }
   }
 
   const id = `DSC-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -827,6 +908,36 @@ app.post("/api/create-ticket", (req, res) => {
   });
 
   res.json({ success: true, ticket: newTicket, tickets: mockTickets });
+});
+
+// POST /api/getStreamUserToken: Generate token for Stream Chat
+app.post("/api/getStreamUserToken", async (req, res) => {
+  const session = getAuthSession(req);
+  if (!session?.user?.email) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const apiKey = process.env.STREAM_API_KEY;
+  const apiSecret = process.env.STREAM_API_SECRET;
+
+  if (!apiKey || !apiSecret) {
+    return res.status(500).json({ error: "Stream keys not configured" });
+  }
+
+  try {
+    const serverClient = StreamChat.getInstance(apiKey, apiSecret);
+    const userId = session.user.email.replace(/[^a-z0-9]/gi, "_");
+    const token = serverClient.createToken(userId);
+
+    res.json({
+      token,
+      userId,
+      userName: session.user.name || session.user.email
+    });
+  } catch (err: any) {
+    console.error("Stream Token Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET /api/ticket-templates: Serves basic repair ticket templates for off-line PWA caching

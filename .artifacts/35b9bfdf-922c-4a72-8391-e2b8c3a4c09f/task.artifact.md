@@ -1,7 +1,6 @@
-- `[x]` Install `helmet` and `compression` dependencies.
-- `[x]` Configure security headers and `maxDuration` in `vercel.json`.
-- `[x]` Create `.vercelignore` to optimize deployment uploads.
-- `[x]` Integrate `helmet`, `compression`, and Edge caching in `server.ts`.
-- `[x]` Create `vercel-deploy.sh` script for streamlined CLI usage.
-- `[x]` Update `.env.example` with expanded configuration variables.
-- `[x]` Verify build and linting.
+- `[ ]` Merge Stream Chat token logic into `server.ts`.
+- `[ ]` Merge persistent Ticket DB logic into `server.ts`.
+- `[ ]` Relocate redundant `api/*.ts` files to `api/_legacy/`.
+- `[ ]` Move utility scripts to `scripts/`.
+- `[ ]` Verify consolidated build and linting.
+- `[ ]` Create walkthrough.

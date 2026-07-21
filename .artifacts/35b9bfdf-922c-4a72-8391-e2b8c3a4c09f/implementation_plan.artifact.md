@@ -1,47 +1,33 @@
-# Implementation Plan - Vercel Deployment Best Practices
+# Implementation Plan - Consolidate API for Vercel Hobby Plan
 
-The goal is to optimize the project for Vercel deployment by implementing industry-standard security, performance, and developer experience best practices.
+The goal is to resolve the Vercel Hobby plan limit of 12 serverless functions by consolidating all API endpoints into a single Express application entry point.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> I am adding a suite of security headers to `vercel.json` (HSTS, CSP, X-Frame-Options, etc.). This is highly recommended for production apps but can sometimes interfere with third-party widgets if they are not explicitly allowed in the Content Security Policy (CSP).
+> I am merging all standalone serverless functions (Stream Chat tokens, persistent Tickets, etc.) into the main `server.ts` file. This ensures the entire backend runs as a single function, staying well within the Hobby plan limits while maintaining all existing features.
 
 ## Proposed Changes
 
-### Infrastructure & Security
-
-#### [MODIFY] [vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel.json)
-- Add a `headers` block to implement security best practices (HSTS, CSP, X-Content-Type-Options, etc.).
-- Add `maxDuration` to long-running AI functions (triage, diagnostics) to prevent timeouts.
-
-#### [NEW] [.vercelignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.vercelignore)
-- Add common exclusions (local logs, artifacts, large unused assets) to speed up deployment uploads.
-
-### Backend Optimization
+### Backend Consolidation
 
 #### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Integrate `helmet` middleware for application-level security headers.
-- Implement `Cache-Control` headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, `/api/rds-status`) to leverage Vercel's Edge Network.
-- Add compression middleware for smaller payload transfers.
+- Add `GET /api/tickets` endpoint with database persistence support.
+- Add `POST /api/getStreamUserToken` endpoint for Stream Chat integration.
+- Update `POST /api/create-ticket` to use the database when configured.
+- Add mock session handling to mirror the current `auth-utils.ts` logic until a full Auth solution is integrated.
 
-#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)
-- Add `helmet` and `compression` dependencies.
+### Filesystem Reorganization
 
-### Developer Experience
-
-#### [NEW] [vercel-deploy.sh](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel-deploy.sh)
-- Create a streamlined bash script to help the user deploy via Vercel CLI, including environment variable synchronization.
-
-#### [MODIFY] [.env.example](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.env.example)
-- Expand the example to include all necessary AWS and reCAPTCHA variables for a "batteries-included" setup.
+#### [DELETE/MOVE] `api/*.ts` (except `index.ts`)
+- Move redundant standalone functions to `api/_legacy/` to prevent Vercel from provisioning them as separate entry points.
+- Move utility scripts (`setup-db.ts`, `test-connection.ts`) to the `scripts/` directory.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint` to ensure new middleware doesn't break types.
-- Validate `vercel.json` syntax.
+- Run `npm run lint` to verify combined logic and dependencies.
+- Verify `vercel.json` rewrites still point to the single entry point.
 
 ### Manual Verification
-- Review the generated `vercel-deploy.sh` for correctness.
-- Ensure security headers are logically sound for a React/Express hybrid app.
+- Review the consolidated `server.ts` to ensure no business logic from the standalone functions was lost.
