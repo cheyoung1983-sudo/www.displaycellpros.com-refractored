@@ -51,4 +51,17 @@ export interface QuoteResponse {
   };
   subtotal: number;
   grandTotal: number;
+  bookingSummary?: string;
 }
+
+export interface TicketTemplate {
+  id: string;
+  name: string;
+  brand: string;
+  issueType: string;
+  description: string;
+  estimatedTime: string;
+  difficulty: "Easy" | "Intermediate" | "Advanced" | string;
+  defaultPrice: number;
+}
+

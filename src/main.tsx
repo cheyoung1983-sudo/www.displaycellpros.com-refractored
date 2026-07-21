@@ -1,5 +1,6 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
+import {SpeedInsights} from '@vercel/speed-insights/react';
 import App from './App.tsx';
 import './index.css';
 
@@ -22,9 +23,27 @@ if (typeof window !== 'undefined') {
   });
 }
 
+// Register the Service Worker for offline Diagnostic Lab capabilities
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .then((registration) => {
+        console.log("[Service Worker] Registration successful with scope:", registration.scope);
+      })
+      .catch((error) => {
+        console.error("[Service Worker] Registration failed:", error);
+      });
+  });
+}
+
+import { AuthProvider } from './contexts/AuthContext';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+    <SpeedInsights />
   </StrictMode>,
 );
 

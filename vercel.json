@@ -1,13 +1,15 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.ts"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/health", "destination": "/api/health.ts" },
+    { "source": "/api/generate-quote", "destination": "/api/generate-quote.ts" },
+    { "source": "/api/tax-lookup", "destination": "/api/tax-lookup.ts" },
+    { "source": "/api/triage", "destination": "/api/triage.ts" },
+    { "source": "/api/getStreamUserToken", "destination": "/api/getStreamUserToken.ts" },
+    { "source": "/api/tickets", "destination": "/api/tickets.ts" },
+    { "source": "/api/rds-status", "destination": "/api/rds-status.ts" },
+    { "source": "/api/movies", "destination": "/api/movies.ts" },
+    { "source": "/api/(.*)", "destination": "/api/health.ts" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
