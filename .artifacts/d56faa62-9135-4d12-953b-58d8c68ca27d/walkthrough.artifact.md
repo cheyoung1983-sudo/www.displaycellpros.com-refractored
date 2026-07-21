@@ -29,7 +29,15 @@ Updated [vite.config.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displa
 - Configured explicit HMR host and protocol for better reliability.
 - Added a proxy rule for `/api` to route requests to the local Vercel dev server (port 3000).
 
+### 6. Build & Middleware Fixes
+Updated [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/middleware.ts), [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json), and [tsconfig.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/tsconfig.json).
+- Replaced Next.js-specific `NextResponse` with `@vercel/edge` `next` to support Vite projects on Vercel.
+- Added `@vercel/node` and `@vercel/edge` dependencies to provide necessary types for API handlers and middleware.
+- Configured `tsconfig.json` with `vite/client` types to resolve `import.meta.env` errors.
+- Updated `QuoteResponse` interface in `src/types.ts` to include missing `bookingSummary` property.
+
 ## Verification
+- **Lint Check:** Successfully ran `npm run lint` (using `tsc --noEmit`), confirming all TypeScript errors are resolved.
 
 ### Automated Check
 - Ran `npm install` to confirm dependency resolution.

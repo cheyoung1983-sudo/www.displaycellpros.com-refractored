@@ -7,4 +7,4 @@
 - [x] Refactor `App.tsx` to use environment variables for reCAPTCHA
 - [x] Update `api/lib/recaptcha.ts` with new secret and Enterprise SDK
 - [x] Optimize `vite.config.ts` for HMR and API proxying
-- [/] Fix Vercel build errors (Middleware and Types)
+- [x] Fix Vercel build errors (Middleware and Types)
