@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "vite",
     "build": "vite build",
     "start": "vercel deploy --prebuilt",
     "clean": "rm -rf dist .vercel",
