@@ -1,6 +1,8 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import compression from "compression";
+import helmet from "helmet";
 import { OpenAI } from "openai";
 import dotenv from "dotenv";
 import { getDbPool, isDbConfigured, queryWithToken } from "./db";
@@ -12,8 +14,25 @@ dotenv.config();
 export const app = express();
 const PORT = 3000;
 
-// Middleware
+// Security & Performance Middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Managed by vercel.json for static/dynamic parity
+}));
+app.use(compression());
 app.use(express.json());
+
+// Edge Network Caching Policy Helper
+app.use((req, res, next) => {
+  // Idempotent GET requests for static-ish data can be cached at the edge
+  if (req.method === "GET") {
+    const cacheablePaths = ["/api/welcome", "/api/movies", "/api/rds-status", "/api/ticket-templates"];
+    if (cacheablePaths.some(p => req.url.startsWith(p))) {
+      // Cache at edge for 60s, revalidate in background up to 1 hour
+      res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=3600");
+    }
+  }
+  next();
+});
 
 // Normalize API routes for serverless rewrites (e.g., when /api/ is stripped by hosting gateways)
 app.use((req, res, next) => {

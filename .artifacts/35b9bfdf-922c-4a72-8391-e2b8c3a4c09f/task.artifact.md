@@ -1,4 +1,7 @@
-- `[x]` Configure Node.js version in `package.json` engines.
-- `[x]` Remove manual runtime override from `vercel.json`.
-- `[x]` Verify JSON syntax for both files.
-- `[x]` Create walkthrough.
+- `[x]` Install `helmet` and `compression` dependencies.
+- `[x]` Configure security headers and `maxDuration` in `vercel.json`.
+- `[x]` Create `.vercelignore` to optimize deployment uploads.
+- `[x]` Integrate `helmet`, `compression`, and Edge caching in `server.ts`.
+- `[x]` Create `vercel-deploy.sh` script for streamlined CLI usage.
+- `[x]` Update `.env.example` with expanded configuration variables.
+- `[x]` Verify build and linting.

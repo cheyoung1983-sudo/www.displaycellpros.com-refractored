@@ -1,19 +1,38 @@
-# Walkthrough - Fixing Vercel Runtime Configuration
+# Walkthrough - Vercel Deployment Best Practices
 
-I have updated the project configuration to resolve the Vercel deployment error related to function runtimes.
+I have optimized the project for production-ready deployment on Vercel by implementing industry-standard security, performance, and developer experience enhancements.
 
 ## Changes Made
 
-### Configuration
-- **[package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)**:
-    - Added the `engines` field with `"node": "22.x"`. This is the recommended way to set the Node.js version on Vercel, ensuring the platform correctly provisions the environment.
+### Infrastructure & Security
 - **[vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel.json)**:
-    - Removed the manual `"runtime": "nodejs22.x"` override from the `functions` block. This eliminates the "invalid version" validation error while allowing Vercel to use the version specified in `package.json`.
+    - Added a comprehensive `headers` block implementing **HSTS**, **Content Security Policy (CSP)**, **X-Frame-Options**, and **Permissions-Policy**.
+    - Set `maxDuration: 60` for API functions to ensure long-running AI tasks don't time out prematurely.
+- **[.vercelignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.vercelignore)**:
+    - Created a new exclusion file to prevent large or sensitive local assets (logs, artifacts, etc.) from being uploaded, significantly speeding up the deployment process.
+
+### Backend Optimization
+- **[server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)**:
+    - Integrated `helmet` middleware for standard application-level security.
+    - Added `compression` middleware to reduce the size of transferred payloads.
+    - Implemented **Edge Network Caching** for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.) to improve global latency.
+- **[package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)**:
+    - Added `helmet`, `compression`, and their respective `@types` definitions.
+
+### Developer Experience
+- **[vercel-deploy.sh](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel-deploy.sh)**:
+    - Created a specialized deployment script to automate environment variable syncing, build verification, and deployment targeting (Preview vs. Production).
+- **[.env.example](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.env.example)**:
+    - Expanded the environment template to cover all required AWS, reCAPTCHA, and Firebase configurations.
 
 ## Verification Results
 
-### Syntax Check
-- Both `package.json` and `vercel.json` have been verified for valid JSON syntax.
+### Build & Linting
+- **`npm run build`**: Successfully completed production build in ~14s.
+- **`npm run lint`**: Passed with zero errors.
 
-### Deployment Verification
-- You can now trigger a new deployment on Vercel. The platform should now correctly recognize Node.js 22 via the `package.json` engines field and proceed with the build.
+### Security Check
+- The CSP is configured to allow necessary third-party connections for Google Services and OpenAI while restricting all other sources.
+
+> [!TIP]
+> Use the new `./vercel-deploy.sh` script to manage your deployments. It will help ensure your local `.env.local` stays in sync with Vercel's secret manager.
