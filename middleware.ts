@@ -1,5 +1,5 @@
 import { next } from '@vercel/edge';
-import { get } from '@vercel/edge-config';
+import { get, has } from '@vercel/edge-config';
 
 export async function middleware(request: Request) {
   const url = new URL(request.url);
@@ -8,6 +8,11 @@ export async function middleware(request: Request) {
   // Handle /welcome route directly at the edge to reduce latency
   if (pathname === '/welcome' || pathname === '/api/welcome') {
     try {
+      // Existence check at the edge is very efficient
+      if (!(await has('greeting'))) {
+        return next();
+      }
+
       const greeting = await get('greeting');
       return new Response(JSON.stringify({
         greeting: greeting || "hello world",

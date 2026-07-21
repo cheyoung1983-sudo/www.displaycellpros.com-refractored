@@ -1,25 +1,31 @@
-# Walkthrough - Edge Middleware Dynamic Greeting
+# Walkthrough - Edge Config Best Practices
 
-I have implemented a high-performance `/welcome` route using Vercel Edge Middleware and Edge Config.
+I have aligned the project's Edge Config implementation with Vercel's recommended best practices to improve local development reliability and production performance.
 
 ## Changes Made
 
-### Edge Configuration
+### Local Development Synchronization
+- **[package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)**:
+    - Added `dotenv-expand` to `devDependencies`.
+- **[vite.config.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vite.config.ts)**:
+    - Implemented a more robust environment variable loading pattern for development. This ensures that `process.env` is correctly populated with your `.env` variables (including `EDGE_CONFIG`) when running the Vite dev server.
+
+### Robust Data Fetching
+- **[server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)**:
+    - Added defensive existence checks using `has("greeting")` before attempting to fetch values.
+    - Improved error logging for Edge Config failures to help diagnose configuration issues faster.
 - **[middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/middleware.ts)**:
-    - Integrated `@vercel/edge-config` to fetch dynamic values at the network edge.
-    - Added an interceptor for the `/welcome` and `/api/welcome` paths.
-    - The middleware now returns the `greeting` as a JSON response directly from the edge, bypassing the main serverless function.
-    - Added a fallback mechanism: if Edge Config is unavailable, it passes the request through to the Express server.
-    - Updated the `matcher` configuration to include the new route.
+    - Added an efficient existence check (`has`) at the edge. If the `greeting` key is missing, the middleware now immediately passes through to the server instead of failing silently or returning a malformed response.
 
 ## Verification Results
 
-### Linting
-- **`npm run lint`**: Passed successfully. The middleware implementation follows standard TypeScript and Web Fetch API patterns.
+### Build & Dev Environment
+- **`npm run build`**: Successfully completed production build.
+- **`npm run lint`**: Passed with zero errors.
+- **Local Dev**: The new `vite.config.ts` logic correctly bridges the gap between Vite's `import.meta.env` and the Edge Config SDK's reliance on `process.env`.
 
-### Performance Benefits
-- **Zero Cold Starts**: Since the response is generated at the edge, there is no need to wake up the Express serverless function for this route.
-- **Low Latency**: The greeting is served from the closest Vercel Edge node to the user.
+### Performance & Immutability
+- All Edge Config calls now follow the recommended "Bound Function" pattern, ensuring that retrieved values are treated as immutable and avoiding potential side-effects.
 
 > [!TIP]
-> You can update the greeting instantly through the Vercel Dashboard's Edge Config UI without needing a new deployment.
+> Your local development environment is now much closer to the Vercel production environment. Any changes you make to your `.env` file will be automatically expanded and made available to the Edge Config SDK locally.

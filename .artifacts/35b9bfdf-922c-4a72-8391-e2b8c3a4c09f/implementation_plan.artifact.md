@@ -1,34 +1,39 @@
-# Implementation Plan - Backend Stability and Performance Mitigation
+# Implementation Plan - Vercel Container Registry (VCR) Integration
 
-The goal is to resolve recurring HTTP 500 errors on the backend and optimize frontend rendering to address render-blocking resources and layout shifts.
+The goal is to prepare the project for container-based deployment using Vercel Container Registry (VCR). This allows the application to run as a containerized Vercel Function.
 
 ## User Review Required
 
-> [!NOTE]
-> I am adding a global error handler to the Express backend. This will log detailed error information to the console (visible in Vercel logs) and return a structured JSON error response instead of a generic 500 HTML page.
+> [!IMPORTANT]
+> To support VCR, I am re-introducing a `Dockerfile` (optimized as `Dockerfile.vercel`).
+>
+> **Note on Port Configuration**: I will update `server.ts` to listen on `process.env.PORT || 80`. Vercel's container runtime expects applications to listen on port 80 by default.
 
 ## Proposed Changes
 
-### Backend Stability
+### Infrastructure & Containerization
+
+#### [NEW] [Dockerfile.vercel](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/Dockerfile.vercel)
+- Create a multi-stage build for a Node.js 22 alpine image.
+- Stage 1: Build the Vite frontend and bundle the Express server.
+- Stage 2: Production runtime with minimal dependencies.
+
+### Backend Updates
 
 #### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Add a global error handler (`app.use((err, req, res, next) => { ... })`) at the end of the middleware stack.
-- Wrap route handlers in `try-catch` blocks where async operations (like database or AI calls) occur to prevent unhandled rejections.
-- Add a catch-all route for unhandled `/api/*` requests to return a proper 404 JSON response instead of potentially crashing the Vercel bridge.
+- Update the listener to use the `PORT` environment variable, defaulting to 80 for container compatibility.
 
-### Frontend Performance
+### Deployment Tooling
 
-#### [MODIFY] [index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)
-- Add a `preload` hint for the main CSS bundle to reduce render-blocking delay.
-- Add `display=swap` to the Google Fonts URL to prevent invisible text during font loading.
-- Implement the "Preload + Noscript" pattern for the main stylesheet to move it out of the critical path.
+#### [MODIFY] [vercel-deploy.sh](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel-deploy.sh)
+- Add a new option for **Container-based Deployment**.
+- Include the `vercel vcr login docker` command and build recommendations.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint` to ensure no syntax errors are introduced.
-- Run `npm run build` to verify the production assets are still correctly linked.
+- Run `npm run build` to ensure the bundling logic used in the Dockerfile is valid.
 
 ### Manual Verification
-- Review the Vercel deployment logs after push to confirm errors are being caught and logged.
-- Use PageSpeed Insights or Chrome DevTools Performance tab to verify reduced render-blocking time.
+- The user will need to run the `docker build` and `docker push` commands from a machine with Docker installed.
+- I will provide the recommended `docker buildx` command for optimal compression and cold-start performance on Vercel.

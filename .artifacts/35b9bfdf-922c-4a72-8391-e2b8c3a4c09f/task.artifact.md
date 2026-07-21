@@ -1,3 +1,6 @@
-- `[x]` Update `middleware.ts` to handle `/welcome` via Edge Config.
-- `[x]` Verify middleware logic and routing.
+- `[x]` Install `dotenv-expand` for better environment variable management.
+- `[x]` Update `vite.config.ts` to populate `process.env` during local development.
+- `[x]` Refactor `server.ts` Edge Config logic for better error handling and "Best Practices" compliance.
+- `[x]` Refactor `middleware.ts` to use existence checks (`has`).
+- `[x]` Verify local dev environment and production build.
 - `[x]` Create walkthrough.

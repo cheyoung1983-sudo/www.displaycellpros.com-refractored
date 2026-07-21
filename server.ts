@@ -8,7 +8,7 @@ import { StreamChat } from "stream-chat";
 import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
 import dotenv from "dotenv";
 import { getDbPool, isDbConfigured, queryWithToken } from "./db";
-import { get } from "@vercel/edge-config";
+import { get, has } from "@vercel/edge-config";
 
 dotenv.config();
 
@@ -1188,6 +1188,15 @@ app.get(["/welcome", "/api/welcome"], async (req, res) => {
         greeting: "hello world",
         source: "local-fallback",
         message: "Connect your Vercel Edge Config to enable live remote configuration."
+      });
+    }
+
+    // Defensive existence check before fetching
+    if (!(await has("greeting"))) {
+      return res.json({
+        greeting: "hello world",
+        source: "edge-config-fallback",
+        message: "Greeting key not found in Edge Config."
       });
     }
 
