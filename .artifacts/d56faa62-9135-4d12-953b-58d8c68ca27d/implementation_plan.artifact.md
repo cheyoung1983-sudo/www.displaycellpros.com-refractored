@@ -1,49 +1,39 @@
-# Implementation Plan: Upgrade to reCAPTCHA Enterprise
+# Implementation Plan: Fix Vercel Build Errors (Non-Next.js Middleware & Missing Types)
 
-The goal is to upgrade the reCAPTCHA integration from the legacy `siteverify` API to the modern **reCAPTCHA Enterprise API** using the `@google-cloud/recaptcha-enterprise` SDK. This provides better security and detailed risk assessments.
+The goal is to resolve the Vercel build failures by correcting the middleware implementation and providing the necessary TypeScript declarations for the API handlers.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Google Cloud Credentials:** The `@google-cloud/recaptcha-enterprise` library requires authentication to Google Cloud. This typically requires a Service Account Key or OIDC configured in your environment. I will implement the code, but you may need to add `GOOGLE_APPLICATION_CREDENTIALS` to your Vercel/Local environment if it's not already there.
+> **Middleware Refactor:** I am switching `middleware.ts` from `next/server` (which is for Next.js only) to `@vercel/edge`. This is the correct way to handle middleware in a Vite/React project on Vercel.
 
-> [!NOTE]
-> **Key Update:** I will update the project to use the new keys you provided:
-> - Site Key: `6LeqGV0tAAAAAC_MQbIkcyZa2L-LvTNhSlmxKaLo`
-> - Project ID: `displaycellpros-com`
+> [!WARNING]
+> **New Dependencies:** I will add `@vercel/node` and `@vercel/edge` to your `package.json`. These are required for TypeScript support in your API functions and Middleware.
 
 ## Proposed Changes
 
 ### [Dependencies]
 
 #### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
-- Add `@google-cloud/recaptcha-enterprise` dependency.
+- Add `@vercel/node` to `devDependencies`.
+- Add `@vercel/edge` to `dependencies`.
 
-### [Environment Configuration]
+### [Middleware]
 
-#### [MODIFY] [.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env.local) & [.env](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env)
-- Set `GOOGLE_CLOUD_PROJECT_ID="displaycellpros-com"`.
-- Update `VITE_RECAPTCHA_SITE_KEY` with the new key.
+#### [MODIFY] [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/middleware.ts)
+- Replace `next/server` imports with `@vercel/edge`.
+- Update implementation to follow Edge Function standards.
 
-### [Backend Integration]
+### [API Library]
 
-#### [MODIFY] [recaptcha.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/lib/recaptcha.ts)
-- Replace legacy fetch-based verification with the `RecaptchaEnterpriseServiceClient`.
-- Update `verifyRecaptcha` to accept an optional `action` name for score-based validation.
-
-#### [MODIFY] [tickets.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/tickets.ts)
-- Update the verification call to include an action name (e.g., `SUBMIT_TICKET`).
-
-### [Frontend Integration]
-
-#### [MODIFY] [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
-- Replace hardcoded `sitekey` with `import.meta.env.VITE_RECAPTCHA_SITE_KEY`.
+#### [MODIFY] [auth-utils.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/api/lib/auth-utils.ts)
+- Ensure imports from `@vercel/node` are correct (installing the package will resolve the TS error).
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run dev` and check for any build-time errors.
-- (Manual) Verify the reCAPTCHA checkbox still appears and works on the login and triage pages.
+- Run `npm run lint` to verify that TypeScript errors are resolved locally.
+- Run `vercel build` (locally) if Vercel CLI is configured, to simulate the cloud build.
 
 ### Manual Verification
-- Test a ticket submission and check the server logs (or Vercel logs) to ensure the Enterprise assessment is being created successfully.
+- Deploy to Vercel and verify the build log shows "Build Completed" without the `next/server` error.
