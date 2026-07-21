@@ -1,39 +1,40 @@
-# Implementation Plan - CI/CD Pipeline and Windows Deployment Support
+# Implementation Plan - Spokane Market Dominance & Pricing Strategy
 
-The goal is to automate the deployment process to **Vercel Container Registry (VCR)** using GitHub Actions and provide native PowerShell support for local Windows development.
+The goal is to transition the application to a **Value-Based Tiered Strategy** that monetizes the "Convenience Premium" of the mobile lab and integrates a "Data Privacy Guarantee" into the customer intake flow.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> To enable the GitHub Actions pipeline, you will need to add the following **Repository Secrets** in your GitHub project settings (`Settings > Secrets and variables > Actions`):
-> - `VERCEL_TOKEN`: Your Vercel Access Token.
-> - `VERCEL_ORG_ID`: Your Vercel Team ID (`team_zl2oSyklLa3nDVTel7ImA4rV`).
-> - `VERCEL_PROJECT_ID`: Your Vercel Project ID (`prj_QKxT51u4q2771aPcCPGQMo1xJXYB`).
+> I am updating the core pricing logic to use the formula from the mission briefing: *Parts Cost + Labor ($50/hr) + 80% Overhead/Profit Margin*. This will result in three distinct tiers (Budget, Professional, Authorized) for every quote.
 
 ## Proposed Changes
 
-### CI/CD Automation
+### Backend Logic (`server.ts`)
 
-#### [NEW] [deploy.yml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.github/workflows/deploy.yml)
-- Create a GitHub Action that triggers on push to `main`.
-- **Build Verification**: Runs `npm run build` and `npm run lint` in a clean environment.
-- **Docker Buildx**: Configures Buildx for OCI-compliant builds with `zstd` compression (optimized for Vercel cold starts).
-- **VCR Push**: Authenticates with Vercel and pushes the image to `vcr.vercel.com/dcpllc/www.displaycellpros.com-refractored/dcp-depository:latest`.
-- **Automatic Deployment**: Triggers a Vercel deployment using the newly pushed container.
+#### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
+- Update `calculateQuoteInternal` to return a `tiers` object (Budget, Professional, Authorized) instead of a single value.
+- Implement "Bundle-to-Win" logic:
+    - **Professional/Authorized**: Automatically include "Protective Shield" (tempered glass).
+    - **Authorized**: Highlight "Genuine Parts" status.
+- Add "Battery-Plus" upsell logic: return a discounted price for a battery repair when bundled.
+- Update AI `systemInstruction` to include the **Data Privacy Guarantee**: "Highlight the on-site security advantage—device never leaves sight, no data exported."
 
-### Local Windows Support
+### Frontend UI (`src/App.tsx`)
 
-#### [NEW] [vercel-deploy.ps1](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel-deploy.ps1)
-- Create a native PowerShell version of the deployment script.
-- Synchronizes secrets from Vercel to local `.env.local` using the Vercel CLI.
-- Provides an interactive menu for choosing between Preview and Production deployments.
-- Replaces the need for `bash` or a local Docker installation for standard deployments.
+#### [MODIFY] [src/App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/src/App.tsx)
+- Update the quote state and `fetchDynamicQuote` fallback to handle the new tiered response.
+- **Redesign Quote UI**: Replace the single summary with a **Three-Tier Comparison Table**.
+    - Highlight the **Professional Tier** as the recommended "Mission Sweet Spot".
+    - Clearly list "Bundled Extras" (Tempered Glass, Lifetime Warranty) for the upper tiers.
+- Add a "Add Battery Recovery (+50% Off)" toggle to the quote panel to demonstrate the upsell strategy.
 
 ## Verification Plan
 
 ### Automated Tests
-- The GitHub Action itself will serve as the verification. I will review the YAML syntax for correctness.
+- Run `npm run lint` to ensure type safety with the new tiered quote structure.
+- Run `npm run build` to verify production bundling.
 
 ### Manual Verification
-- The user will need to push the code and check the "Actions" tab in GitHub to see the pipeline run.
-- The user can test `.\vercel-deploy.ps1` in their PowerShell terminal.
+- Trigger a quote in the UI and verify that all three tiers are displayed correctly.
+- Toggle the "Battery Recovery" upsell and verify the total adjusts based on the 50% discount logic.
+- Verify the AI Assistant mentions "On-site Data Privacy" during the intake flow.

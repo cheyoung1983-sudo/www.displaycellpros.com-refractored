@@ -190,12 +190,16 @@ export default function App() {
   const [isValidZip, setIsValidZip] = useState<boolean>(true);
 
   // Live Quote Response
+  const [includeBatteryUpsell, setIncludeBatteryUpsell] = useState<boolean>(false);
+  const [selectedTier, setSelectedTier] = useState<"budget" | "professional" | "authorized">("professional");
   const [quote, setQuote] = useState<QuoteResponse>({
-    baseQuote: { partsCost: 180, laborCost: 170, overhead: 52.5, subtotal: 402.5 },
-    taxInfo: { zipCode: "98101", city: "Seattle", rate: 0.1035, calculatedTax: 33.32 },
-    discountInfo: { applied: true, percentage: 20, amount: 80.5, company: "AMAZON Fleet" },
-    subtotal: 322,
-    grandTotal: 355.32
+    tiers: {
+      budget: { partsCost: 45, laborCost: 50, subtotal: 171, discountAmount: 25.65, calculatedTax: 15.04, grandTotal: 160.39, extras: ["Aftermarket Quality", "90-Day Warranty"] },
+      professional: { partsCost: 95, laborCost: 50, subtotal: 261, discountAmount: 39.15, calculatedTax: 22.95, grandTotal: 244.80, extras: ["Premium Soft OLED", "Lifetime Warranty", "Free Protective Shield"] },
+      authorized: { partsCost: 180, laborCost: 75, subtotal: 459, discountAmount: 68.85, calculatedTax: 40.38, grandTotal: 430.53, extras: ["Genuine OEM Parts", "Lifetime Warranty", "Free Protective Shield"] }
+    },
+    taxInfo: { zipCode: "98101", city: "Seattle", rate: 0.1035 },
+    discountInfo: { applied: true, percentage: 15, company: "AMAZON Fleet" }
   });
   const [isCalculatingQuote, setIsCalculatingQuote] = useState<boolean>(false);
 
@@ -685,6 +689,12 @@ export default function App() {
 
 
 
+  useEffect(() => {
+    if (activeTab === "lab" && (deviceBrand || deviceModel)) {
+      fetchDynamicQuote();
+    }
+  }, [includeBatteryUpsell, issueType, deviceTier, isCorporate]);
+
   const fetchDynamicQuote = async (retries = 2, delay = 1000) => {
     setIsCalculatingQuote(true);
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -698,6 +708,7 @@ export default function App() {
             zipCode: zipInput,
             isCorporate,
             companyName: isCorporate ? companyName : undefined,
+            includeBatteryUpsell
           })
         });
         if (res.ok) {
@@ -710,82 +721,70 @@ export default function App() {
         if (attempt === retries) {
           console.warn("Quote generation API failed, using high-fidelity local simulation:", err);
           // High-fidelity fallback computation matching backend
-          let partsCost = 45;
-          let laborHours = 1.5;
-          const hourlyLaborRate = 85;
-          const overheadMultiplier = 1.15;
+          const HOURLY_LABOR_RATE = 50;
+          const OVERHEAD_MARGIN = 0.8;
 
-          if (issueType === "screen") {
-            partsCost = deviceTier === "flagship" ? 180 : deviceTier === "midrange" ? 95 : 55;
-            laborHours = deviceTier === "flagship" ? 2.0 : 1.5;
-          } else if (issueType === "battery") {
-            partsCost = deviceTier === "flagship" ? 45 : deviceTier === "midrange" ? 35 : 25;
-            laborHours = 1.0;
-          } else if (issueType === "button") {
-            partsCost = deviceTier === "flagship" ? 30 : deviceTier === "midrange" ? 20 : 12;
-            laborHours = 1.25;
-          }
+          const getPartsCost = (quality: "budget" | "pro" | "auth") => {
+            if (issueType === "screen") {
+              if (quality === "auth") return deviceTier === "flagship" ? 220 : 180;
+              if (quality === "pro") return deviceTier === "flagship" ? 140 : 95;
+              return deviceTier === "flagship" ? 75 : 45;
+            } else if (issueType === "battery") {
+              if (quality === "auth") return 65;
+              if (quality === "pro") return 45;
+              return 25;
+            }
+            return 30;
+          };
 
-          const baseLabor = laborHours * hourlyLaborRate;
-          const rawSubtotal = (partsCost + baseLabor) * overheadMultiplier;
-          const subtotalPrice = Math.round(rawSubtotal * 100) / 100;
-
-          const WA_TAX_DATA: Record<string, { city: string; rate: number }> = {
-            "98101": { city: "Seattle", rate: 0.1035 },
-            "98102": { city: "Seattle", rate: 0.1035 },
-            "98104": { city: "Seattle", rate: 0.1035 },
-            "98115": { city: "Seattle", rate: 0.1035 },
-            "98004": { city: "Bellevue", rate: 0.101 },
-            "98005": { city: "Bellevue", rate: 0.101 },
-            "98402": { city: "Tacoma", rate: 0.103 },
-            "98405": { city: "Tacoma", rate: 0.103 },
-            "98052": { city: "Redmond", rate: 0.101 },
-            "98201": { city: "Everett", rate: 0.099 },
+          const getLaborHours = () => {
+            if (issueType === "screen") return deviceTier === "flagship" ? 1.5 : 1.0;
+            if (issueType === "battery") return 0.75;
+            return 1.0;
           };
 
           let tRate = 0.1035;
-          let tCity = "Seattle";
           if (zipInput) {
-            const lookup = WA_TAX_DATA[zipInput.trim()] || (zipInput.trim().startsWith("98") || zipInput.trim().startsWith("99") ? { city: "WA Unspecified", rate: 0.088 } : null);
-            if (lookup) {
-              tRate = lookup.rate;
-              tCity = lookup.city;
-            } else {
-              tRate = 0;
-              tCity = "Out of State";
+            const WA_TAX_DATA: Record<string, number> = { "98101": 0.1035, "99201": 0.09 };
+            tRate = WA_TAX_DATA[zipInput.trim()] || (zipInput.startsWith("98") ? 0.088 : 0);
+          }
+
+          const processTier = (quality: "budget" | "pro" | "auth") => {
+            const parts = getPartsCost(quality);
+            const labor = getLaborHours() * HOURLY_LABOR_RATE;
+            let subtotal = (parts + labor) * (1 + OVERHEAD_MARGIN);
+
+            if (includeBatteryUpsell && issueType !== "battery") {
+              const batteryParts = getPartsCost("pro"); // Use Pro quality for upsell battery
+              const batteryLabor = 0.75 * HOURLY_LABOR_RATE;
+              subtotal += ((batteryParts + batteryLabor) * (1 + OVERHEAD_MARGIN)) * 0.5;
             }
-          }
 
-          let discountAmount = 0;
-          if (isCorporate) {
-            discountAmount = Math.round((subtotalPrice * 0.2) * 100) / 100;
-          }
+            let discount = isCorporate ? subtotal * 0.15 : 0;
+            const subAfterDisc = subtotal - discount;
+            const tax = subAfterDisc * tRate;
 
-          const subtotalAfterDiscount = Math.round((subtotalPrice - discountAmount) * 100) / 100;
-          const calculatedTax = Math.round((subtotalAfterDiscount * tRate) * 100) / 100;
-          const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
+            return {
+              partsCost: parts,
+              laborCost: labor,
+              subtotal: subtotal,
+              discountAmount: discount,
+              calculatedTax: tax,
+              grandTotal: subAfterDisc + tax,
+              extras: quality === "auth" ? ["Genuine OEM Parts", "Lifetime Warranty", "Free Protective Shield"]
+                     : quality === "pro" ? ["Premium Soft OLED", "Lifetime Warranty", "Free Protective Shield"]
+                     : ["Aftermarket Quality", "90-Day Warranty"]
+            };
+          };
 
           setQuote({
-            baseQuote: {
-              partsCost: Math.round(partsCost * 100) / 100,
-              laborCost: Math.round(baseLabor * 100) / 100,
-              overhead: Math.round((rawSubtotal - partsCost - baseLabor) * 100) / 100,
-              subtotal: subtotalPrice,
+            tiers: {
+              budget: processTier("budget"),
+              professional: processTier("pro"),
+              authorized: processTier("auth"),
             },
-            taxInfo: {
-              zipCode: zipInput || "98101",
-              city: tCity,
-              rate: tRate,
-              calculatedTax,
-            },
-            discountInfo: {
-              applied: isCorporate,
-              percentage: 20,
-              amount: discountAmount,
-              company: companyName || "Corporate Account",
-            },
-            subtotal: subtotalAfterDiscount,
-            grandTotal,
+            taxInfo: { zipCode: zipInput || "98101", city: "Seattle", rate: tRate },
+            discountInfo: { applied: isCorporate, percentage: 15, company: companyName || "Corporate Account" }
           });
         } else {
           await new Promise((resolve) => setTimeout(resolve, delay));
@@ -943,6 +942,7 @@ export default function App() {
 
   const createOfficialTicket = async () => {
     try {
+      const tierData = quote.tiers[selectedTier];
       const res = await fetch("/api/create-ticket", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -951,10 +951,10 @@ export default function App() {
           companyName: isCorporate ? companyName : undefined,
           device: `${deviceBrand} ${deviceModel}`,
           issueType,
-          quotedPrice: quote.baseQuote.subtotal,
-          tax: quote.taxInfo.calculatedTax,
-          discount: quote.discountInfo.amount,
-          total: quote.grandTotal
+          quotedPrice: tierData.subtotal,
+          tax: tierData.calculatedTax,
+          discount: tierData.discountAmount,
+          total: tierData.grandTotal
         })
       });
       if (res.ok) {
@@ -2995,88 +2995,153 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
               <aside className="col-span-12 lg:col-span-3 flex flex-col gap-6">
                 
                 {/* Live Quoter Panel */}
-                <section className="bg-slate-850/60 border border-slate-800 rounded-xl p-5 shadow-md">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 select-none">
-                    <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                      <DollarSign className="w-4 h-4 text-blue-400" />
-                      Live Quote Summary
-                    </h3>
-                    <span className="bg-slate-950 text-slate-400 text-[9px] px-1.5 py-0.2 rounded font-mono border border-slate-800">V3.5 LAB</span>
+                {/* Strategic Live Quote Comparison Panel */}
+                <section className="bg-slate-900 border border-slate-755 rounded-2xl p-6 shadow-xl col-span-1 lg:col-span-2 overflow-hidden relative">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                    <DollarSign size={120} className="text-blue-500" />
                   </div>
 
-                  <div className="space-y-4 font-mono text-xs">
-                    
-                    <div className="text-[11px] p-2.5 bg-slate-950 rounded border border-slate-850 text-slate-300 block leading-tight">
-                      <span className="font-bold block text-white text-[9px] uppercase tracking-wider mb-0.5">🛠️ Config Target</span>
-                      {deviceBrand} {deviceModel} ({deviceTier}) - {issueType} Repair
+                  <div className="flex justify-between items-start mb-6 border-b border-slate-800 pb-4 relative z-10">
+                    <div>
+                      <h3 className="text-xs font-extrabold text-slate-300 uppercase tracking-widest flex items-center gap-2 font-mono">
+                        <TrendingUp className="w-4 h-4 text-emerald-400" />
+                        Strategic Value Matrix
+                      </h3>
+                      <p className="text-[10px] text-slate-500 font-mono mt-1">Spokane Market Optimized Pricing Tier Analysis</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {issueType !== "battery" && (
+                        <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Battery Plus Upsell</span>
+                          <button
+                            onClick={() => setIncludeBatteryUpsell(!includeBatteryUpsell)}
+                            className={`w-8 h-4 rounded-full relative transition-colors ${includeBatteryUpsell ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                          >
+                            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${includeBatteryUpsell ? 'left-4.5' : 'left-0.5'}`}></div>
+                          </button>
+                          <span className="text-[9px] font-extrabold text-emerald-400 font-mono">-50%</span>
+                        </div>
+                      )}
+                      <span className="bg-blue-900/40 text-blue-300 text-[10px] px-2 py-0.5 rounded-md font-bold border border-blue-800/40">SPOKANE_v4.0</span>
+                    </div>
+                  </div>
+
+                  {isCalculatingQuote ? (
+                    <div className="py-20 flex flex-col items-center justify-center text-slate-500 italic text-xs animate-pulse">
+                      <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mb-4" />
+                      SYNCHRONIZING REAL-TIME MARKET DATA...
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                      {/* Budget Tier */}
+                      <div className="bg-slate-950/50 border border-slate-850 rounded-xl p-4 flex flex-col hover:border-slate-700 transition-colors">
+                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Entry Level</span>
+                        <h4 className="text-sm font-extrabold text-white mb-3">BUDGET</h4>
+                        <div className="text-2xl font-black text-slate-300 mb-4 tracking-tighter">
+                          ${quote.tiers.budget.grandTotal.toFixed(2)}
+                        </div>
+                        <ul className="space-y-2 mb-6 flex-1">
+                          {quote.tiers.budget.extras.map((extra, i) => (
+                            <li key={i} className="text-[10px] text-slate-400 flex items-center gap-1.5">
+                              <Check className="w-3 h-3 text-slate-600" /> {extra}
+                            </li>
+                          ))}
+                        </ul>
+                        <button
+                          onClick={() => setSelectedTier("budget")}
+                          className={`w-full py-2 text-[10px] font-bold uppercase rounded-lg transition-colors ${selectedTier === "budget" ? 'bg-blue-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}`}
+                        >
+                          {selectedTier === "budget" ? "Selected" : "Select Budget"}
+                        </button>
+                      </div>
+
+                      {/* Professional Tier (Recommended) */}
+                      <div className={`bg-blue-600/5 border-2 rounded-xl p-4 flex flex-col relative transform transition-all duration-300 ${selectedTier === "professional" ? 'border-blue-500 scale-105 shadow-2xl z-20' : 'border-blue-500/20 opacity-80 scale-100 z-10'}`}>
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-lg">
+                          MISSION SWEET SPOT
+                        </div>
+                        <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-1">High Performance</span>
+                        <h4 className="text-sm font-extrabold text-white mb-3">PROFESSIONAL</h4>
+                        <div className="text-3xl font-black text-white mb-4 tracking-tighter flex items-baseline gap-1">
+                          ${quote.tiers.professional.grandTotal.toFixed(2)}
+                          <span className="text-[10px] font-normal text-blue-300 tracking-normal">/all in</span>
+                        </div>
+                        <ul className="space-y-2 mb-6 flex-1">
+                          {quote.tiers.professional.extras.map((extra, i) => (
+                            <li key={i} className="text-[10px] text-slate-200 flex items-center gap-1.5">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" /> {extra}
+                            </li>
+                          ))}
+                          <li className="text-[10px] text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-950/30 py-1 px-2 rounded -mx-1">
+                            <Zap className="w-3.5 h-3.5" /> Productivity Recovery Inc.
+                          </li>
+                        </ul>
+                        <button
+                          onClick={() => setSelectedTier("professional")}
+                          className={`w-full py-3 text-xs font-black uppercase rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-900/20 ${selectedTier === "professional" ? 'bg-blue-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}`}
+                        >
+                          {selectedTier === "professional" ? "Selected" : "Select Professional"}
+                        </button>
+                      </div>
+
+                      {/* Authorized Tier */}
+                      <div className="bg-slate-950/50 border border-slate-850 rounded-xl p-4 flex flex-col hover:border-slate-700 transition-colors">
+                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">OEM Standard</span>
+                        <h4 className="text-sm font-extrabold text-white mb-3">AUTHORIZED</h4>
+                        <div className="text-2xl font-black text-slate-300 mb-4 tracking-tighter">
+                          ${quote.tiers.authorized.grandTotal.toFixed(2)}
+                        </div>
+                        <ul className="space-y-2 mb-6 flex-1">
+                          {quote.tiers.authorized.extras.map((extra, i) => (
+                            <li key={i} className="text-[10px] text-slate-400 flex items-center gap-1.5">
+                              <Check className="w-3.5 h-3.5 text-slate-600" /> {extra}
+                            </li>
+                          ))}
+                        </ul>
+                        <button
+                          onClick={() => setSelectedTier("authorized")}
+                          className={`w-full py-2 text-[10px] font-bold uppercase rounded-lg transition-colors ${selectedTier === "authorized" ? 'bg-blue-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}`}
+                        >
+                          {selectedTier === "authorized" ? "Selected" : "Select Authorized"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-8 pt-6 border-t border-slate-850 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                    <div className="grid grid-cols-2 gap-4 text-[10px] font-mono">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-slate-550 uppercase font-bold">Market Tax ({quote.taxInfo.rate > 0 ? (quote.taxInfo.rate * 100).toFixed(1) + '%' : 'N/A'})</span>
+                        <span className="text-slate-300">{quote.taxInfo.city || "Spokane Region"}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-slate-550 uppercase font-bold">Fleet Status</span>
+                        <span className={isCorporate ? "text-emerald-400 font-bold" : "text-slate-400"}>
+                          {isCorporate ? `${quote.discountInfo.percentage}% B2B DISCOUNT` : "STANDARD RETAIL"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-slate-550 uppercase font-bold">Convenience</span>
+                        <span className="text-blue-400 font-bold">MOBILE LAB DISPATCH</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-slate-550 uppercase font-bold">Security</span>
+                        <span className="text-violet-400 font-bold">DATA PRIVACY GUARANTEE</span>
+                      </div>
                     </div>
 
-                    {isCalculatingQuote ? (
-                      <div className="py-6 text-center text-slate-500 italic text-[11px]">
-                        <RefreshCw className="w-4 h-4 animate-spin mx-auto text-blue-500 mb-2" />
-                        CALCULATING LAB LABOR TIER OUTCOME...
-                      </div>
-                    ) : (
-                      <div className="space-y-2.5 text-[11px]">
-                        <div className="flex justify-between items-center text-slate-400">
-                          <span>Parts Base Cost</span>
-                          <span className="text-white">${quote.baseQuote.partsCost.toFixed(2)}</span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center text-slate-400">
-                          <span>L3 Mobile Labor Rate</span>
-                          <span className="text-white">${quote.baseQuote.laborCost.toFixed(2)}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-slate-550 text-[10px]">
-                          <span>Lab Overlay margin (15%)</span>
-                          <span>${quote.baseQuote.overhead.toFixed(2)}</span>
-                        </div>
-
-                        <div className="h-[1px] bg-slate-800/80 my-2"></div>
-
-                        <div className="flex justify-between items-center font-semibold text-slate-300">
-                          <span>Wholesale Baseline</span>
-                          <span className="text-white">${(quote.baseQuote.partsCost + quote.baseQuote.laborCost + quote.baseQuote.overhead).toFixed(2)}</span>
-                        </div>
-
-                        {quote.discountInfo.applied && (
-                          <div className="flex justify-between items-center text-emerald-400 font-semibold bg-emerald-950/40 border border-emerald-900/50 px-2 py-1 rounded">
-                            <span>B2B Fleet Disc (20%)</span>
-                            <span>-${quote.discountInfo.amount.toFixed(2)}</span>
-                          </div>
-                        )}
-
-                        <div className="flex justify-between items-center text-slate-400">
-                          <span>Dest Tax ({quote.taxInfo.city || "WA"})</span>
-                          <span>
-                            {quote.taxInfo.rate > 0 ? `${(quote.taxInfo.rate * 100).toFixed(2)}%` : "0%"} 
-                            {" "}(+${quote.taxInfo.calculatedTax.toFixed(2)})
-                          </span>
-                        </div>
-
-                        <div className="h-[1px] bg-slate-700 my-2"></div>
-
-                        <div className="flex justify-between items-baseline py-1">
-                          <span className="font-bold text-slate-300 text-xs">TOTAL DUE</span>
-                          <span className="font-extrabold text-blue-400 text-xl tracking-tight">
-                            ${quote.grandTotal.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-5 space-y-2">
-                    <button 
-                      onClick={createOfficialTicket}
-                      disabled={ticketCreationSuccess}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-md active:scale-98 flex items-center justify-center gap-2"
-                    >
-                      <span>TRANSMIT POS WEBHook</span>
-                    </button>
-                    <div className="text-[9.5px] text-center text-slate-500 font-mono leading-relaxed mt-1 select-none">
-                      *Coordinates automatically sync with physical CellSmart monitors inside mobile van.
+                    <div className="flex flex-col justify-end gap-3">
+                      <button
+                        onClick={createOfficialTicket}
+                        disabled={ticketCreationSuccess}
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl text-sm font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-emerald-950/20 active:scale-95 flex items-center justify-center gap-3 border-b-4 border-emerald-800"
+                      >
+                        <ShoppingCart size={18} />
+                        <span>Book Selected Mission</span>
+                      </button>
+                      <p className="text-[9px] text-center text-slate-500 font-mono italic">
+                        *Synchronizing {selectedTier.toUpperCase()} configuration with Spokane mobile lab...
+                      </p>
                     </div>
                   </div>
                 </section>

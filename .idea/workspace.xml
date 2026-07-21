@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000.">
-      <change beforePath="$PROJECT_DIR$/server.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server.ts" afterDir="false" />
-    </list>
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="implement CI/CD pipeline and Windows deployment support&#10;&#10;- Add GitHub Action workflow for automated deployment to Vercel Container Registry (VCR).&#10;- Create `vercel-deploy.ps1` for native PowerShell deployment support on Windows.&#10;- Update `server.ts` to ensure `PORT` environment variable is parsed as a number.&#10;- Update implementation plan, task list, and walkthrough documentation to reflect new automation features." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -243,7 +241,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784670455472</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="implement CI/CD pipeline and Windows deployment support&#10;&#10;- Add GitHub Action workflow for automated deployment to Vercel Container Registry (VCR).&#10;- Create `vercel-deploy.ps1` for native PowerShell deployment support on Windows.&#10;- Update `server.ts` to ensure `PORT` environment variable is parsed as a number.&#10;- Update implementation plan, task list, and walkthrough documentation to reflect new automation features.">
+      <option name="closed" value="true" />
+      <created>1784671195923</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1784671195923</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -266,6 +272,7 @@
     <MESSAGE value="backend stability and error handling&#10;&#10;- Implement global error handler and try-catch blocks in `server.ts` to prevent unhandled rejections.&#10;- Add catch-all 404 JSON response for unhandled `/api/*` routes.&#10;- Add `/api/auth/session` mock endpoint to improve client-side compatibility.&#10;- Update `bypassPaths` and implementation plan to reflect stability and performance focus." />
     <MESSAGE value="align Edge Config implementation with Vercel best practices&#10;&#10;- Add `dotenv-expand` and update `vite.config.ts` to correctly populate `process.env` during local development.&#10;- Refactor `middleware.ts` and `server.ts` to use defensive `has()` checks before retrieving values from Edge Config.&#10;- Update project documentation and implementation artifacts to reflect focus on Edge Config stability and performance.&#10;- Improve fallback handling for the `/welcome` route when Edge Config keys are missing." />
     <MESSAGE value="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000." />
+    <MESSAGE value="implement CI/CD pipeline and Windows deployment support&#10;&#10;- Add GitHub Action workflow for automated deployment to Vercel Container Registry (VCR).&#10;- Create `vercel-deploy.ps1` for native PowerShell deployment support on Windows.&#10;- Update `server.ts` to ensure `PORT` environment variable is parsed as a number.&#10;- Update implementation plan, task list, and walkthrough documentation to reflect new automation features." />
+    <option name="LAST_COMMIT_MESSAGE" value="implement CI/CD pipeline and Windows deployment support&#10;&#10;- Add GitHub Action workflow for automated deployment to Vercel Container Registry (VCR).&#10;- Create `vercel-deploy.ps1` for native PowerShell deployment support on Windows.&#10;- Update `server.ts` to ensure `PORT` environment variable is parsed as a number.&#10;- Update implementation plan, task list, and walkthrough documentation to reflect new automation features." />
   </component>
 </project>

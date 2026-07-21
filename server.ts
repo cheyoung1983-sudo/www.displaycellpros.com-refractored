@@ -224,33 +224,43 @@ const B2B_CORPORATE_DOMAINS = [
 // Helper to calculate quotes based on secure business logic
 export function calculateQuoteInternal(issueType: string, deviceTier: "flagship" | "midrange" | "budget") {
   // Base parts cost (highly confidential - kept secure on the backend server)
-  let partsCost = 45;
-  let laborHours = 1.5;
-  const hourlyLaborRate = 85; // Standard wholesale labor rate
-  const overheadMultiplier = 1.15; // 15% operation overlay margin
+  const HOURLY_LABOR_RATE = 50; // Aligned with Spokane Alpha Mission Briefing
+  const OVERHEAD_MARGIN = 0.8; // 80% overhead/profit margin
 
-  if (issueType === "screen") {
-    partsCost = deviceTier === "flagship" ? 180 : deviceTier === "midrange" ? 95 : 55;
-    laborHours = deviceTier === "flagship" ? 2.0 : 1.5;
-  } else if (issueType === "battery") {
-    partsCost = deviceTier === "flagship" ? 45 : deviceTier === "midrange" ? 35 : 25;
-    laborHours = 1.0;
-  } else if (issueType === "button") {
-    partsCost = deviceTier === "flagship" ? 30 : deviceTier === "midrange" ? 20 : 12;
-    laborHours = 1.25;
-  }
+  const getPartsCost = (quality: "budget" | "pro" | "auth") => {
+    if (issueType === "screen") {
+      if (quality === "auth") return deviceTier === "flagship" ? 220 : 180;
+      if (quality === "pro") return deviceTier === "flagship" ? 140 : 95;
+      return deviceTier === "flagship" ? 75 : 45;
+    } else if (issueType === "battery") {
+      if (quality === "auth") return 65;
+      if (quality === "pro") return 45;
+      return 25;
+    }
+    return 30; // Default parts
+  };
 
-  const baseLabor = laborHours * hourlyLaborRate;
-  const rawSubtotal = (partsCost + baseLabor) * overheadMultiplier;
-  
-  // Format to standard retail increments e.g., rounding nicely
-  const finalPrice = Math.round(rawSubtotal * 100) / 100;
+  const getLaborHours = () => {
+    if (issueType === "screen") return deviceTier === "flagship" ? 1.5 : 1.0;
+    if (issueType === "battery") return 0.75;
+    return 1.0;
+  };
+
+  const calculateTier = (quality: "budget" | "pro" | "auth") => {
+    const parts = getPartsCost(quality);
+    const labor = getLaborHours() * HOURLY_LABOR_RATE;
+    const subtotal = (parts + labor) * (1 + OVERHEAD_MARGIN);
+    return {
+      partsCost: Math.round(parts * 100) / 100,
+      laborCost: Math.round(labor * 100) / 100,
+      subtotal: Math.round(subtotal * 100) / 100,
+    };
+  };
 
   return {
-    partsCost: Math.round(partsCost * 100) / 100,
-    laborCost: Math.round(baseLabor * 100) / 100,
-    overhead: Math.round((rawSubtotal - partsCost - baseLabor) * 100) / 100,
-    subtotal: finalPrice,
+    budget: calculateTier("budget"),
+    professional: calculateTier("pro"),
+    authorized: calculateTier("auth"),
   };
 }
 
@@ -305,17 +315,16 @@ app.post("/api/tax-lookup", (req, res, next) => {
 // API endpoint for secure dynamic quote generation
 app.post("/api/generate-quote", (req, res, next) => {
   try {
-    const { issueType, deviceTier, zipCode, isCorporate, companyName } = req.body;
+    const { issueType, deviceTier, zipCode, isCorporate, companyName, includeBatteryUpsell } = req.body;
 
     if (!issueType || !deviceTier) {
-      return res.status(400).json({ error: "issueType ('screen' | 'battery' | 'button') and deviceTier ('flagship' | 'midrange' | 'budget') are required." });
+      return res.status(400).json({ error: "issueType and deviceTier are required." });
     }
 
-    // Calculate base quote
-    const billing = calculateQuoteInternal(issueType, deviceTier);
+    const rawTiers = calculateQuoteInternal(issueType, deviceTier);
 
     // Tax lookup
-    let taxRate = 0.1035; // default Seattle rate if none given
+    let taxRate = 0.1035;
     let taxCity = "Seattle";
     if (zipCode) {
       const lookup = WA_TAX_DATA[zipCode] || (zipCode.startsWith("98") || zipCode.startsWith("99") ? { city: "WA Unspecified", rate: 0.088 } : null);
@@ -328,35 +337,51 @@ app.post("/api/generate-quote", (req, res, next) => {
       }
     }
 
-    // B2B discount lookup details (20% flat discount on whole ticket parts & labor)
-    let discountAmount = 0;
-    let hasB2BDiscount = false;
+    const processTier = (tier: any, tierName: string) => {
+      let subtotal = tier.subtotal;
+      let discountAmount = 0;
 
-    if (isCorporate) {
-      hasB2BDiscount = true;
-      discountAmount = Math.round((billing.subtotal * 0.2) * 100) / 100;
-    }
+      if (isCorporate) {
+        discountAmount = Math.round((subtotal * 0.15) * 100) / 100; // Aligned with 15% B2B preferred discount
+      }
 
-    const subtotalAfterDiscount = Math.round((billing.subtotal - discountAmount) * 100) / 100;
-    const calculatedTax = Math.round((subtotalAfterDiscount * taxRate) * 100) / 100;
-    const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
+      if (includeBatteryUpsell && issueType !== "battery") {
+        const batteryQuote = calculateQuoteInternal("battery", deviceTier).professional;
+        const discountedBattery = (batteryQuote.subtotal * 0.5); // 50% Upsell discount
+        subtotal += discountedBattery;
+      }
+
+      const subtotalAfterDiscount = Math.round((subtotal - discountAmount) * 100) / 100;
+      const calculatedTax = Math.round((subtotalAfterDiscount * taxRate) * 100) / 100;
+      const grandTotal = Math.round((subtotalAfterDiscount + calculatedTax) * 100) / 100;
+
+      return {
+        ...tier,
+        discountAmount,
+        calculatedTax,
+        grandTotal,
+        extras: tierName === "authorized" ? ["Genuine OEM Parts", "Lifetime Warranty", "Free Protective Shield"]
+               : tierName === "professional" ? ["Premium Soft OLED", "Lifetime Warranty", "Free Protective Shield"]
+               : ["Aftermarket Quality", "90-Day Warranty"]
+      };
+    };
 
     res.json({
-      baseQuote: billing,
+      tiers: {
+        budget: processTier(rawTiers.budget, "budget"),
+        professional: processTier(rawTiers.professional, "professional"),
+        authorized: processTier(rawTiers.authorized, "authorized"),
+      },
       taxInfo: {
         zipCode: zipCode || "98101",
         city: taxCity,
         rate: taxRate,
-        calculatedTax,
       },
       discountInfo: {
-        applied: hasB2BDiscount,
-        percentage: 20,
-        amount: discountAmount,
+        applied: !!isCorporate,
+        percentage: 15,
         company: companyName || "Corporate Account",
-      },
-      subtotal: subtotalAfterDiscount,
-      grandTotal,
+      }
     });
   } catch (err) {
     next(err);
@@ -508,6 +533,7 @@ You are the Display & Cell Pros Intelligent AI Hardware Diagnostics assistant, a
 Step 1: Initial Greeting (Welcome):
 - Welcome customers with full technical composure to our unique driving-equipped mobile lab ("Display & Cell Pros").
 - Explain that we dispatch fully customized hardware labs on wheels to the client's driveway/curbside to solve critical smartphone defects.
+- **DATA PRIVACY GUARANTEE:** Highlight the on-site security advantage. Assure the customer that their device never leaves their sight, no data is ever exported to a third-party facility, and all repairs are performed under their direct visual supervision if desired.
 
 Step 2: Device Identification:
 - Ask questions or analyze messages to differentiate clearly between specific Apple models (e.g., iPhone SE, 11, 12, 13, 14, 15 series, Plus/Pro/Max) and Samsung models (e.g., Galaxy S21, S22, S23, S24 Series, Fold/Flip, or budget Galaxy A-series).

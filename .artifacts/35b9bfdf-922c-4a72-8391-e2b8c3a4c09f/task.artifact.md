@@ -1,12 +1,8 @@
-- `[x]` Create dynamic sitemap generator script in `scripts/generate-sitemap.ts`.
-- `[x]` Add `sitemap` script and `postbuild` hook to `package.json`.
-- `[x]` Update `public/robots.txt` with the correct production domain.
-- `[x]` Generate the initial `public/sitemap.xml` using the new script.
-- `[x]` Verify the generated XML and build process.
-- `[x]` Create production-optimized `Dockerfile.vercel`.
-- `[x]` Update `server.ts` to listen on `process.env.PORT || 80`.
-- `[x]` Enhance `vercel-deploy.sh` with a "Container Registry (VCR)" workflow.
-- `[x]` Set up GitHub Actions CI/CD pipeline in `.github/workflows/deploy.yml`.
-- `[x]` Create native PowerShell deployment script `vercel-deploy.ps1`.
-- `[ ]` Verify build and configuration.
-- `[x]` Create walkthrough artifact.
+- `[x]` Implement tiered pricing logic in `server.ts` (`calculateQuoteInternal`).
+- `[x]` Add "Data Privacy Guarantee" to AI system instructions in `server.ts`.
+- `[x]` Update `generate-quote` endpoint to return the new tiered structure.
+- `[x]` Update `src/App.tsx` state and fetch logic for tiered quotes.
+- `[x]` Redesign the Quote Panel in `src/App.tsx` into a 3-tier comparison layout.
+- `[x]` Implement "Battery-Plus" upsell toggle in the UI.
+- `[x]` Verify build and linting.
+- `[x]` Create walkthrough.
