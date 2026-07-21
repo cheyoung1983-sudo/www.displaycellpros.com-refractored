@@ -1,6 +1,6 @@
-- `[ ]` Merge Stream Chat token logic into `server.ts`.
-- `[ ]` Merge persistent Ticket DB logic into `server.ts`.
-- `[ ]` Relocate redundant `api/*.ts` files to `api/_legacy/`.
-- `[ ]` Move utility scripts to `scripts/`.
-- `[ ]` Verify consolidated build and linting.
-- `[ ]` Create walkthrough.
+- `[x]` Merge Stream Chat token logic into `server.ts`.
+- `[x]` Merge persistent Ticket DB logic into `server.ts`.
+- `[x]` Relocate/Delete redundant `api/*.ts` files to resolve 12-function limit.
+- `[x]` Move utility scripts to `scripts/` and fix imports.
+- `[x]` Verify consolidated build and linting.
+- `[x]` Create walkthrough.

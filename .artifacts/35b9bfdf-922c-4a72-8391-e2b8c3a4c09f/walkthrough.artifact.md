@@ -1,38 +1,29 @@
-# Walkthrough - Vercel Deployment Best Practices
+# Walkthrough - API Consolidation and Hobby Plan Optimization
 
-I have optimized the project for production-ready deployment on Vercel by implementing industry-standard security, performance, and developer experience enhancements.
+I have consolidated the backend API into a single Express application to resolve Vercel's Hobby plan limit of 12 serverless functions.
 
 ## Changes Made
 
-### Infrastructure & Security
-- **[vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel.json)**:
-    - Added a comprehensive `headers` block implementing **HSTS**, **Content Security Policy (CSP)**, **X-Frame-Options**, and **Permissions-Policy**.
-    - Set `maxDuration: 60` for API functions to ensure long-running AI tasks don't time out prematurely.
-- **[.vercelignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.vercelignore)**:
-    - Created a new exclusion file to prevent large or sensitive local assets (logs, artifacts, etc.) from being uploaded, significantly speeding up the deployment process.
-
-### Backend Optimization
+### Backend Consolidation
 - **[server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)**:
-    - Integrated `helmet` middleware for standard application-level security.
-    - Added `compression` middleware to reduce the size of transferred payloads.
-    - Implemented **Edge Network Caching** for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.) to improve global latency.
-- **[package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)**:
-    - Added `helmet`, `compression`, and their respective `@types` definitions.
+    - Integrated **Stream Chat** token generation logic directly into the main Express app (`POST /api/getStreamUserToken`).
+    - Enhanced **Ticket Management** with database persistence support. If a database is configured, tickets are now stored and retrieved from PostgreSQL; otherwise, the app gracefully falls back to mock data.
+    - Integrated **reCAPTCHA Enterprise** verification directly into the ticket creation flow.
+    - Added a mock session helper to maintain feature parity with the previous standalone auth utilities.
 
-### Developer Experience
-- **[vercel-deploy.sh](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel-deploy.sh)**:
-    - Created a specialized deployment script to automate environment variable syncing, build verification, and deployment targeting (Preview vs. Production).
-- **[.env.example](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.env.example)**:
-    - Expanded the environment template to cover all required AWS, reCAPTCHA, and Firebase configurations.
+### Filesystem Cleanup & Optimization
+- **API Entry Point**: Consolidated all `api/*.ts` entry points into a single file: `api/index.ts`. This reduces the serverless function count from 11 to 1, ensuring compliance with the Vercel Hobby plan.
+- **Utility Scripts**: Moved `setup-db.ts` and `test-connection.ts` from the `api/` folder to `scripts/` and updated them to use the centralized database configuration in root `db.ts`.
+- **Removed Redundancy**: Deleted the `api/lib/` and other redundant standalone function files after successfully merging their logic into the core server.
 
 ## Verification Results
 
-### Build & Linting
-- **`npm run build`**: Successfully completed production build in ~14s.
-- **`npm run lint`**: Passed with zero errors.
+### Linting & Build
+- **`npm run lint`**: Successfully passed with zero errors. All broken imports caused by file moves have been corrected.
+- **Function Count**: Verified that only `api/index.ts` remains as a root entry point in the `api/` directory.
 
-### Security Check
-- The CSP is configured to allow necessary third-party connections for Google Services and OpenAI while restricting all other sources.
+### Feature Parity
+- All previous endpoints (`tax-lookup`, `triage`, `generate-quote`, etc.) are still handled by the Express app and correctly routed by Vercel's `rewrites` configuration.
 
 > [!TIP]
-> Use the new `./vercel-deploy.sh` script to manage your deployments. It will help ensure your local `.env.local` stays in sync with Vercel's secret manager.
+> Your project is now optimized for the Vercel Hobby plan. Any new API endpoints should be added as routes in `server.ts` rather than new files in the `api/` directory.
