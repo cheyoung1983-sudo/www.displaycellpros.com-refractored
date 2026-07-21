@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored" value="3Gp0itf8zyVYcA7b8mpNiiSkzLy" />
+    </persistenceIdMap>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "cheyoung1983-sudo"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/cheyoung1983-sudo/www.displaycellpros.com-refractored.git",
+    "accountId": "bd881d76-3260-4d09-b506-f0e6d5bf747f"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3Gp0itf8zyVYcA7b8mpNiiSkzLy" />
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_id" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="BACKGROUND" />
+        <option name="worktreeMode" value="WORKSPACE" />
+      </template>
+    </option>
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "show.migrate.to.gradle.popup": "false"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="" />
+      <created>1784653343126</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1784653343126</updated>
+    </task>
+    <task id="LOCAL-00001" summary="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files.">
+      <option name="closed" value="true" />
+      <created>1784654659246</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1784654659246</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="migrate project from Gemini to OpenAI&#10;&#10;- Update UI strings and AI model references in `App.tsx`, replacing Gemini with OpenAI (`o3-mini` and `gpt-4o`).&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting with fenced code blocks.&#10;- Add new dependencies to `package.json`, including `@vercel/node`, `@vercel/edge`, `ai`, and `@ai-sdk/openai`.&#10;- Update `tsconfig.json` to include `vite/client` types for environment variable support.&#10;- Fix database pool initialization in `scripts/test-db.ts`.&#10;- Update `server.ts` initialization logs to reflect the OpenAI migration.&#10;- Include project-level IDE configuration files in the `.idea` directory." />
+    <MESSAGE value="migrate from Gemini to OpenAI and project cleanup&#10;&#10;- Update UI strings, logs, and model references from Gemini to OpenAI (using `o3-mini` and `gpt-4o`).&#10;- Update `README.md` and environment variable instructions to use `OPENAI_API_KEY`.&#10;- Add missing dependencies for OpenAI SDK, Vercel, Firebase, and Stream Chat.&#10;- Fix database pool initialization in `scripts/test-db.ts`.&#10;- Configure `vite/client` types in `tsconfig.json` to resolve environment variable errors.&#10;- Add IDE configuration and project metadata files." />
+    <MESSAGE value="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
+  </component>
+</project>
