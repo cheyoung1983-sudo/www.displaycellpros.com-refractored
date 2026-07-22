@@ -22,7 +22,7 @@ import * as dotenvLocal from "dotenv";
 dotenv.config();
 dotenvLocal.config({ path: ".env.local", override: true });
 
-import { getDbPool } from "../lib/db";
+import { getDbPool } from "../src/lib/db";
 
 const REQUIRED_VARS = ["SQL_HOST", "SQL_USER", "SQL_DB_NAME", "AWS_REGION"] as const;
 
