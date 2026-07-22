@@ -1,0 +1,15 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/generate-quote/route": "/api/generate-quote",
+  "/api/tax-lookup/route": "/api/tax-lookup",
+  "/api/health/route": "/api/health",
+  "/api/tickets/route": "/api/tickets",
+  "/api/triage/route": "/api/triage",
+  "/lab/page": "/lab",
+  "/b2b/page": "/b2b",
+  "/services/page": "/services",
+  "/page": "/",
+  "/privacy/page": "/privacy",
+  "/store/page": "/store",
+  "/welcome/page": "/welcome"
+}
