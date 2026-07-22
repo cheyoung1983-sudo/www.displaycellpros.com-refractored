@@ -4,19 +4,10 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes.">
-      <change afterPath="$PROJECT_DIR$/app/api/generate-quote/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/health/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/tax-lookup/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/auth0.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/repair-logic.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure.">
+      <change afterPath="$PROJECT_DIR$/components/AIAssistantWidget.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/AuthLoadingOverlay.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/StoreView.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -318,11 +309,18 @@
       <option name="project" value="LOCAL" />
       <updated>1784685991332</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure.">
+      <option name="closed" value="true" />
+      <created>1784688253227</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1784688253227</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="migrate from Gemini to OpenAI and project cleanup&#10;&#10;- Update UI strings, logs, and model references from Gemini to OpenAI (using `o3-mini` and `gpt-4o`).&#10;- Update `README.md` and environment variable instructions to use `OPENAI_API_KEY`.&#10;- Add missing dependencies for OpenAI SDK, Vercel, Firebase, and Stream Chat.&#10;- Fix database pool initialization in `scripts/test-db.ts`.&#10;- Configure `vite/client` types in `tsconfig.json` to resolve environment variable errors.&#10;- Add IDE configuration and project metadata files." />
     <MESSAGE value="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
     <MESSAGE value="fix: resolve Vercel runtime configuration error&#10;&#10;- Specify Node.js version 22.x in `package.json` engines.&#10;- Remove manual `runtime` override from `vercel.json` to fix deployment validation issues.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect configuration changes." />
     <MESSAGE value="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS." />
@@ -347,6 +345,7 @@
     <MESSAGE value="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks." />
     <MESSAGE value="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies." />
     <MESSAGE value="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes." />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes." />
+    <MESSAGE value="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure." />
   </component>
 </project>
