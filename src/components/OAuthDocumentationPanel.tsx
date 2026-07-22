@@ -34,6 +34,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
     recaptchaSetup: false,
     androidSigning: true,
     clientIdSafelisting: false,
+    vercelOAuthRegistered: false,
   });
 
   const toggleCheck = (key: keyof typeof checklist) => {
@@ -75,6 +76,12 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
       status: "Authorized",
       purpose: "GPT-4o Triage Core and plugin domain authorization.",
       icon: <Cloud className="w-4 h-4 text-purple-400" />
+    },
+    {
+      name: "Vercel (OAuth)",
+      status: "Pending",
+      purpose: "Partner integration and multi-tenant SSO handshakes.",
+      icon: <Server className="w-4 h-4 text-slate-400" />
     }
   ];
 
@@ -319,6 +326,47 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                       />
                       <button className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors border border-slate-700">
                         Whitelist
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Task 7: Vercel OAuth App Registration */}
+            <div className={`p-3.5 rounded-lg border transition-all ${checklist.vercelOAuthRegistered ? "bg-slate-950/40 border-slate-800 shadow-inner" : "bg-slate-950/20 border-slate-900"}`}>
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => toggleCheck("vercelOAuthRegistered")}
+                  className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors ${checklist.vercelOAuthRegistered ? "bg-emerald-500 border-emerald-400 text-slate-950" : "border-slate-700 hover:border-slate-500"}`}
+                >
+                  {checklist.vercelOAuthRegistered && <Check className="w-3 h-3 stroke-[3]" />}
+                </button>
+                <div className="flex-1 space-y-1">
+                  <span className="font-bold text-slate-200 text-xs uppercase tracking-tight">Register Vercel OAuth Client</span>
+                  <p className="text-[10.5px] text-slate-400 leading-normal">
+                    Register a new Vercel App to enable partner integrations and SSO. Requires <code className="text-emerald-400 font-bold">Vercel CLI 56.4.0+</code>.
+                  </p>
+
+                  <div className="mt-3 space-y-2">
+                    <div className="bg-slate-950 p-2 rounded border border-slate-850/60 font-mono text-[9px] text-slate-500">
+                      <span className="text-blue-400 font-bold block mb-1"># REGISTER NEW OAUTH CLIENT:</span>
+                      <code className="select-all block break-all mb-2">
+                        vercel oauth-apps register --name "D&CP Lab" --slug dcp-lab --redirect-uri {prodUrl}/api/auth/callback
+                      </code>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[8px] font-bold text-slate-500 uppercase">Vercel Client ID</label>
+                        <input
+                          type="text"
+                          placeholder="cl_abc123..."
+                          className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-[9px] text-slate-300 font-mono outline-none focus:border-blue-500"
+                        />
+                      </div>
+                      <button className="self-end bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded text-[9px] font-bold uppercase tracking-wider transition-colors shadow-lg shadow-blue-900/20 active:scale-95">
+                        Register
                       </button>
                     </div>
                   </div>

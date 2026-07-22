@@ -1,28 +1,28 @@
-# Walkthrough - Configuration Cleanup and Domain Finalization
+# Walkthrough - Canonical Domain Optimization (`www`)
 
-I have cleaned up the project configuration to resolve minor build warnings and successfully aliased your latest deployment to the canonical domains.
+I have updated the application's configuration to set `https://www.displaycellpros.com` as the primary canonical domain, ensuring consistent SEO and user experience.
 
 ## Changes Made
 
-### Configuration Cleanup
-- **[vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel.json)**:
-    - Removed the redundant `memory` property. This resolved the "ignored on Active CPU billing" warning seen in your Vercel logs, resulting in a cleaner build output.
-- **[package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)**:
-    - Updated the Node.js engine requirement to `>=22.x`. This suppresses the local "Unsupported engine" warning for your current Node 24 environment while maintaining full compatibility with the production Vercel runtime.
+### Domain Configuration
+- **Vercel Aliasing**: Re-added the `www.displaycellpros.com` alias to the production deployment. Both the apex and `www` domains are now active.
+- **Environment Synchronization**:
+    - Updated `APP_URL` in `.env` and `.env.example` to `https://www.displaycellpros.com`.
+- **Sitemap Generation**:
+    - Updated `scripts/generate-sitemap.ts` to use the `www` subdomain as the canonical prefix for all indexed URLs.
 
-### Canonical Domain Aliasing
-- Successfully mapped your latest production deployment (`displaycellproscom-refractored-3gumd1cwb-dcpllc.vercel.app`) to both canonical domains:
-    - [**https://www.displaycellpros.com**](https://www.displaycellpros.com)
-    - [**https://displaycellpros.com**](https://displaycellpros.com)
+### SEO & Metadata
+- **[robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/robots.txt)**:
+    - Updated the sitemap link to point to the canonical `www` address.
+- **[index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)**:
+    - Updated Open Graph (`og:url`) and other canonical tags to use `https://www.displaycellpros.com`.
 
 ## Verification Results
 
-### Build & Environment
-- **`npm run build`**: Successfully completed production bundling with zero warnings.
-- **Node Sync**: The engine version warning is now resolved in your local PowerShell terminal.
-
-### Live Alias Check
-- Confirmed that both `www.displaycellpros.com` and the apex domain `displaycellpros.com` are pointing to the latest version of the application.
+### Build & SEO Integrity
+- **Sitemap Verification**: Successfully ran `npm run sitemap`. Confirmed all entries in `public/sitemap.xml` now correctly use the `www` prefix.
+- **Production Build**: `npm run build` completed successfully, ensuring the updated metadata is baked into the production assets.
+- **Alias Success**: Verified via Vercel CLI that the `www` alias is active and points to the latest deployment.
 
 > [!TIP]
-> Your production environment is now officially finalized. All future pushes to `main` will be automatically built and deployed via the CI/CD pipeline we established.
+> By standardizing on `www.displaycellpros.com`, you provide a familiar and professional URL structure while ensuring that search engines consolidate all ranking authority onto a single canonical address.

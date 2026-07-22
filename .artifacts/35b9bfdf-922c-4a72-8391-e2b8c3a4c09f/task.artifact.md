@@ -1,5 +1,7 @@
-- `[x]` Remove `memory` setting from `vercel.json` to suppress build warning.
-- `[x]` Update `package.json` engines to `>=22.x`.
-- `[x]` Alias the latest deployment to `www.displaycellpros.com` and `displaycellpros.com`.
-- `[x]` Verify build and aliases.
+- `[x]` Remove subdomains (`www`, `triage`) via Vercel CLI.
+- `[x]` Update `APP_URL` in `.env` and `.env.example`.
+- `[x]` Update fallback URL in `scripts/generate-sitemap.ts`.
+- `[x]` Remove `/api` block and update sitemap link in `public/robots.txt`.
+- `[x]` Update canonical and OG links in `index.html`.
+- `[x]` Verify build and sitemap generation.
 - `[x]` Create walkthrough.

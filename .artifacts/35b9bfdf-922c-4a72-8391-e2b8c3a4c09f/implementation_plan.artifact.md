@@ -1,32 +1,39 @@
-# Implementation Plan - Resource Blocking and API Stability Mitigation
+# Implementation Plan - Canonical Domain Optimization (`www`)
 
-The goal is to resolve CSP violations related to the Web App Manifest and investigate/fix recurring HTTP 500 errors on API endpoints.
+The goal is to set `https://www.displaycellpros.com` as the canonical entry point for the application, ensuring consistent branding and SEO across all assets.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> I am updating the Content Security Policy (CSP) to allow manifests from `https://vercel.com`. This is necessary when using Vercel features like Deployment Protection or SSO, which can redirect manifest requests.
+> [!NOTE]
+> Although `displaycellpros.com` is technically the apex domain, you have requested `https://www.displaycellpros.com` as the primary address. I will configure the application to use this as the canonical URL for all links, sitemaps, and social sharing.
 
 ## Proposed Changes
 
-### Infrastructure & Security (`vercel.json`)
+### Domain Configuration
 
-#### [MODIFY] [vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel.json)
-- Add `manifest-src 'self' https://vercel.com;` to the Content-Security-Policy header.
-- This will resolve the "Blocked (CSP)" issue identified in the diagnostic report.
+#### [EXECUTE] Vercel Domain Alias
+- Re-add the `www.displaycellpros.com` alias to the latest production deployment.
+- Ensure both the apex (`displaycellpros.com`) and the subdomain (`www.displaycellpros.com`) are active, with `www` treated as the primary canonical address in the app logic.
 
-### Backend Stability (`server.ts`)
+### Canonical Asset Updates
 
-#### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Add `app.set('trust proxy', 1);`. This is critical for `express-rate-limit` to work correctly behind Vercel's proxy. Without it, the rate limiter may fail or incorrectly block traffic.
-- Enhance the global error handler to provide even more detail in the server logs (stack traces) while keeping the client response clean.
-- Add "Request Context" logging to the 500-failing routes (`/api/pos-sync-logs`, `/api/generate-quote`, `/api/tax-lookup`) to verify if the issue is related to body parsing or middleware execution.
+#### [MODIFY] [.env](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.env) and [.env.example](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.env.example)
+- Update `APP_URL` to `https://www.displaycellpros.com`.
+
+#### [MODIFY] [generate-sitemap.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/scripts/generate-sitemap.ts)
+- Update the default `APP_URL` fallback to `https://www.displaycellpros.com`.
+
+#### [MODIFY] [robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/public/robots.txt)
+- Update the sitemap link to `https://www.displaycellpros.com/sitemap.xml`.
+
+#### [MODIFY] [index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)
+- Update `og:url` and other canonical references to use the `www` subdomain.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` and `npm run lint` to ensure no regression.
+- Run `npm run sitemap` and verify that all URLs in `public/sitemap.xml` start with `https://www.displaycellpros.com`.
+- Run `npm run build` to ensure project consistency.
 
 ### Manual Verification
-- Review Vercel logs after deployment to see the new detailed error traces if 500s persist.
-- Verify in the browser console that the CSP violation for `manifest.json` is resolved.
+- Verify that `https://www.displaycellpros.com` resolves correctly to the latest deployment.

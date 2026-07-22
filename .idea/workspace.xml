@@ -4,8 +4,16 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks.">
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies.">
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public/robots.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/sitemap.xml" beforeDir="false" afterPath="$PROJECT_DIR$/public/sitemap.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/OAuthDocumentationPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OAuthDocumentationPanel.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -291,7 +299,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784681397948</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies.">
+      <option name="closed" value="true" />
+      <created>1784683646368</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1784683646368</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -319,6 +335,7 @@
     <MESSAGE value="Production launch best practices&#10;&#10;- Add rate limiting to API routes using `express-rate-limit`.&#10;- Implement a `/api/health` endpoint for uptime monitoring.&#10;- Add request logging middleware for improved traceability.&#10;- Create `README_PROD.md` with operational guides for rollbacks, monitoring, and secret management.&#10;- Optimize font loading in `index.html`." />
     <MESSAGE value="Production launch best practices&#10;&#10;- Add rate limiting to API routes and implement `/api/health` endpoint.&#10;- Add request logging middleware for traceability.&#10;- Create `README_PROD.md` and optimize font loading in `index.html`." />
     <MESSAGE value="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks." />
-    <option name="LAST_COMMIT_MESSAGE" value="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks." />
+    <MESSAGE value="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies." />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies." />
   </component>
 </project>
