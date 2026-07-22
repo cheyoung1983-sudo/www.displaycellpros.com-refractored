@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 const WA_TAX_DATA: Record<string, { city: string; rate: number }> = {
   "98101": { city: "Seattle", rate: 0.1035 },
   "98102": { city: "Seattle", rate: 0.1035 },

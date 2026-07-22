@@ -5,68 +5,102 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="docs: update implementation plan for Auth0 &quot;Quantum&quot; integration&#10;&#10;Align the project implementation plan with the modern Auth0 middleware proxy pattern and &quot;Quantum&quot; design aesthetic.&#10;&#10;- Relocate the existing landing page to `/welcome`.&#10;- Replace the root page with the Auth0 Login Card dashboard.&#10;- Update `lib/auth0.ts` to use `Auth0Client` for zero-config initialization.&#10;- Introduce a middleware proxy (`proxy.ts`) for authentication handshakes.&#10;- Add new UI components: `LoginButton`, `LogoutButton`, and `Profile`.&#10;- Update the root layout to use the client-side `Auth0Provider`.">
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/BUILD_ID" beforeDir="false" afterPath="$PROJECT_DIR$/.next/BUILD_ID" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/app-build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/app-build-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/app-path-routes-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/app-path-routes-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/build-manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/.tsbuildinfo" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/0.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/1.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/1.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/13.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/13.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/3.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/3.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/15.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/15.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/17.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/17.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/19.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/19.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/4.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/4.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/5.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/5.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/9.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/9.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack.old" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/0.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/1.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/1.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/index.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/index.pack.old" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/0.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/1.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/1.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/11.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/11.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/4.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/4.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/6.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/6.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/8.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/8.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/9.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/9.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/16.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/16.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/18.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/18.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/3.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/3.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/7.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/7.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack.old" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/diagnostics/build-diagnostics.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/diagnostics/build-diagnostics.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/export-marker.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/next-minimal-server.js.nft.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/next-server.js.nft.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/prerender-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/prerender-manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app-paths-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app-paths-manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found.rsc" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found.rsc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found/page.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/api/auth/[auth0]/route.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/api/auth/[auth0]/route.js.nft.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found/page_client-reference-manifest.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/api/health/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/health/route.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route_client-reference-manifest.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/health/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/health/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/health/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/health/route_client-reference-manifest.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route_client-reference-manifest.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/tickets/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tickets/route.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/tickets/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tickets/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tickets/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tickets/route_client-reference-manifest.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/triage/route.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/triage/route.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/api/triage/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/triage/route.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/triage/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/triage/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b.rsc" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b.rsc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/b2b/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b/page.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/lab/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab.rsc" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab.rsc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/lab/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab/page_client-reference-manifest.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy.rsc" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy.rsc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/privacy/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy/page.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/services/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services.rsc" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services.rsc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/services/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services/page.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/app/store/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store.rsc" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store.rsc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/app/store/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store/page.js.nft.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/chunks/692.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/chunks/695.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/server/pages-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/welcome.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome.rsc" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/welcome.rsc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/welcome/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/welcome/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/middleware-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/middleware-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/middleware.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/middleware.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/middleware.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/middleware.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/404.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/404.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/500.html" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/500.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/pages/_app.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/_app.js.nft.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/pages/_document.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/_document.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/_error.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/_error.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/server/pages/_error.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/_error.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/23ZUVxnztjGGlwKSjhj-C/_buildManifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/23ZUVxnztjGGlwKSjhj-C/_ssgManifest.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.next/trace" beforeDir="false" afterPath="$PROJECT_DIR$/.next/trace" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/types/app/api/auth/[auth0]/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/types/routes.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/.next/types/routes.d.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.next/types/validator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/.next/types/validator.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/auth/[auth0]/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/generate-quote/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/generate-quote/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/tax-lookup/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/tax-lookup/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/tickets/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/tickets/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/triage/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/triage/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/auth0.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/auth0.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -464,7 +498,31 @@
       <option name="project" value="LOCAL" />
       <updated>1784692348362</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="docs: update implementation plan for Auth0 &quot;Quantum&quot; integration&#10;&#10;Align the project implementation plan with the modern Auth0 middleware proxy pattern and &quot;Quantum&quot; design aesthetic.&#10;&#10;- Relocate the existing landing page to `/welcome`.&#10;- Replace the root page with the Auth0 Login Card dashboard.&#10;- Update `lib/auth0.ts` to use `Auth0Client` for zero-config initialization.&#10;- Introduce a middleware proxy (`proxy.ts`) for authentication handshakes.&#10;- Add new UI components: `LoginButton`, `LogoutButton`, and `Profile`.&#10;- Update the root layout to use the client-side `Auth0Provider`.">
+      <option name="closed" value="true" />
+      <created>1784692753663</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1784692753663</updated>
+    </task>
+    <task id="LOCAL-00041" summary="docs: update implementation plan for Auth0 &quot;Quantum&quot; integration&#10;&#10;Align the project implementation plan with the modern Auth0 middleware proxy pattern and &quot;Quantum&quot; design aesthetic.&#10;&#10;- Relocate the existing landing page to `/welcome`.&#10;- Replace the root page with the Auth0 Login Card dashboard.&#10;- Update `lib/auth0.ts` to use `Auth0Client` for zero-config initialization.&#10;- Introduce a middleware proxy (`proxy.ts`) for authentication handshakes.&#10;- Add new UI components: `LoginButton`, `LogoutButton`, and `Profile`.&#10;- Update the root layout to use the client-side `Auth0Provider`.">
+      <option name="closed" value="true" />
+      <created>1784692971723</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1784692971723</updated>
+    </task>
+    <task id="LOCAL-00042" summary="docs: update implementation plan for Auth0 &quot;Quantum&quot; integration&#10;&#10;Align the project implementation plan with the modern Auth0 middleware proxy pattern and &quot;Quantum&quot; design aesthetic.&#10;&#10;- Relocate the existing landing page to `/welcome`.&#10;- Replace the root page with the Auth0 Login Card dashboard.&#10;- Update `lib/auth0.ts` to use `Auth0Client` for zero-config initialization.&#10;- Introduce a middleware proxy (`proxy.ts`) for authentication handshakes.&#10;- Add new UI components: `LoginButton`, `LogoutButton`, and `Profile`.&#10;- Update the root layout to use the client-side `Auth0Provider`.">
+      <option name="closed" value="true" />
+      <created>1784693081274</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1784693081274</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { OpenAI } from 'openai';
 
-const openaiClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export const dynamic = 'force-dynamic';
+
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing OPENAI_API_KEY environment variable.");
+  }
+  return new OpenAI({ apiKey });
+}
 
 const systemInstruction = `
 You are the Display & Cell Pros Intelligent AI Hardware Diagnostics assistant, an expert laboratory-grade driveway device troubleshooting engineer stationed in Spokane & Seattle WA. Your objective is to guide customers down the following three-step logic flow:
@@ -39,6 +45,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "An array of messages is required." }, { status: 400 });
     }
 
+    const openaiClient = getOpenAIClient();
+
     const deviceContextPrompt = deviceDetails
       ? `User current UI state: ${deviceDetails.brand || "Unspecified"} brand, ${deviceDetails.model || "Unspecified"} model (${deviceDetails.tier || "standard"} tier). Merge appropriately based on user input.`
       : `User has not selected a specific device yet inside the UI. Maintain full flow from greeting onwards.`;
@@ -63,6 +71,6 @@ export async function POST(req: Request) {
 
   } catch (err: any) {
     console.error("[Triage Error]:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
   }
 }
