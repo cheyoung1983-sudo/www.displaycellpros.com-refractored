@@ -1,77 +1,51 @@
-# Implementation Plan - Migration to Next.js (App Router)
+# Implementation Plan - Auth0 Best Practices for Next.js
 
-The goal is to migrate the entire project from a Vite + Express hybrid to a modern Next.js architecture using the App Router. This will consolidate the frontend and backend, simplify deployments, and enable native support for the Auth0 Next.js SDK.
+The goal is to refine the Auth0 integration to follow the latest Next.js 15 and App Router best practices, including zero-config environment variables, server-side protection, and standardized authentication routes.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> This is a major architectural change.
-> 1.  **Routing**: The single-page `activeTab` state in `App.tsx` will be replaced by file-based routing (`/services`, `/b2b`, etc.).
-> 2.  **API**: All Express routes will be moved to `app/api/` routes.
-> 3.  **Auth**: Firebase/Mock auth will be fully replaced by `@auth0/nextjs-auth0`.
-> 4.  **Middleware**: The existing Vercel Edge middleware will be adapted to the Next.js middleware standard.
+> I am switching to the standard `@auth0/nextjs-auth0` imports for App Router. This removes the need for a custom client instance in most cases and leverages Next.js's built-in security features.
+>
+> **Secrets Needed**: Please ensure the following are set in your environment (I will update `.env.local` with the values you provided):
+> - `AUTH0_SECRET`: A 32+ character random string.
+> - `AUTH0_BASE_URL`: `https://www.displaycellpros.com`
+> - `AUTH0_ISSUER_BASE_URL`: `https://icfg-lpfzl6ejhmeudwfnf0rviy2r.us.auth0.com`
+> - `AUTH0_CLIENT_ID`: `iHyCQzrHYenv4lrkCFy4v9528jtJUUHl`
+> - `AUTH0_CLIENT_SECRET`: `[Provided Secret]`
 
 ## Proposed Changes
 
-### 1. Project Scaffolding
+### Configuration
 
-#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)
-- Add dependencies: `next`, `@auth0/nextjs-auth0`.
-- Remove dependencies: `express`, `express-rate-limit`, `helmet`, `compression`, `vite`, `esbuild`, `tsx`, `firebase`.
-- Update scripts to use `next dev`, `next build`, and `next start`.
+#### [MODIFY] [.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.env.local)
+- Add/Update standard Auth0 environment variables to enable zero-config SDK features.
 
-#### [DELETE] Old Entry Points
-- Delete [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Delete [vite.config.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vite.config.ts)
-- Delete [index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)
-- Delete `api/` directory (redundant with `app/api`).
+### Frontend Security (`app/` directory)
 
-### 2. Frontend Migration (`app/` directory)
+#### [MODIFY] [app/lab/page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/lab/page.tsx)
+- Wrap the page export with `withPageAuthRequired`.
+- Remove legacy mock login/sign-out logic and bypass buttons.
+- Use `user` from `withPageAuthRequired` (Server Component) or `useUser` (Client Component) consistently.
 
-#### [NEW] `app/layout.tsx`
-- Root layout including HTML head, Google Fonts, and `UserProvider` from Auth0.
-- Integrate the Google Analytics script previously in `index.html`.
+### API Security (`app/api/` directory)
 
-#### [NEW] Page Routing
-- `app/page.tsx`: Home view.
-- `app/services/page.tsx`: Services view.
-- `app/b2b/page.tsx`: B2B Fleet view.
-- `app/store/page.tsx`: Logistics & Supply view.
-- `app/privacy/page.tsx`: Privacy & Consent view.
-- `app/lab/page.tsx`: Diagnostics Lab Portal (Beta).
+#### [MODIFY] [app/api/tickets/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/api/tickets/route.ts)
+- Refactor to use `withApiAuthRequired` for automatic protection and session retrieval.
 
-#### [MODIFY] Components
-- Move `src/components/` to the root `components/` directory.
-- Update components to work with Next.js (e.g., using `next/image` if applicable, removing React-specific router logic).
+### UI Enhancements
 
-### 3. Backend Migration (`app/api/` directory)
-
-#### [NEW] API Routes
-- Move logic from `server.ts` to individual `route.ts` files:
-    - `app/api/health/route.ts`
-    - `app/api/tax-lookup/route.ts`
-    - `app/api/generate-quote/route.ts`
-    - `app/api/triage/route.ts`
-    - `app/api/tickets/route.ts`
-    - etc.
-- Implement Auth0 protection using `auth0.withApiAuthRequired()` as per your snippets.
-
-### 4. Middleware & Utils
-
-#### [MODIFY] [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/middleware.ts)
-- Refactor to use Next.js `NextResponse` and adapt existing Edge Config/Auth protection logic.
-
-#### [NEW] `lib/` directory
-- Move `db.ts` to `lib/db.ts`.
-- Create `lib/auth0.ts` to initialize the Auth0 SDK.
+#### [MODIFY] [components/Navbar.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/components/Navbar.tsx)
+- Update "Book Mission" and profile links to use standard `/api/auth/login` and `/api/auth/logout` routes.
+- Integrate the `useUser` hook to show/hide authentication-related UI elements.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint`.
-- Run `npm run build` to verify the Next.js production build.
+- Run `npm run build` and `npm run lint`.
+- Verify that the Auth0 routes are correctly provisioned.
 
 ### Manual Verification
-- Verify all routes (`/`, `/lab`, etc.) resolve correctly.
-- Test the Auth0 login flow and protected API access.
-- Verify that SEO assets (Sitemap, robots.txt, manifest.json) are correctly served from the `public/` directory.
+- Test the login flow: navigate to `/lab`, verify redirect to Auth0, login, and verify return to `/lab`.
+- Test the logout flow: click logout and verify session termination.
+- Verify that API routes return `401` when accessed without an active session.

@@ -3,11 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Wrench, Cpu } from 'lucide-react';
+import { Menu, X, Wrench, Cpu, User, LogOut } from 'lucide-react';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 export function Navbar({ onBookClick }: { onBookClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user, isLoading } = useUser();
 
   const navItems = [
     { name: 'Home', href: '/' },
@@ -56,9 +58,31 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
             >
               <Cpu size={14} /> Lab Portal
             </Link>
+
+            {isLoading ? (
+              <div className="w-8 h-8 rounded-full bg-slate-800 animate-pulse" />
+            ) : user ? (
+              <div className="flex items-center gap-3 ml-2">
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-bold text-white leading-none">{user.name}</span>
+                  <Link href="/api/auth/logout" className="text-[9px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest mt-1">Logout</Link>
+                </div>
+                <div className="w-9 h-9 rounded-full border border-slate-700 p-0.5 bg-slate-800">
+                  <img src={user.picture || ''} alt="Profile" className="w-full h-full rounded-full" referrerPolicy="no-referrer" />
+                </div>
+              </div>
+            ) : (
+              <a
+                href="/api/auth/login"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-all"
+              >
+                <User size={14} /> Sign In
+              </a>
+            )}
+
             <button
               onClick={onBookClick}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-95"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-95 ml-2"
             >
               Book Mission
             </button>
@@ -93,6 +117,25 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
             >
               <Cpu size={18} /> Diagnostics Lab Portal (Beta)
             </Link>
+
+            {user ? (
+               <a
+                href="/api/auth/logout"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-left flex items-center gap-2 block px-3 py-3 rounded-md text-base font-medium text-red-400 bg-slate-900 border border-red-900/30 mb-2"
+              >
+                <LogOut size={18} /> Sign Out ({user.name})
+              </a>
+            ) : (
+              <a
+                href="/api/auth/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-left flex items-center gap-2 block px-3 py-3 rounded-md text-base font-medium text-white bg-slate-700 border border-slate-600 mb-2"
+              >
+                <User size={18} /> Sign In
+              </a>
+            )}
+
             <button
               onClick={() => { onBookClick(); setMobileMenuOpen(false); }}
               className="w-full text-left block px-3 py-3 rounded-md text-base font-medium text-white bg-blue-600"

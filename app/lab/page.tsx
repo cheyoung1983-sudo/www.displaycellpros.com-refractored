@@ -5,7 +5,8 @@ import {
   User, Database, AlertCircle, Wifi, Terminal, Activity,
   MapPin, Settings, ShieldCheck, Cpu, RefreshCw, Plus, FileText,
   Trash2, Mail, Eye, EyeOff, Globe, Server, Check, CheckCircle2,
-  TrendingUp, DollarSign, Zap, ShoppingCart, ChevronUp, ChevronDown
+  TrendingUp, DollarSign, Zap, ShoppingCart, ChevronUp, ChevronDown,
+  LogOut
 } from 'lucide-react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { RdsDiagnosticPanel } from '@/components/RdsDiagnosticPanel';
@@ -16,7 +17,7 @@ import { RepairTicket, POSLog, QuoteResponse, TicketTemplate } from '@/lib/types
 import { calculateQuoteInternal, WA_TAX_DATA } from '@/lib/repair-logic';
 
 export default function LabPortal() {
-  const { user: auth0User, isLoading: isAuth0Loading } = useUser();
+  const { user: auth0User, isLoading: isAuth0Loading, error: auth0Error } = useUser();
 
   // State from App.tsx
   const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "postgres" | "settings">("triage");
@@ -72,7 +73,6 @@ export default function LabPortal() {
   const [taxRate, setTaxRate] = useState(0.1035);
 
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [isAuthChecking, setIsAuthChecking] = useState(false);
 
   // Mock handlers
   const handleVerifyB2B = async (e?: React.FormEvent) => {
@@ -99,13 +99,63 @@ export default function LabPortal() {
   const handleRunThinkingDiagnostic = async (e: any) => {};
   const handleVisionDiagnostic = async () => {};
   const handleImageUploadChange = (e: any) => {};
-  const handleSignOut = () => {};
-  const handleLocalQuickLogin = () => {};
   const fetchPOSLogs = async () => {};
   const handleApplyTemplate = (t: TicketTemplate) => {};
 
+  // Force login if not authenticated
+  useEffect(() => {
+    if (!isAuth0Loading && !auth0User) {
+      window.location.href = "/api/auth/login?returnTo=/lab";
+    }
+  }, [auth0User, isAuth0Loading]);
+
+  if (isAuth0Loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+          <p className="text-slate-400 font-mono text-sm animate-pulse">AUTHORIZING LAB SESSION...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (auth0Error) return <div className="p-8 text-red-500">Auth Error: {auth0Error.message}</div>;
+  if (!auth0User) return null; // Redirecting
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
+      {/* Technician Authentication Status bar */}
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+            {auth0User.picture ? (
+              <img src={auth0User.picture} alt="Profile" className="w-full h-full rounded-full" referrerPolicy="no-referrer" />
+            ) : (
+              <User className="w-5 h-5" />
+            )}
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              Authed: {auth0User.name || auth0User.email}
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-sm font-mono uppercase tracking-wider font-extrabold border border-emerald-500/30">LAB SESSION LOCKED</span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              Logged in with technician credential {auth0User.email}. Backing up active Spokane WA tickets.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href="/api/auth/logout"
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg border border-slate-600 transition-colors flex items-center gap-2"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Disconnect
+          </a>
+        </div>
+      </div>
+
       {/* Header section representing Lab identity */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>

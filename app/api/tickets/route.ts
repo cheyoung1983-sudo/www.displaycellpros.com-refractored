@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getDbPool, isDbConfigured } from '@/lib/db';
 import { auth0 } from '@/lib/auth0';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await auth0.getSession();
     if (!session?.user?.email) {
@@ -25,7 +25,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await auth0.getSession();
     if (!session?.user?.email) {

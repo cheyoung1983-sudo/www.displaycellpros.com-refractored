@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`.">
-      <change afterPath="$PROJECT_DIR$/app/api/auth/[auth0]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/tickets/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/tickets/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lab/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lab/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Navbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Navbar.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/auth0.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/auth0.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -341,7 +344,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784689880386</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`.">
+      <option name="closed" value="true" />
+      <created>1784691172573</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1784691172573</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
