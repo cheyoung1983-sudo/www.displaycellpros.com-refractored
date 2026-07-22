@@ -1,7 +1,3 @@
-- `[x]` Remove subdomains (`www`, `triage`) via Vercel CLI.
-- `[x]` Update `APP_URL` in `.env` and `.env.example`.
-- `[x]` Update fallback URL in `scripts/generate-sitemap.ts`.
-- `[x]` Remove `/api` block and update sitemap link in `public/robots.txt`.
-- `[x]` Update canonical and OG links in `index.html`.
-- `[x]` Verify build and sitemap generation.
-- `[x]` Create walkthrough.
+- `[ ]` Update `deploy.yml` with secrets validation and optimized Node version.
+- `[ ]` Verify YAML syntax.
+- `[ ]` Create walkthrough.

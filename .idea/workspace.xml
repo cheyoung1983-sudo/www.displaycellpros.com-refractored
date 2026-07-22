@@ -4,16 +4,19 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies.">
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes.">
+      <change afterPath="$PROJECT_DIR$/app/api/generate-quote/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/health/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/tax-lookup/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/auth0.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/repair-logic.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/task.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/walkthrough.artifact.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public/robots.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/sitemap.xml" beforeDir="false" afterPath="$PROJECT_DIR$/public/sitemap.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/OAuthDocumentationPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OAuthDocumentationPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -307,11 +310,18 @@
       <option name="project" value="LOCAL" />
       <updated>1784683646368</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes.">
+      <option name="closed" value="true" />
+      <created>1784685991332</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1784685991332</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="migrate project from Gemini to OpenAI&#10;&#10;- Update UI strings and AI model references in `App.tsx`, replacing Gemini with OpenAI (`o3-mini` and `gpt-4o`).&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting with fenced code blocks.&#10;- Add new dependencies to `package.json`, including `@vercel/node`, `@vercel/edge`, `ai`, and `@ai-sdk/openai`.&#10;- Update `tsconfig.json` to include `vite/client` types for environment variable support.&#10;- Fix database pool initialization in `scripts/test-db.ts`.&#10;- Update `server.ts` initialization logs to reflect the OpenAI migration.&#10;- Include project-level IDE configuration files in the `.idea` directory." />
     <MESSAGE value="migrate from Gemini to OpenAI and project cleanup&#10;&#10;- Update UI strings, logs, and model references from Gemini to OpenAI (using `o3-mini` and `gpt-4o`).&#10;- Update `README.md` and environment variable instructions to use `OPENAI_API_KEY`.&#10;- Add missing dependencies for OpenAI SDK, Vercel, Firebase, and Stream Chat.&#10;- Fix database pool initialization in `scripts/test-db.ts`.&#10;- Configure `vite/client` types in `tsconfig.json` to resolve environment variable errors.&#10;- Add IDE configuration and project metadata files." />
     <MESSAGE value="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
     <MESSAGE value="fix: resolve Vercel runtime configuration error&#10;&#10;- Specify Node.js version 22.x in `package.json` engines.&#10;- Remove manual `runtime` override from `vercel.json` to fix deployment validation issues.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect configuration changes." />
@@ -336,6 +346,7 @@
     <MESSAGE value="Production launch best practices&#10;&#10;- Add rate limiting to API routes and implement `/api/health` endpoint.&#10;- Add request logging middleware for traceability.&#10;- Create `README_PROD.md` and optimize font loading in `index.html`." />
     <MESSAGE value="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks." />
     <MESSAGE value="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies." />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies." />
+    <MESSAGE value="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes." />
   </component>
 </project>
