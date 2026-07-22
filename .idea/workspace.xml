@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="migrate to Next.js App Router&#10;&#10;- Remove legacy Vite frontend and Express backend architecture.&#10;- Delete Firebase configuration, custom deployment scripts, and GitHub Actions workflows.&#10;- Implement new `app/` directory structure with routes for `/lab`, `/privacy`, and `/store`.&#10;- Refactor hardware diagnostic and repair logic into Next.js page components.&#10;- Transition authentication toward an Auth0-based implementation.">
-      <change afterPath="$PROJECT_DIR$/postcss.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tailwind.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lab/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lab/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vercel.json" beforeDir="false" afterPath="$PROJECT_DIR$/vercel.json" afterDir="false" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`.">
+      <change afterPath="$PROJECT_DIR$/app/api/auth/[auth0]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/auth0.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/auth0.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -337,11 +333,18 @@
       <option name="project" value="LOCAL" />
       <updated>1784688725117</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`.">
+      <option name="closed" value="true" />
+      <created>1784689880385</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1784689880386</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS." />
     <MESSAGE value="chore: update IDEA workspace configuration and task history" />
     <MESSAGE value="remove legacy api utilities and add database scripts&#10;&#10;- Removed `auth-utils.ts`, `db.ts`, and `recaptcha.ts` from `api/lib/`.&#10;- Added `scripts/setup-db.ts` to initialize the database schema.&#10;- Added `scripts/test-connection.ts` to verify RDS connectivity and IAM authentication." />
     <MESSAGE value="consolidate API into single server for Vercel Hobby plan optimization&#10;&#10;- Merged Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduced serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Moved database utility scripts to `scripts/`.&#10;- Updated project documentation and task tracking." />
@@ -366,6 +369,7 @@
     <MESSAGE value="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure." />
     <MESSAGE value="feat: add core UI components and global layout wrapper&#10;&#10;- Implement `LayoutWrapper` to manage global state for the AI widget and toast notifications.&#10;- Add `Navbar` and `Footer` components with responsive design and mobile menus.&#10;- Create `AIAssistantWidget` for interactive device triage and hardware diagnostic simulation.&#10;- Implement `StoreView` for product listings and `AuthLoadingOverlay` for authentication transitions.&#10;- Update root layout and page routes (Home, B2B, Services) to utilize the new modular component architecture." />
     <MESSAGE value="migrate to Next.js App Router&#10;&#10;- Remove legacy Vite frontend and Express backend architecture.&#10;- Delete Firebase configuration, custom deployment scripts, and GitHub Actions workflows.&#10;- Implement new `app/` directory structure with routes for `/lab`, `/privacy`, and `/store`.&#10;- Refactor hardware diagnostic and repair logic into Next.js page components.&#10;- Transition authentication toward an Auth0-based implementation." />
-    <option name="LAST_COMMIT_MESSAGE" value="migrate to Next.js App Router&#10;&#10;- Remove legacy Vite frontend and Express backend architecture.&#10;- Delete Firebase configuration, custom deployment scripts, and GitHub Actions workflows.&#10;- Implement new `app/` directory structure with routes for `/lab`, `/privacy`, and `/store`.&#10;- Refactor hardware diagnostic and repair logic into Next.js page components.&#10;- Transition authentication toward an Auth0-based implementation." />
+    <MESSAGE value="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`." />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`." />
   </component>
 </project>

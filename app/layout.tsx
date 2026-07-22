@@ -28,8 +28,6 @@ export const metadata: Metadata = {
   description: "Spokane's premier mobile technical device repair laboratory. Professional on-site screen renewals, battery replacements, and hardware diagnostics in Spokane, WA. Combat-veteran owned, Right-to-Repair compliant.",
   keywords: "phone repair spokane, phone diagnostic lab, mobile screen repair, battery replacement spokane, iphone repair spokane, galaxy repair spokane, right to repair spokane, mobile electronics lab spokane, device diagnostic, tablet repair spokane valley, display cell pros",
   authors: [{ name: "Display & Cell Pros LLC" }],
-  viewport: "width=device-width, initial-scale=1",
-  themeColor: "#2563eb",
   manifest: "/manifest.json",
   other: {
     "google-site-verification": "DjTZnriRaF2EHXE831Ic98h35DrLC07FA6gYqBV_TLU",
@@ -49,6 +47,12 @@ export const metadata: Metadata = {
     title: "Display & Cell Pros | Mobile Lab Spokane",
     description: "Professional on-site device diagnostics and repair solutions. Screen, battery, and micro-soldering delivered straight to you in Spokane, WA.",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({

@@ -1,6 +1,11 @@
-import { Auth0Client } from '@auth0/nextjs-auth0';
+import { initAuth0 } from '@auth0/nextjs-auth0';
 
-export const auth0 = new Auth0Client({
-  // Use environment variables for configuration
-  // The SDK automatically picks up AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_SECRET, etc.
+export const auth0 = initAuth0({
+  secret: process.env.AUTH0_SECRET,
+  issuerBaseURL: process.env.AUTH0_DOMAIN?.startsWith('http')
+    ? process.env.AUTH0_DOMAIN
+    : `https://${process.env.AUTH0_DOMAIN}`,
+  baseURL: process.env.APP_URL || process.env.AUTH0_BASE_URL || 'http://localhost:3000',
+  clientID: process.env.AUTH0_CLIENT_ID,
+  clientSecret: process.env.AUTH0_CLIENT_SECRET,
 });

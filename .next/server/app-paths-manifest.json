@@ -1,0 +1,15 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/generate-quote/route": "app/api/generate-quote/route.js",
+  "/api/tax-lookup/route": "app/api/tax-lookup/route.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/tickets/route": "app/api/tickets/route.js",
+  "/api/triage/route": "app/api/triage/route.js",
+  "/api/auth/[auth0]/route": "app/api/auth/[auth0]/route.js",
+  "/b2b/page": "app/b2b/page.js",
+  "/lab/page": "app/lab/page.js",
+  "/page": "app/page.js",
+  "/privacy/page": "app/privacy/page.js",
+  "/services/page": "app/services/page.js",
+  "/store/page": "app/store/page.js"
+}

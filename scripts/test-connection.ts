@@ -1,4 +1,4 @@
-import { queryWithToken as query } from '../db';
+import { queryWithToken as query } from '../lib/db';
 import dotenv from 'dotenv';
 import path from 'path';
 
