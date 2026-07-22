@@ -4,8 +4,89 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="build update">
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="config: update VCS settings and issue navigation for github-mcp-server&#10;&#10;- Add issue navigation links for `github-mcp-server` supporting multiple formats (`#`, `(#)`, and `GH-`).&#10;- Map `github-mcp-server` directory to Git in VCS directory mappings.&#10;- Update IDE workspace metadata and task history.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/BUILD_ID" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/app-build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/app-build-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/app-path-routes-manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/build-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/.tsbuildinfo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/10.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/10.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/11.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/11.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/7.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/7.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/9.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/9.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/diagnostics/build-diagnostics.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/diagnostics/build-diagnostics.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/export-marker.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/images-manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/next-minimal-server.js.nft.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/next-server.js.nft.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/prerender-manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/required-server-files.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/routes-manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app-paths-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app-paths-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found.rsc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/health/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/health/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/health/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/health/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tickets/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tickets/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tickets/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tickets/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/triage/route.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/triage/route.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/triage/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/triage/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b.rsc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab.rsc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy.rsc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services.rsc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store.rsc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome.rsc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome/page.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/welcome/page.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/welcome/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/welcome/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/functions-config-manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/middleware-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/middleware-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/404.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/500.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/_app.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/_app.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/_document.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/_document.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/pages/_error.js.nft.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/pages/_error.js.nft.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/XT09T0I5zgJxe2ChS9RS9/_buildManifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/XT09T0I5zgJxe2ChS9RS9/_ssgManifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/806-5960837390428507.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/store/page-7158042e1d749ba6.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/css/4d5f523296361c1d.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/trace" beforeDir="false" afterPath="$PROJECT_DIR$/.next/trace" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,14 +171,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1784653343126</updated>
-    </task>
-    <task id="LOCAL-00003" summary="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS.">
-      <option name="closed" value="true" />
-      <created>1784657903232</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1784657903232</updated>
     </task>
     <task id="LOCAL-00004" summary="chore: update IDEA workspace configuration and task history">
       <option name="closed" value="true" />
@@ -483,7 +556,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784710062331</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="config: update VCS settings and issue navigation for github-mcp-server&#10;&#10;- Add issue navigation links for `github-mcp-server` supporting multiple formats (`#`, `(#)`, and `GH-`).&#10;- Map `github-mcp-server` directory to Git in VCS directory mappings.&#10;- Update IDE workspace metadata and task history.">
+      <option name="closed" value="true" />
+      <created>1784711014345</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1784711014345</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -498,7 +579,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="backend stability and error handling&#10;&#10;- Implement global error handler and try-catch blocks in `server.ts` to prevent unhandled rejections.&#10;- Add catch-all 404 JSON response for unhandled `/api/*` routes.&#10;- Add `/api/auth/session` mock endpoint to improve client-side compatibility.&#10;- Update `bypassPaths` and implementation plan to reflect stability and performance focus." />
     <MESSAGE value="align Edge Config implementation with Vercel best practices&#10;&#10;- Add `dotenv-expand` and update `vite.config.ts` to correctly populate `process.env` during local development.&#10;- Refactor `middleware.ts` and `server.ts` to use defensive `has()` checks before retrieving values from Edge Config.&#10;- Update project documentation and implementation artifacts to reflect focus on Edge Config stability and performance.&#10;- Improve fallback handling for the `/welcome` route when Edge Config keys are missing." />
     <MESSAGE value="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000." />
     <MESSAGE value="implement CI/CD pipeline and Windows deployment support&#10;&#10;- Add GitHub Action workflow for automated deployment to Vercel Container Registry (VCR).&#10;- Create `vercel-deploy.ps1` for native PowerShell deployment support on Windows.&#10;- Update `server.ts` to ensure `PORT` environment variable is parsed as a number.&#10;- Update implementation plan, task list, and walkthrough documentation to reflect new automation features." />
@@ -523,6 +603,7 @@
     <MESSAGE value="refactor: move app, components, and lib to src directory&#10;&#10;- Move `app/`, `components/`, and `lib/` directories into a new `src/` folder.&#10;- Update import paths in `scripts/setup-db.ts` to point to `../src/lib/db`.&#10;- Regenerate Next.js build manifests and cache to reflect the updated project structure." />
     <MESSAGE value="build: update production artifacts for technical lab and Auth0 integration" />
     <MESSAGE value="build update" />
-    <option name="LAST_COMMIT_MESSAGE" value="build update" />
+    <MESSAGE value="config: update VCS settings and issue navigation for github-mcp-server&#10;&#10;- Add issue navigation links for `github-mcp-server` supporting multiple formats (`#`, `(#)`, and `GH-`).&#10;- Map `github-mcp-server` directory to Git in VCS directory mappings.&#10;- Update IDE workspace metadata and task history." />
+    <option name="LAST_COMMIT_MESSAGE" value="config: update VCS settings and issue navigation for github-mcp-server&#10;&#10;- Add issue navigation links for `github-mcp-server` supporting multiple formats (`#`, `(#)`, and `GH-`).&#10;- Map `github-mcp-server` directory to Git in VCS directory mappings.&#10;- Update IDE workspace metadata and task history." />
   </component>
 </project>
