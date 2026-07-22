@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { get, has } from '@vercel/edge-config';
+import { proxy } from './proxy';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Handle /welcome route directly at the edge
+  // 1. Auth0 Proxy Middleware
+  const authResponse = await proxy(request);
+  if (authResponse) return authResponse;
+
+  // 2. Existing Edge Config logic
   if (pathname === '/welcome' || pathname === '/api/welcome') {
     try {
       if (await has('greeting')) {
@@ -28,15 +33,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/welcome',
-    '/api/welcome',
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
+     * - api/auth (handled by SDK handleAuth, though proxy might overlap)
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };
