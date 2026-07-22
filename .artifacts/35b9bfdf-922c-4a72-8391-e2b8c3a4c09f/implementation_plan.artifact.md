@@ -1,32 +1,32 @@
-# Implementation Plan - Configuration Cleanup and Domain Aliasing
+# Implementation Plan - Resource Blocking and API Stability Mitigation
 
-The goal is to resolve minor build warnings and successfully alias the latest production deployment to the canonical domains.
+The goal is to resolve CSP violations related to the Web App Manifest and investigate/fix recurring HTTP 500 errors on API endpoints.
 
 ## User Review Required
 
-> [!NOTE]
-> I am updating the Node.js engine requirement to `>=22.x` to suppress the "Unsupported engine" warning on your local machine (Node 24) while maintaining compatibility with Vercel's Node 22 runtime.
+> [!IMPORTANT]
+> I am updating the Content Security Policy (CSP) to allow manifests from `https://vercel.com`. This is necessary when using Vercel features like Deployment Protection or SSO, which can redirect manifest requests.
 
 ## Proposed Changes
 
-### Configuration Cleanup
+### Infrastructure & Security (`vercel.json`)
 
 #### [MODIFY] [vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel.json)
-- Remove the `memory` property from the `functions` block. As noted in your build logs, this is ignored on Vercel's Active CPU billing and generates a warning.
+- Add `manifest-src 'self' https://vercel.com;` to the Content-Security-Policy header.
+- This will resolve the "Blocked (CSP)" issue identified in the diagnostic report.
 
-#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)
-- Update `engines` to `"node": ">=22.x"`.
+### Backend Stability (`server.ts`)
 
-### Domain Aliasing
-
-#### [EXECUTE] Alias Command
-- I will run the `vercel alias` command for your latest deployment (`displaycellproscom-refractored-3gumd1cwb-dcpllc.vercel.app`) to both `displaycellpros.com` and `www.displaycellpros.com`.
-- **Note**: The `https://` prefix is not used in the alias command target.
+#### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
+- Add `app.set('trust proxy', 1);`. This is critical for `express-rate-limit` to work correctly behind Vercel's proxy. Without it, the rate limiter may fail or incorrectly block traffic.
+- Enhance the global error handler to provide even more detail in the server logs (stack traces) while keeping the client response clean.
+- Add "Request Context" logging to the 500-failing routes (`/api/pos-sync-logs`, `/api/generate-quote`, `/api/tax-lookup`) to verify if the issue is related to body parsing or middleware execution.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` to confirm the warning is gone and the build still passes.
+- Run `npm run build` and `npm run lint` to ensure no regression.
 
 ### Manual Verification
-- Verify the live site URLs directly in the browser.
+- Review Vercel logs after deployment to see the new detailed error traces if 500s persist.
+- Verify in the browser console that the CSP violation for `manifest.json` is resolved.

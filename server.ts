@@ -15,6 +15,7 @@ dotenv.config();
 
 // Initialize Express
 export const app = express();
+app.set("trust proxy", 1); // Critical for express-rate-limit behind Vercel proxy
 const PORT = Number(process.env.PORT) || 3000;
 
 // Security & Performance Middleware
@@ -310,6 +311,7 @@ app.get("/api/health", (req, res) => {
 app.post("/api/tax-lookup", (req, res, next) => {
   try {
     const { zipCode } = req.body;
+    console.log(`[Diagnostic] Tax lookup for ZIP: ${zipCode}`);
     if (!zipCode) {
       return res.status(400).json({ error: "zipCode is required." });
     }
@@ -356,6 +358,7 @@ app.post("/api/tax-lookup", (req, res, next) => {
 app.post("/api/generate-quote", (req, res, next) => {
   try {
     const { issueType, deviceTier, zipCode, isCorporate, companyName, includeBatteryUpsell } = req.body;
+    console.log(`[Diagnostic] Generating quote: ${issueType} | ${deviceTier} | ZIP: ${zipCode}`);
 
     if (!issueType || !deviceTier) {
       return res.status(400).json({ error: "issueType and deviceTier are required." });
@@ -885,8 +888,13 @@ app.post("/api/analyze-image", async (req, res) => {
 });
 
 // POS Simulating API testing
-app.get("/api/pos-sync-logs", (req, res) => {
-  res.json({ logs: syncLogs, tickets: mockTickets });
+app.get("/api/pos-sync-logs", (req, res, next) => {
+  try {
+    console.log(`[Diagnostic] Accessing pos-sync-logs. Ticket count: ${mockTickets.length}`);
+    res.json({ logs: syncLogs, tickets: mockTickets });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // GET /api/tickets: Fetch user-specific tickets from DB if available, otherwise mock
@@ -1293,13 +1301,17 @@ app.all("/api/*", (req, res) => {
 
 // Global Error Handler - Captures crashes and returns structured JSON
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(`[Global Error Handler]: ${err.stack || err}`);
-
   const status = err.status || 500;
+  const errorId = Math.random().toString(36).substring(2, 9).toUpperCase();
+
+  console.error(`[Global Error Handler] [ID:${errorId}] [Status:${status}]: ${err.stack || err}`);
+  console.error(`[Request Context]: ${req.method} ${req.url} - IP: ${req.ip} - Body: ${JSON.stringify(req.body)}`);
+
   res.status(status).json({
     error: "Internal Server Error",
-    message: process.env.NODE_ENV === "production" ? "An unexpected error occurred." : err.message,
-    code: err.code || "INTERNAL_FAILURE"
+    message: process.env.NODE_ENV === "production" ? "An unexpected error occurred. Please contact support if this persists." : err.message,
+    code: err.code || "INTERNAL_FAILURE",
+    errorId: errorId
   });
 });
 

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="Production launch best practices&#10;&#10;- Add rate limiting to API routes and implement `/api/health` endpoint.&#10;- Add request logging middleware for traceability.&#10;- Create `README_PROD.md` and optimize font loading in `index.html`.">
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -283,7 +283,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784680709201</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks.">
+      <option name="closed" value="true" />
+      <created>1784681397948</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1784681397948</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -310,6 +318,7 @@
     <MESSAGE value="implement tiered pricing strategy and battery recovery upsell&#10;&#10;- Refactor backend pricing logic to support Budget, Professional, and Authorized tiers.&#10;- Implement battery replacement upsell logic with a 50% discount for bundled repairs.&#10;- Redesign the Live Quote UI in `App.tsx` into a three-tier &quot;Strategic Value Matrix&quot; comparison.&#10;- Update AI assistant system instructions to include a Data Privacy Guarantee.&#10;- Adjust B2B discount rate to 15% and update labor/overhead calculation formulas.&#10;- Update `src/types.ts` and project documentation to reflect the new tiered structure." />
     <MESSAGE value="Production launch best practices&#10;&#10;- Add rate limiting to API routes using `express-rate-limit`.&#10;- Implement a `/api/health` endpoint for uptime monitoring.&#10;- Add request logging middleware for improved traceability.&#10;- Create `README_PROD.md` with operational guides for rollbacks, monitoring, and secret management.&#10;- Optimize font loading in `index.html`." />
     <MESSAGE value="Production launch best practices&#10;&#10;- Add rate limiting to API routes and implement `/api/health` endpoint.&#10;- Add request logging middleware for traceability.&#10;- Create `README_PROD.md` and optimize font loading in `index.html`." />
-    <option name="LAST_COMMIT_MESSAGE" value="Production launch best practices&#10;&#10;- Add rate limiting to API routes and implement `/api/health` endpoint.&#10;- Add request logging middleware for traceability.&#10;- Create `README_PROD.md` and optimize font loading in `index.html`." />
+    <MESSAGE value="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks." />
+    <option name="LAST_COMMIT_MESSAGE" value="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks." />
   </component>
 </project>
