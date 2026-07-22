@@ -23,7 +23,7 @@
     "@vercel/node": "^5.1.0",
     "@vercel/oidc-aws-credentials-provider": "^3.3.0",
     "@vercel/speed-insights": "^2.0.0",
-    "ai": "^4.1.45",
+    "ai": "^7.0.34",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^13.0.0",
     "jspdf": "^4.2.1",
