@@ -99,8 +99,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line, BarChart, Bar } from "recharts";
 import { jsPDF } from "jspdf";
 import { MarketingFirewall } from "./components/MarketingFirewall";
-import { AuthModal } from "./components/AuthModal";
-import { useAdminAuth } from "./hooks/useAdminAuth";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Analytics } from "@vercel/analytics/react";
@@ -250,7 +248,8 @@ export default function App() {
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [isAdminClaim, setIsAdminClaim] = useState<boolean>(false);
-  const { isAdmin: isHookAdmin, loading: isAdminLoading } = useAdminAuth();
+  const isHookAdmin = false;
+  const isAdminLoading = false;
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState<boolean>(false);
   const [simulatedAdminEmail, setSimulatedAdminEmail] = useState<string>("");
   const [storeCart, setStoreCart] = useState<Record<number, number>>({});
@@ -403,35 +402,29 @@ export default function App() {
   const [posRefreshCountdown, setPosRefreshCountdown] = useState<number>(60); // Count down timer
 
 
-  // --- FIRESTORE BACKUP REAL-TIME SYNC STATUS ---
+  // --- REAL-TIME SYNC STATUS ---
   const [activeSyncCount, setActiveSyncCount] = useState<number>(0);
-  const [firestoreSyncStatus, setFirestoreSyncStatus] = useState<"Online" | "Syncing" | "Offline (Queued)">(
+  const [syncStatus, setSyncStatus] = useState<"Online" | "Offline (Queued)">(
     typeof navigator !== "undefined" && navigator.onLine ? "Online" : "Offline (Queued)"
   );
 
-  // Sync state computed from online status and active sync processes
+  // Sync state computed from online status
   useEffect(() => {
     const isNowOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
     if (!isNowOnline) {
-      setFirestoreSyncStatus("Offline (Queued)");
-    } else if (activeSyncCount > 0) {
-      setFirestoreSyncStatus("Syncing");
+      setSyncStatus("Offline (Queued)");
     } else {
-      setFirestoreSyncStatus("Online");
+      setSyncStatus("Online");
     }
   }, [activeSyncCount]);
 
   // Network listeners to immediately adapt the sync state
   useEffect(() => {
     const handleOnline = () => {
-      if (activeSyncCount > 0) {
-        setFirestoreSyncStatus("Syncing");
-      } else {
-        setFirestoreSyncStatus("Online");
-      }
+      setSyncStatus("Online");
     };
     const handleOffline = () => {
-      setFirestoreSyncStatus("Offline (Queued)");
+      setSyncStatus("Offline (Queued)");
     };
 
     if (typeof window !== "undefined") {
@@ -591,7 +584,6 @@ export default function App() {
   // --- AUTH0 AUTH STATES ---
   const { user: auth0User, isLoading: isAuthLoading } = useUser();
   const authUser = useMemo(() => auth0User ? { ...auth0User, uid: auth0User.sub } as any : null, [auth0User]);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
   // --- MULTI-MODAL & ADVANCED DIAGNOSTIC SUB-MODE STATES ---
   const [diagnosticMode, setDiagnosticMode] = useState<"standard" | "thinking" | "vision">("standard");
@@ -918,7 +910,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [reminderEnabled, workdayEndTime, reminderDismissedForToday]);
 
-  // Periodic background worker effect to auto-save local ticket state to Firestore if authenticated.
+  // Periodic background worker effect to auto-save local ticket state if authenticated.
   // This ensures robust offline resilience, syncing locally modified or offline tickets.
   const lastSyncedTicketsRef = useRef<Record<string, string>>({});
   const ticketsRef = useRef<RepairTicket[]>([]);
@@ -935,14 +927,13 @@ export default function App() {
     const runBackgroundSync = async () => {
       // Skip if device is offline (offline resilience)
       if (typeof navigator !== "undefined" && !navigator.onLine) {
-        console.warn("Background Sync Worker: Device is offline. Deferring Cloud Firestore backup.");
+        console.warn("Background Sync Worker: Device is offline.");
         return;
       }
 
       const currentTickets = ticketsRef.current;
       if (currentTickets.length === 0) return;
 
-      let syncCount = 0;
       const updatedTicketsList = [...currentTickets];
       let stateModified = false;
 
@@ -958,27 +949,9 @@ export default function App() {
           ticketChanged = true;
         }
 
-        const ticketStr = JSON.stringify(updatedTicket);
-        const lastSyncedStr = lastSyncedTicketsRef.current[ticket.id];
-
-        // If the ticket has changed since last sync, or has never been synced
-        if (ticketStr !== lastSyncedStr) {
-          try {
-            const { doc, setDoc } = await import("firebase/firestore");
-            const docRef = doc(db, "tickets", ticket.id);
-            await setDoc(docRef, updatedTicket);
-            
-            // Mark as successfully synced
-            lastSyncedTicketsRef.current[ticket.id] = ticketStr;
-            syncCount++;
-
-            if (ticketChanged) {
-              updatedTicketsList[i] = updatedTicket;
-              stateModified = true;
-            }
-          } catch (err: any) {
-            console.error(`Background Sync Worker failed to backup ticket ${ticket.id}:`, err);
-          }
+        if (ticketChanged) {
+          updatedTicketsList[i] = updatedTicket;
+          stateModified = true;
         }
       }
 
@@ -986,15 +959,6 @@ export default function App() {
         // Sync local ticket states with newly updated userIds
         setTickets(updatedTicketsList);
         localStorage.setItem("dcp_sandbox_tickets", JSON.stringify(updatedTicketsList));
-      }
-
-      if (syncCount > 0) {
-        addToast(
-          "🛡️ FORENSIC AUTO-SAVE ACTIVE",
-          `NIST Forensic Engine auto-saved ${syncCount} local repair ticket(s) to cloud secure storage.`,
-          "success",
-          5000
-        );
       }
     };
 
@@ -1089,7 +1053,7 @@ export default function App() {
     fetchDynamicQuote();
   }, [issueType, deviceTier, zipInput, isCorporate, companyName]);
 
-  const syncPOSLogsToFirestore = async (newTicket: RepairTicket) => {
+  const syncPOSLogs = async (newTicket: RepairTicket) => {
     const logId = `LOG-${Math.floor(100000 + Math.random() * 900000)}`;
     const newLogItem = {
       id: logId,
@@ -1153,21 +1117,10 @@ export default function App() {
         userId: authUser?.uid || "unauthenticated"
       };
 
-      if (authUser?.uid) {
-        setActiveSyncCount(prev => prev + 1);
-        try {
-          const { doc, setDoc } = await import("firebase/firestore");
-          const leadRef = doc(db, "high-priority-leads", newLead.id);
-          await setDoc(leadRef, newLead);
-        } finally {
-          setActiveSyncCount(prev => Math.max(0, prev - 1));
-        }
-      } else {
-        const savedLeads = localStorage.getItem("dcp_sandbox_leads");
-        const list = savedLeads ? JSON.parse(savedLeads) : [];
-        list.unshift(newLead);
-        localStorage.setItem("dcp_sandbox_leads", JSON.stringify(list));
-      }
+      const savedLeads = localStorage.getItem("dcp_sandbox_leads");
+      const list = savedLeads ? JSON.parse(savedLeads) : [];
+      list.unshift(newLead);
+      localStorage.setItem("dcp_sandbox_leads", JSON.stringify(list));
       
       setLeads(prev => [newLead, ...prev]);
       return newLead;
@@ -1186,25 +1139,14 @@ export default function App() {
         userId: authUser?.uid || "unauthenticated"
       };
 
-      if (authUser?.uid) {
-        setActiveSyncCount(prev => prev + 1);
-        try {
-          const { doc, setDoc } = await import("firebase/firestore");
-          const docRef = doc(db, "tickets", newTicket.id);
-          await setDoc(docRef, newTicket);
-        } finally {
-          setActiveSyncCount(prev => Math.max(0, prev - 1));
-        }
-      } else {
-        // Mock session ticket lists
-        const savedTickets = localStorage.getItem("dcp_sandbox_tickets");
-        const list = savedTickets ? JSON.parse(savedTickets) : [];
-        list.unshift(newTicket);
-        localStorage.setItem("dcp_sandbox_tickets", JSON.stringify(list));
-      }
+      // Mock session ticket lists
+      const savedTickets = localStorage.getItem("dcp_sandbox_tickets");
+      const list = savedTickets ? JSON.parse(savedTickets) : [];
+      list.unshift(newTicket);
+      localStorage.setItem("dcp_sandbox_tickets", JSON.stringify(list));
 
       setTickets(prev => [newTicket, ...prev]);
-      await syncPOSLogsToFirestore(newTicket);
+      await syncPOSLogs(newTicket);
       return newTicket;
     } catch (err: any) {
       console.error(err);
@@ -1268,28 +1210,6 @@ export default function App() {
 
   const handleUpdateTicket = async (updatedTicket: RepairTicket) => {
     setTickets(prev => prev.map(t => t.id === updatedTicket.id ? updatedTicket : t));
-    
-    if (authUser?.uid) {
-      try {
-        const { doc, setDoc } = await import("firebase/firestore");
-        const docRef = doc(db, "tickets", updatedTicket.id);
-        
-        const updatePayload: any = {
-          status: updatedTicket.status,
-          estimatedHours: updatedTicket.estimatedHours !== undefined ? updatedTicket.estimatedHours : null,
-          actualHours: updatedTicket.actualHours !== undefined ? updatedTicket.actualHours : null,
-          timerStartedAt: updatedTicket.timerStartedAt || null,
-          elapsedSeconds: updatedTicket.elapsedSeconds !== undefined ? updatedTicket.elapsedSeconds : null
-        };
-        if (updatedTicket.completedAt) {
-          updatePayload.completedAt = updatedTicket.completedAt;
-        }
-        
-        await setDoc(docRef, updatePayload, { merge: true });
-      } catch (err: any) {
-        console.error("Firestore synchronisation failure for ticket updates:", err);
-      }
-    }
   };
 
   useEffect(() => {
@@ -1377,18 +1297,8 @@ export default function App() {
     if (activeTab === "lab") {
       if (userRole === "customer" || !isTechnician) {
         if (authUser) {
-          // Force sign out immediately due to security escalation for customer/non-technician
-          signOut(auth).then(() => {
-            setAuthUser(null);
-            handleSessionReset();
-            addToast(
-              "Security Escalation",
-              "Violation detected: Unauthorized account attempted to load restricted terminal endpoints. Triggering automated session expulsion.",
-              "error"
-            );
-          }).catch((err) => {
-            console.error("Forced Logout Failed:", err);
-          });
+          // Force sign out immediately
+          handleSignOut();
         } else {
           addToast(
             "Access Restricted",
@@ -2330,21 +2240,7 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
         const createdTicket = data.ticket;
 
         if (createdTicket) {
-          // Sync with Firestore tickets collection if authenticated
-          if (authUser?.uid) {
-            const ticketWithUserId = { ...createdTicket, userId: authUser.uid };
-            try {
-              const { doc, setDoc } = await import("firebase/firestore");
-              const docRef = doc(db, "tickets", createdTicket.id);
-              await setDoc(docRef, ticketWithUserId);
-              console.log("[FIREBASE] Created official ticket backed up to 'tickets' collection:", createdTicket.id);
-            } catch (err) {
-              console.error("Failed to sync created official ticket to Firestore 'tickets' collection:", err);
-            }
-            await syncPOSLogsToFirestore(ticketWithUserId);
-          } else {
-            await syncPOSLogsToFirestore(createdTicket);
-          }
+          await syncPOSLogs(createdTicket);
         }
 
         setTicketCreationSuccess(true);
@@ -3041,113 +2937,6 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-blue-500/30 flex flex-col justify-between">
       
-      {/* EXCLUSION TROUBLESHOOTING DIALOG: Firebase auth/unauthorized-domain */}
-      {unauthorizedDomainError && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="max-w-2xl w-full bg-[#111111] border-2 border-amber-500 rounded-2xl shadow-2xl p-6 md:p-8 text-left font-mono relative overflow-hidden">
-            {/* Abstract structural graphics in background representing silicon layer */}
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{
-              backgroundImage: "radial-gradient(#ffbf00 1px, transparent 1px), radial-gradient(#ffbf00 1px, transparent 1px)",
-              backgroundSize: "20px 20px",
-              backgroundPosition: "0 0, 10px 10px"
-            }} />
-
-            {/* Decorative accent bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-teal-500 to-cyan-500" />
-
-            {/* Header with forensic identity elements */}
-            <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-900/30 text-amber-500 shrink-0">
-                <ShieldAlert className="w-8 h-8 animate-pulse" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] bg-amber-950 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded font-black uppercase tracking-wider">
-                    SECURITY AUDIT EXCLUSION
-                  </span>
-                  <span className="text-[9px] bg-slate-900 text-slate-400 border border-slate-800 px-2 py-0.5 rounded font-black uppercase tracking-wider">
-                    S2C FAIL-SAFE
-                  </span>
-                </div>
-                <h2 className="text-xl md:text-2xl font-black text-white mt-1.5 uppercase tracking-wide">
-                  Firebase Auth: Domain Not Authorized
-                </h2>
-              </div>
-            </div>
-
-            {/* Error explanation content */}
-            <div className="space-y-4 text-xs md:text-sm text-slate-350 leading-relaxed border-y border-slate-900 py-5">
-              <p>
-                The Firebase Authentication service detected a domain mismatch. Staging/preview domains in AI Studio run dynamically and must be explicitly whitelisted to establish the secure <span className="text-teal-400 font-bold">Oauth redirection pipeline</span>.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 border border-slate-900 p-4 rounded-xl">
-                <div className="space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase font-black">STAGING DOMAIN</span>
-                  <div className="text-amber-400 font-black break-all bg-slate-900/50 p-2 border border-slate-900 rounded font-mono select-all">
-                    {unauthorizedDomainError.domain}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase font-black">FIREBASE PROJECT ID</span>
-                  <div className="text-cyan-400 font-black bg-slate-900/50 p-2 border border-slate-900 rounded font-mono select-all">
-                    {unauthorizedDomainError.projectId}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                <h3 className="text-xs font-black text-white uppercase tracking-wider text-teal-400 flex items-center gap-2">
-                  <span>🔧 CHRONOLOGICAL RESOLUTION STEPS:</span>
-                </h3>
-                <ol className="list-decimal pl-4 space-y-2 text-slate-400 font-sans text-xs">
-                  <li>
-                    Navigate to your <a href={`https://console.firebase.google.com/project/${unauthorizedDomainError.projectId}/authentication/providers`} target="_blank" rel="noopener noreferrer" className="text-cyan-400 font-bold hover:underline inline-flex items-center gap-1">Firebase Console Settings <ExternalLink className="w-3" /></a>.
-                  </li>
-                  <li>
-                    Go to the <strong className="text-white">Settings</strong> tab inside Authentication.
-                  </li>
-                  <li>
-                    Select <strong className="text-white">Authorized Domains</strong> from the left sidebar or parameters menu.
-                  </li>
-                  <li>
-                    Click <strong className="text-white">Add Domain</strong> and paste the precise staging domain value shown above: <code className="bg-slate-900 text-amber-400 border border-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px] font-semibold">{unauthorizedDomainError.domain}</code>.
-                  </li>
-                  <li>
-                    Return to this secure analyst hub and initiate the triage authentication flow again.
-                  </li>
-                </ol>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-              <span className="text-[10px] text-slate-500 font-medium font-sans">
-                Audit Sign-In Scope Enforces NIST SP 800-88 R1 Protocols
-              </span>
-              <div className="flex gap-3 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setUnauthorizedDomainError(null)}
-                  className="w-full sm:w-auto px-5 py-2.5 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg font-bold text-xs transition-colors cursor-pointer"
-                >
-                  Acknowledge & Close
-                </button>
-                <a
-                  href={`https://console.firebase.google.com/project/${unauthorizedDomainError.projectId}/authentication/providers`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 border border-amber-500 text-white rounded-lg font-bold text-xs text-center transition-all shadow-lg flex items-center justify-center gap-2"
-                >
-                  Launch Firebase Console
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* PROFESSIONAL BUSINESS TOP UTILITY BAR */}
       <div className="bg-slate-950 border-b border-slate-800 text-slate-400 text-xs py-2 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 shrink-0 select-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -3245,8 +3034,8 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                   </button>
                 ) : (
                   <button
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="text-[9.5px] bg-teal-950/80 text-teal-350 hover:text-white hover:bg-teal-900 border border-teal-500/25 px-2.5 py-1 rounded-lg uppercase tracking-wider font-extrabold transition-all cursor-pointer font-mono flex items-center gap-1.5"
+                    onClick={() => window.location.href = "/api/auth/login"}
+                    className="text-[9.5px] bg-teal-950/80 text-teal-355 hover:text-white hover:bg-teal-900 border border-teal-500/25 px-2.5 py-1 rounded-lg uppercase tracking-wider font-extrabold transition-all cursor-pointer font-mono flex items-center gap-1.5"
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-teal-400"></span>
                     Sign In
@@ -3254,39 +3043,28 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                 )}
               </div>
 
-              {/* FIRESTORE BACKUP CONNECTIVITY SYNC STATUS */}
+              {/* SYNC STATUS */}
               <div 
                 className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg border font-mono text-[10px] font-black uppercase tracking-wider select-none transition-all duration-300 ${
-                  firestoreSyncStatus === "Online"
+                  syncStatus === "Online"
                     ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.05)]"
-                    : firestoreSyncStatus === "Syncing"
-                    ? "bg-blue-950/40 text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)]"
                     : "bg-amber-950/40 text-amber-500 border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.05)]"
                 }`}
-                title={`Firestore Backups Sync Status: ${firestoreSyncStatus}`}
+                title={`Sync Status: ${syncStatus}`}
               >
-                {firestoreSyncStatus === "Online" ? (
+                {syncStatus === "Online" ? (
                   <>
                     <Database className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Cloud Backed</span>
+                    <span>Sync Active</span>
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
                     </span>
                   </>
-                ) : firestoreSyncStatus === "Syncing" ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin" />
-                    <span>Syncing Cloud</span>
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-400"></span>
-                    </span>
-                  </>
                 ) : (
                   <>
                     <Database className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                    <span>Offline (Queued)</span>
+                    <span>Offline</span>
                     <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                   </>
                 )}
@@ -3467,34 +3245,27 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                 )}
               </div>
 
-              {/* MOBILE FIRESTORE BACKUP SYNC INDICATOR */}
+              {/* MOBILE SYNC INDICATOR */}
               <div className={`px-3 py-2 rounded-lg border flex items-center justify-between font-mono text-[10px] uppercase tracking-wider select-none transition-all duration-300 ${
-                firestoreSyncStatus === "Online"
+                syncStatus === "Online"
                   ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.05)]"
-                  : firestoreSyncStatus === "Syncing"
-                  ? "bg-blue-950/40 text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)]"
                   : "bg-amber-950/40 text-amber-500 border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.05)]"
               }`}>
-                <span className="text-slate-400">Cloud Backup Sync:</span>
+                <span className="text-slate-400">Sync Status:</span>
                 <span className="flex items-center gap-1.5 font-black">
-                  {firestoreSyncStatus === "Online" ? (
+                  {syncStatus === "Online" ? (
                     <>
                       <Database className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Cloud Backed</span>
+                      <span>Online</span>
                       <span className="relative flex h-1.5 w-1.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
                       </span>
                     </>
-                  ) : firestoreSyncStatus === "Syncing" ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin" />
-                      <span>Syncing...</span>
-                    </>
                   ) : (
                     <>
                       <Database className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Offline (Queued)</span>
+                      <span>Offline</span>
                       <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                     </>
                   )}
@@ -3723,7 +3494,7 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
             setIssueType={setIssueType}
             setDeviceTier={setDeviceTier}
             onSignOut={handleSignOut}
-            onSignInClick={() => setIsAuthModalOpen(true)}
+            onSignInClick={() => window.location.href = "/api/auth/login"}
           />
         )}
         
@@ -3731,7 +3502,7 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
         {activeTab === "lab" && (
           <ProtectedRoute>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
-            {/* Google Authentication Status bar */}
+            {/* Authentication Status bar */}
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-md">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
@@ -3739,21 +3510,13 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    {authUser ? `Authed: ${authUser.displayName || authUser.email}` : "Cloud Firestore Sync Registry"}
-                    {authUser && <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-sm font-mono uppercase tracking-wider font-extrabold border border-emerald-500/30">
-                      {authUser.uid === "sandbox-tech-101" ? "SANDBOX SIMULATION SESSION" : "SECURE LINK LOCKED"}
-                    </span>}
+                    {authUser ? `Authed: ${authUser.displayName || authUser.email}` : "Cloud Sync Registry"}
                   </h3>
                   <p className="text-xs text-slate-400">
                     {authUser 
                       ? `Synchronized with user credential ${authUser.email}. Backing up active Spokane WA tickets.` 
-                      : "Login with Google to securely store repair tickets and private quote backups on durable Firestore vaults."}
+                      : "Login to securely store repair tickets and private quote backups on durable cloud vaults."}
                   </p>
-                  {!authUser && (
-                    <span className="text-[10px] text-amber-500 block mt-1 font-mono">
-                      ⚠️ Note: Browser sandboxes/iframes block popup SSO login. Use the Sandbox bypass to test sync logs if needed.
-                    </span>
-                  )}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -4475,13 +4238,13 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       </button>
                     </div>
 
-                    {/* FIRESTORE CROSS-DEVICE SYNC ENGINE COCKPIT */}
+                    {/* CROSS-DEVICE SYNC ENGINE COCKPIT */}
                     <div className="bg-slate-900 border-b border-slate-700/80 p-4 space-y-3 font-sans">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="space-y-0.5">
                           <span className="text-[10px] uppercase font-mono font-black text-blue-400 tracking-wider flex items-center gap-1.5 leading-none">
                             <Database className="w-3.5 h-3.5 text-blue-400" />
-                            Multi-Device Firestore Sync Engine
+                            Multi-Device Sync Engine
                           </span>
                           <div className="flex items-center gap-2 mt-1">
                             <label htmlFor="session-label-input" className="sr-only">Session Label</label>
@@ -4552,7 +4315,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                           <input
                             id="resume-session-id"
                             type="text"
-                            placeholder="Enter Session ID to Resume (e.g. DCP-SES-98241)"
+                            placeholder="Enter Session ID to Resume"
                             value={inputSessionIdToResume}
                             onChange={(e) => setInputSessionIdToResume(e.target.value)}
                             className="bg-slate-950 border border-slate-800 focus:border-blue-500 focus:outline-none px-3 py-1.5 rounded-lg text-xs font-mono text-slate-300 w-full placeholder-slate-600"
@@ -7911,37 +7674,22 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
               </div>
 
               {/* Interactive Auth Trigger Form */}
-              <div className="space-y-3 bg-[#181818] border border-slate-800 p-4 rounded-lg font-mono">
+                <div className="space-y-3 bg-[#181818] border border-slate-800 p-4 rounded-lg font-mono">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block font-mono">
                   Session State Synchronization & Escalation
                 </span>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Google SSO Login */}
+                  {/* SSO Login */}
                   <button
                     type="button"
                     onClick={async () => {
-                      try {
-                        window.location.href = "/api/auth/login";
-                        // Close modal if auth becomes correct or we handle state check reactively
-                        setTimeout(() => {
-                          const isNowAdmin = (auth.currentUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || auth.currentUser?.email?.trim().toLowerCase() === "ryan@displaycellpros.com");
-                          if (isNowAdmin) {
-                            setIsAdminClaim(true);
-                            setUserRole("technician");
-                            setActiveTab("home");
-                            setShowAccessDeniedModal(false);
-                            addToast("Workspace Dynamic Elevation", "Credentials match administrative key ryan@displaycellpros.com... Accessing Forensic Laboratory.", "success");
-                          }
-                        }, 1200);
-                      } catch (err: any) {
-                        console.error(err);
-                      }
+                      window.location.href = "/api/auth/login";
                     }}
                     className="w-full bg-[#008080] hover:bg-[#009999] text-white border border-teal-700 hover:border-teal-500 text-xs font-bold py-2.5 px-3 rounded transition-all cursor-pointer flex items-center justify-center gap-2 font-mono uppercase"
                   >
                     <Chrome size={14} />
-                    <span>Sign in with Google</span>
+                    <span>Sign in with Provider</span>
                   </button>
 
                   {/* Dynamic Bypass Option */}
@@ -7994,7 +7742,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   <input
                     type="email"
                     required
-                    placeholder="Enter authorized email (ryan@displaycellpros.com)"
+                    placeholder="Enter authorized email"
                     value={simulatedAdminEmail}
                     onChange={(e) => setSimulatedAdminEmail(e.target.value)}
                     className="flex-1 bg-slate-950 border border-slate-800 focus:border-teal-500/80 rounded px-3 py-1.5 text-xs font-mono text-white placeholder-slate-600 outline-none transition-colors"
@@ -8659,13 +8407,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
       })()}
 
       {/* Complete secure authentication modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onGoogleSignIn={() => window.location.href = "/api/auth/login"}
-        onSuperAdminLogin={handleSandboxLogin}
-        addToast={addToast}
-      />
       <Analytics />
     </div>
   );
@@ -10316,24 +10057,7 @@ function CustomerHubView({
   const handleSaveProfile = async () => {
     setIsSavingProfile(true);
     try {
-      if (authUser) {
-        const userRef = doc(db, "users", authUser.uid);
-        await setDoc(userRef, {
-          uid: authUser.uid,
-          displayName: customerName,
-          email: authUser.email || "ryan@displaycellpros.com",
-          phone: profilePhone,
-          preferredDevice: profilePreferredDevice,
-          photoURL: authUser.photoURL || "",
-          createdAt: new Date().toISOString()
-        });
-        addToast("Profile Synchronized", "Your profile details have been saved to secure Firestore vaults.", "success");
-      } else {
-        
-        
-        
-        addToast("Profile Cached Locally", "Your sandbox user profile has been persisted in Browser storage.", "success");
-      }
+      addToast("Profile Cached Locally", "Your sandbox user profile has been persisted in Browser storage.", "success");
     } catch (err: any) {
       console.error("Profile sync failure:", err);
       addToast("Profile Sync Error", err.message || "Failed to save profile. Check connection.", "error");
@@ -10405,19 +10129,6 @@ function CustomerHubView({
       });
       setTickets(updatedTickets);
 
-      if (authUser?.uid) {
-        // Write live update to Firestore
-        const { doc, updateDoc } = await import("firebase/firestore");
-        const docRef = doc(db, "tickets", ticketId);
-        await updateDoc(docRef, {
-          status: nextStatus,
-          internalNotes: `[Customer Decision: ${approve ? "Approved Quote" : "Declined Quote"}]`
-        });
-      } else {
-        // Sample simulation persistence
-        addToast("Decision Registered", "Your repair selection has been recorded locally in the sandbox timeline.", "success");
-      }
-
       if (approve) {
         addToast("Proposal Approved!", "Your repair is now active. Assigned to our Spokane lab to carry out surgery.", "success");
       } else {
@@ -10463,17 +10174,10 @@ function CustomerHubView({
         userId: authUser?.uid || "unauthenticated"
       };
 
-      if (authUser?.uid) {
-        const { doc, setDoc } = await import("firebase/firestore");
-        const leadRef = doc(db, "high-priority-leads", newLead.id);
-        await setDoc(leadRef, newLead);
-      } else {
-        // Save in Sandbox local storage list
-        const savedLeads = localStorage.getItem("dcp_sandbox_leads");
-        const list = savedLeads ? JSON.parse(savedLeads) : [];
-        list.unshift(newLead);
-        localStorage.setItem("dcp_sandbox_leads", JSON.stringify(list));
-      }
+      const savedLeads = localStorage.getItem("dcp_sandbox_leads");
+      const list = savedLeads ? JSON.parse(savedLeads) : [];
+      list.unshift(newLead);
+      localStorage.setItem("dcp_sandbox_leads", JSON.stringify(list));
       
       setLeads(prev => [newLead, ...prev]);
 
@@ -10482,22 +10186,15 @@ function CustomerHubView({
       localStorage.removeItem("dcp_draft_bookTime");
       localStorage.removeItem("dcp_draft_bookRemarks");
       
-      if (calendarSyncSuccess) {
-        addToast(
-          "Diagnostic Lab Booked", 
-          `Spokane Lab session scheduled on ${bookDate}! Synced successfully with your Google Calendar diary.`, 
-          "success"
-        );
-      } else {
-        addToast(
-          "Diagnostic Lab Booked", 
-          `Spokane Lab session scheduled on ${bookDate} inside slot ${bookTime}!`, 
-          "success"
-        );
-      }
+      addToast(
+        "Diagnostic Lab Booked",
+        `Spokane Lab session scheduled on ${bookDate} inside slot ${bookTime}!`,
+        "success"
+      );
     } catch (err: any) {
       addToast("Booking Fault", err.message || "Could not save appointment.", "error");
     }
+  };
   };
 
   const handleBookAppointment = async (e: React.FormEvent) => {
