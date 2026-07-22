@@ -4,13 +4,22 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`.">
-      <change beforePath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" beforeDir="false" afterPath="$PROJECT_DIR$/.artifacts/35b9bfdf-922c-4a72-8391-e2b8c3a4c09f/implementation_plan.artifact.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/tickets/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/tickets/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lab/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lab/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/Navbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Navbar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/auth0.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/auth0.ts" afterDir="false" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="refactor: enhance Auth0 integration and secure Lab portal&#10;&#10;- Update `lib/auth0.ts` to use standardized environment variables for `issuerBaseURL` and `baseURL`.&#10;- Secure `app/lab/page.tsx` with automatic authentication redirects and integrated user session status.&#10;- Update `components/Navbar.tsx` to dynamically display user profile information and authentication actions (Login/Logout).&#10;- Standardize `app/api/tickets/route.ts` handlers to use `NextRequest`.&#10;- Clean up legacy mock authentication logic and update the project implementation plan.">
+      <change beforePath="$PROJECT_DIR$/.next/app-build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/app-build-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/build-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/_not-found/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/_not-found/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/auth/[auth0]/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/auth/[auth0]/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/generate-quote/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/health/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/health/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tax-lookup/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/tickets/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/tickets/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/triage/route_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/api/triage/route_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/b2b/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/b2b/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/lab/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/lab/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/privacy/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/privacy/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/services/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/services/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/store/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/store/page_client-reference-manifest.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -352,11 +361,26 @@
       <option name="project" value="LOCAL" />
       <updated>1784691172573</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="refactor: enhance Auth0 integration and secure Lab portal&#10;&#10;- Update `lib/auth0.ts` to use standardized environment variables for `issuerBaseURL` and `baseURL`.&#10;- Secure `app/lab/page.tsx` with automatic authentication redirects and integrated user session status.&#10;- Update `components/Navbar.tsx` to dynamically display user profile information and authentication actions (Login/Logout).&#10;- Standardize `app/api/tickets/route.ts` handlers to use `NextRequest`.&#10;- Clean up legacy mock authentication logic and update the project implementation plan.">
+      <option name="closed" value="true" />
+      <created>1784691779374</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1784691779374</updated>
+    </task>
+    <task id="LOCAL-00034" summary="refactor: enhance Auth0 integration and secure Lab portal&#10;&#10;- Update `lib/auth0.ts` to use standardized environment variables for `issuerBaseURL` and `baseURL`.&#10;- Secure `app/lab/page.tsx` with automatic authentication redirects and integrated user session status.&#10;- Update `components/Navbar.tsx` to dynamically display user profile information and authentication actions (Login/Logout).&#10;- Standardize `app/api/tickets/route.ts` handlers to use `NextRequest`.&#10;- Clean up legacy mock authentication logic and update the project implementation plan.">
+      <option name="closed" value="true" />
+      <created>1784691848152</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1784691848152</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="chore: update IDEA workspace configuration and task history" />
     <MESSAGE value="remove legacy api utilities and add database scripts&#10;&#10;- Removed `auth-utils.ts`, `db.ts`, and `recaptcha.ts` from `api/lib/`.&#10;- Added `scripts/setup-db.ts` to initialize the database schema.&#10;- Added `scripts/test-connection.ts` to verify RDS connectivity and IAM authentication." />
     <MESSAGE value="consolidate API into single server for Vercel Hobby plan optimization&#10;&#10;- Merged Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduced serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Moved database utility scripts to `scripts/`.&#10;- Updated project documentation and task tracking." />
     <MESSAGE value="consolidate API into single server for Vercel optimization&#10;&#10;- Merge Stream Chat, Ticket DB, and reCAPTCHA logic into `server.ts`.&#10;- Reduce serverless function count by consolidating `api/*.ts` into `api/index.ts`.&#10;- Update IDE workspace configuration and task history." />
@@ -381,6 +405,7 @@
     <MESSAGE value="feat: add core UI components and global layout wrapper&#10;&#10;- Implement `LayoutWrapper` to manage global state for the AI widget and toast notifications.&#10;- Add `Navbar` and `Footer` components with responsive design and mobile menus.&#10;- Create `AIAssistantWidget` for interactive device triage and hardware diagnostic simulation.&#10;- Implement `StoreView` for product listings and `AuthLoadingOverlay` for authentication transitions.&#10;- Update root layout and page routes (Home, B2B, Services) to utilize the new modular component architecture." />
     <MESSAGE value="migrate to Next.js App Router&#10;&#10;- Remove legacy Vite frontend and Express backend architecture.&#10;- Delete Firebase configuration, custom deployment scripts, and GitHub Actions workflows.&#10;- Implement new `app/` directory structure with routes for `/lab`, `/privacy`, and `/store`.&#10;- Refactor hardware diagnostic and repair logic into Next.js page components.&#10;- Transition authentication toward an Auth0-based implementation." />
     <MESSAGE value="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`." />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: refactor middleware and update Tailwind configuration&#10;&#10;- Update `middleware.ts` to use `NextResponse` and `NextRequest`, and refine the matcher to exclude static assets.&#10;- Add `postcss.config.js` and `tailwind.config.js` for project styling.&#10;- Remove legacy rewrites and function duration settings from `vercel.json`.&#10;- Add `@vercel/node`, `@vercel/oidc-aws-credentials-provider`, and `@tailwindcss/postcss` dependencies to `package.json`.&#10;- Fix default imports for `CacheManagement` and `TicketTemplatesPanel` in `app/lab/page.tsx`." />
+    <MESSAGE value="refactor: enhance Auth0 integration and secure Lab portal&#10;&#10;- Update `lib/auth0.ts` to use standardized environment variables for `issuerBaseURL` and `baseURL`.&#10;- Secure `app/lab/page.tsx` with automatic authentication redirects and integrated user session status.&#10;- Update `components/Navbar.tsx` to dynamically display user profile information and authentication actions (Login/Logout).&#10;- Standardize `app/api/tickets/route.ts` handlers to use `NextRequest`.&#10;- Clean up legacy mock authentication logic and update the project implementation plan." />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: enhance Auth0 integration and secure Lab portal&#10;&#10;- Update `lib/auth0.ts` to use standardized environment variables for `issuerBaseURL` and `baseURL`.&#10;- Secure `app/lab/page.tsx` with automatic authentication redirects and integrated user session status.&#10;- Update `components/Navbar.tsx` to dynamically display user profile information and authentication actions (Login/Logout).&#10;- Standardize `app/api/tickets/route.ts` handlers to use `NextRequest`.&#10;- Clean up legacy mock authentication logic and update the project implementation plan." />
   </component>
 </project>
