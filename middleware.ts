@@ -1,51 +1,42 @@
-import { next } from '@vercel/edge';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { get, has } from '@vercel/edge-config';
 
-export async function middleware(request: Request) {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  // Handle /welcome route directly at the edge to reduce latency
+  // Handle /welcome route directly at the edge
   if (pathname === '/welcome' || pathname === '/api/welcome') {
     try {
-      // Existence check at the edge is very efficient
-      if (!(await has('greeting'))) {
-        return next();
+      if (await has('greeting')) {
+        const greeting = await get('greeting');
+        return NextResponse.json({
+          greeting: greeting || "hello world",
+          source: "vercel-edge-config-middleware",
+          timestamp: new Date().toISOString()
+        }, {
+          headers: { 'x-middleware-cache': 'hit' }
+        });
       }
-
-      const greeting = await get('greeting');
-      return new Response(JSON.stringify({
-        greeting: greeting || "hello world",
-        source: "vercel-edge-config-middleware",
-        timestamp: new Date().toISOString()
-      }), {
-        status: 200,
-        headers: {
-          'content-type': 'application/json',
-          'x-middleware-cache': 'hit'
-        }
-      });
     } catch (err) {
-      // Fallback to the main server if Edge Config is unavailable
-      return next();
+      console.error('Middleware Edge Config Error:', err);
     }
   }
 
-  // Protect sensitive API routes
-  if (pathname.startsWith('/api/tickets') || pathname.startsWith('/api/getStreamUserToken')) {
-    const authHeader = request.headers.get('authorization');
-    const cookieHeader = request.headers.get('cookie') || '';
-
-    // In a production Vercel environment, we would verify the session cookie or JWT here
-    // For now, we allow the request to proceed to the handler which does its own check
-    if (!authHeader && !cookieHeader.includes('next-auth.session-token')) {
-      // return new Response(JSON.stringify({ error: 'Authentication required' }), { status: 401, headers: { 'content-type': 'application/json' } });
-    }
-  }
-
-  return next();
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/api/:path*', '/welcome'],
+  matcher: [
+    '/welcome',
+    '/api/welcome',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };

@@ -20,6 +20,8 @@
     "@google-cloud/recaptcha-enterprise": "^6.4.2",
     "@vercel/edge-config": "^1.4.3",
     "@vercel/functions": "^3.7.5",
+    "@vercel/node": "^5.1.0",
+    "@vercel/oidc-aws-credentials-provider": "^3.3.0",
     "@vercel/speed-insights": "^2.0.0",
     "ai": "^4.1.45",
     "dotenv": "^17.2.3",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@ai-sdk/openai": "^1.1.15",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.14.0",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",

@@ -9,9 +9,9 @@ import {
 } from 'lucide-react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { RdsDiagnosticPanel } from '@/components/RdsDiagnosticPanel';
-import { CacheManagement } from '@/components/CacheManagement';
+import CacheManagement from '@/components/CacheManagement';
 import { HardwareScanChart } from '@/components/HardwareScanChart';
-import { TicketTemplatesPanel } from '@/components/TicketTemplatesPanel';
+import TicketTemplatesPanel from '@/components/TicketTemplatesPanel';
 import { RepairTicket, POSLog, QuoteResponse, TicketTemplate } from '@/lib/types';
 import { calculateQuoteInternal, WA_TAX_DATA } from '@/lib/repair-logic';
 
