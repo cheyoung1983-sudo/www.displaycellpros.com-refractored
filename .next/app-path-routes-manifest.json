@@ -1,15 +1,15 @@
 {
   "/_not-found/page": "/_not-found",
   "/api/health/route": "/api/health",
-  "/api/tickets/route": "/api/tickets",
   "/api/generate-quote/route": "/api/generate-quote",
   "/api/tax-lookup/route": "/api/tax-lookup",
+  "/api/tickets/route": "/api/tickets",
   "/api/triage/route": "/api/triage",
   "/b2b/page": "/b2b",
-  "/welcome/page": "/welcome",
-  "/privacy/page": "/privacy",
   "/page": "/",
   "/lab/page": "/lab",
+  "/privacy/page": "/privacy",
+  "/services/page": "/services",
   "/store/page": "/store",
-  "/services/page": "/services"
+  "/welcome/page": "/welcome"
 }
