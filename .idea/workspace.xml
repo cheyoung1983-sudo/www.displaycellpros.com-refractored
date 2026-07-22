@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="update build artifacts" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: initialize project scaffolding and core lab portal features&#10;&#10;- Set up Next.js App Router structure with Auth0 integration and middleware proxying.&#10;- Implement AWS RDS PostgreSQL connection logic using IAM OIDC authentication.&#10;- Create a diagnostic Lab Portal including a USB hardware simulator, QR/barcode scanner, and Recharts-based telemetry visualizations.&#10;- Add an AI triage assistant widget and dynamic quote generation engine with Washington state tax calculations.&#10;- Implement specialized UI components for cache management, RDS diagnostics, and repair ticket templates.&#10;- Establish core API routes for hardware triage, tax lookup, and ticketing.&#10;- Add global styling, custom toast notifications, and responsive navigation components.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -441,7 +443,23 @@
       <option name="project" value="LOCAL" />
       <updated>1784693899359</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="update build artifacts">
+      <option name="closed" value="true" />
+      <created>1784694121066</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1784694121066</updated>
+    </task>
+    <task id="LOCAL-00046" summary="feat: initialize project scaffolding and core lab portal features&#10;&#10;- Set up Next.js App Router structure with Auth0 integration and middleware proxying.&#10;- Implement AWS RDS PostgreSQL connection logic using IAM OIDC authentication.&#10;- Create a diagnostic Lab Portal including a USB hardware simulator, QR/barcode scanner, and Recharts-based telemetry visualizations.&#10;- Add an AI triage assistant widget and dynamic quote generation engine with Washington state tax calculations.&#10;- Implement specialized UI components for cache management, RDS diagnostics, and repair ticket templates.&#10;- Establish core API routes for hardware triage, tax lookup, and ticketing.&#10;- Add global styling, custom toast notifications, and responsive navigation components.">
+      <option name="closed" value="true" />
+      <created>1784694159538</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1784694159538</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -456,7 +474,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="chore: enhance PWA support and clean up redundant deployment configs&#10;&#10;This change implements PWA best practices and removes legacy configuration files to streamline the project for Vercel deployment.&#10;&#10;- **PWA Enhancements**: &#10;    - Added `public/manifest.json` with app identity and icon configurations.&#10;    - Updated `index.html` with PWA meta tags, theme color, and apple-touch-icon.&#10;- **Project Cleanup**:&#10;    - Deleted legacy Google Cloud deployment files: `Dockerfile`, `app.yaml`, and `deploy.sh`.&#10;    - Removed `functions/` directory containing legacy Firebase Functions and Genkit samples.&#10;    - Deleted `metadata.json`.&#10;- **Configuration Updates**:&#10;    - Updated `.vercelignore` to allow access to the `scripts` directory during build.&#10;    - Updated `public/robots.txt` to disallow crawling of `/api` endpoints.&#10;    - Refined `.gitignore` environment variable patterns.&#10;- **Documentation**:&#10;    - Updated implementation plans and walkthrough artifacts to reflect the shift from sitemap generation to PWA and cleanup tasks." />
     <MESSAGE value="feat: implement edge middleware for dynamic greeting&#10;&#10;- Update `middleware.ts` to intercept `/welcome` and `/api/welcome` requests.&#10;- Integrate `@vercel/edge-config` to fetch and serve greetings directly from the edge.&#10;- Update the middleware `matcher` configuration to include the new routes.&#10;- Update implementation plan, task, and walkthrough artifacts to reflect edge middleware changes." />
     <MESSAGE value="Add Google Search Console verification meta tag&#10;&#10;- Update verification comment in `index.html`&#10;- Add `google-site-verification` meta tag for domain ownership verification" />
     <MESSAGE value="Add Google Analytics tracking script to index.html" />
@@ -481,6 +498,7 @@
     <MESSAGE value="build: update site build artifacts" />
     <MESSAGE value="docs: update implementation plan for Auth0 &quot;Quantum&quot; integration&#10;&#10;Align the project implementation plan with the modern Auth0 middleware proxy pattern and &quot;Quantum&quot; design aesthetic.&#10;&#10;- Relocate the existing landing page to `/welcome`.&#10;- Replace the root page with the Auth0 Login Card dashboard.&#10;- Update `lib/auth0.ts` to use `Auth0Client` for zero-config initialization.&#10;- Introduce a middleware proxy (`proxy.ts`) for authentication handshakes.&#10;- Add new UI components: `LoginButton`, `LogoutButton`, and `Profile`.&#10;- Update the root layout to use the client-side `Auth0Provider`." />
     <MESSAGE value="update build artifacts" />
-    <option name="LAST_COMMIT_MESSAGE" value="update build artifacts" />
+    <MESSAGE value="feat: initialize project scaffolding and core lab portal features&#10;&#10;- Set up Next.js App Router structure with Auth0 integration and middleware proxying.&#10;- Implement AWS RDS PostgreSQL connection logic using IAM OIDC authentication.&#10;- Create a diagnostic Lab Portal including a USB hardware simulator, QR/barcode scanner, and Recharts-based telemetry visualizations.&#10;- Add an AI triage assistant widget and dynamic quote generation engine with Washington state tax calculations.&#10;- Implement specialized UI components for cache management, RDS diagnostics, and repair ticket templates.&#10;- Establish core API routes for hardware triage, tax lookup, and ticketing.&#10;- Add global styling, custom toast notifications, and responsive navigation components." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: initialize project scaffolding and core lab portal features&#10;&#10;- Set up Next.js App Router structure with Auth0 integration and middleware proxying.&#10;- Implement AWS RDS PostgreSQL connection logic using IAM OIDC authentication.&#10;- Create a diagnostic Lab Portal including a USB hardware simulator, QR/barcode scanner, and Recharts-based telemetry visualizations.&#10;- Add an AI triage assistant widget and dynamic quote generation engine with Washington state tax calculations.&#10;- Implement specialized UI components for cache management, RDS diagnostics, and repair ticket templates.&#10;- Establish core API routes for hardware triage, tax lookup, and ticketing.&#10;- Add global styling, custom toast notifications, and responsive navigation components." />
   </component>
 </project>
