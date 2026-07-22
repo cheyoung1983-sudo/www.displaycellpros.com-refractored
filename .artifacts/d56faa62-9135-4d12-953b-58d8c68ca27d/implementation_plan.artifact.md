@@ -1,31 +1,48 @@
-# Implementation Plan: Fix "Sitemap is HTML" Error
+# Implementation Plan: Repository Cleanup & Vercel-Native Transition
 
-The goal is to resolve the Google Search Console error by providing a valid XML sitemap and a `robots.txt` file. This will help search engines correctly index the site and avoid misidentifying the sitemap as an HTML page.
+The goal is to fix the GitHub repository by cleaning up the commit history, removing untracked build artifacts, and fully transitioning the project to a Vercel-native architecture (Auth0 + Next.js + Vercel Postgres) while removing all Google/Firebase dependencies as requested.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Domain Name:** I am using `https://displaycellpros.com` as the base URL for the sitemap. Please confirm if this is the correct canonical domain.
+> [!CAUTION]
+> **Repository Sync Strategy:** The local and remote branches have diverged significantly (by over 240 commits, mostly build artifacts). I propose using a `reset --soft` strategy to flatten the local changes into a single clean commit on top of the remote history. This will "fix" the repository history while preserving all your current work.
+>
+> **Firebase Removal:** I will be deleting all Firebase and Google-specific code (Auth, Firestore, Analytics). Please ensure you have backed up any data from the Firebase console if needed.
 
 ## Proposed Changes
 
-### [SEO Configuration]
+### [Repository Integrity]
 
-#### [NEW] [sitemap.xml](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/sitemap.xml)
-- Create a standard XML sitemap in the `public/` directory.
-- Include the main landing page URL.
+#### [MODIFY] [.gitignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.gitignore)
+- Add `.next/`, `.idea/`, `.vercel/`, `out/`, and `dist/` to ensure build artifacts and IDE settings are never tracked again.
 
-#### [NEW] [robots.txt](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/public/robots.txt)
-- Create a `robots.txt` file in the `public/` directory.
-- Allow all user agents and point to the new `sitemap.xml` URL.
+#### [ACTION] Git Index Cleanup
+- Stop tracking `.next/`, `.idea/`, and `.vercel/` folders that are currently in the Git index.
+- Flatten the diverged history into a single clean "Next.js + Auth0 Migration" commit.
+
+### [Vercel-Native Transition]
+
+#### [DELETE] Firebase Files
+- Remove `src/lib/firebase.ts`, `src/lib/firebase-admin.ts`, and `src/lib/firebase-errors.ts`.
+
+#### [MODIFY] [layout.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/layout.tsx)
+- Remove Google Analytics (`gtag.js`) scripts.
+- Remove the `google-site-verification` meta tag.
+
+#### [MODIFY] [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
+- Remove all Firebase imports (`firebase/auth`, `firebase/firestore`).
+- Remove `FirebaseUserAuditor` and `FirebaseAiWorkbenchView` logic.
+- Replace Firebase Auth state management with Auth0 (where applicable, though the new `page.tsx` already handles this).
+
+#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
+- Remove `firebase` and `firebase-admin` dependencies.
 
 ## Verification Plan
 
 ### Automated Tests
-- None (standard static files).
+- Run `npm run lint` to ensure no broken references remain after removing Firebase.
+- Run `npm run build` locally to verify the Next.js build succeeds without errors.
 
 ### Manual Verification
-1. Run `npm run dev`.
-2. Navigate to `http://localhost:5173/sitemap.xml` and `http://localhost:5173/robots.txt` to ensure they are served correctly as static files.
-3. Use an online XML sitemap validator to check the syntax.
-4. **Action for User:** Once deployed, go to Google Search Console and re-submit `https://displaycellpros.com/sitemap.xml`.
+- Verify that the new Auth0 login screen loads correctly.
+- Ensure no "Google" or "Firebase" related logs appear in the browser console.

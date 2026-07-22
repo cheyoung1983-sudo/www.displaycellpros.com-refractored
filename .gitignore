@@ -1,12 +1,13 @@
 node_modules/
+.next/
+.vercel/
+.idea/
 build/
 dist/
+out/
 coverage/
 .DS_Store
 *.log
 .env*
 !.env.example
-
-.env*
-.vercel
 *.exe
