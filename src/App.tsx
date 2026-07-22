@@ -1101,9 +1101,6 @@ export default function App() {
       setIsLoadingLogs(false);
     }
   };
-      setIsLoadingLogs(false);
-    }
-  };
 
   const handleAddNewLeadFromForms = async (newLeadData: { customerName: string; phone: string; deviceModel: string }) => {
     try {
