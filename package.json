@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "clean": "rm -rf .next out",
     "sitemap": "tsx scripts/generate-sitemap.ts",
     "postbuild": "npm run sitemap"
   },
