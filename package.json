@@ -15,7 +15,7 @@
     "postbuild": "npm run sitemap"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^3.5.0",
+    "@auth0/nextjs-auth0": "^4.25.0",
     "@aws-sdk/rds-signer": "^3.1089.0",
     "@google-cloud/recaptcha-enterprise": "^6.4.2",
     "@vercel/edge-config": "^1.4.3",
