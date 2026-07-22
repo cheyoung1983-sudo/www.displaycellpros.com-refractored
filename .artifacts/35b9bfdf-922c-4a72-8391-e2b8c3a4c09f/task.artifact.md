@@ -1,8 +1,5 @@
-- `[x]` Implement tiered pricing logic in `server.ts` (`calculateQuoteInternal`).
-- `[x]` Add "Data Privacy Guarantee" to AI system instructions in `server.ts`.
-- `[x]` Update `generate-quote` endpoint to return the new tiered structure.
-- `[x]` Update `src/App.tsx` state and fetch logic for tiered quotes.
-- `[x]` Redesign the Quote Panel in `src/App.tsx` into a 3-tier comparison layout.
-- `[x]` Implement "Battery-Plus" upsell toggle in the UI.
-- `[x]` Verify build and linting.
+- `[x]` Remove `memory` setting from `vercel.json` to suppress build warning.
+- `[x]` Update `package.json` engines to `>=22.x`.
+- `[x]` Alias the latest deployment to `www.displaycellpros.com` and `displaycellpros.com`.
+- `[x]` Verify build and aliases.
 - `[x]` Create walkthrough.

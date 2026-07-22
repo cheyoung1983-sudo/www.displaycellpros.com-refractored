@@ -1,45 +1,32 @@
-# Implementation Plan - Production Launch Best Practices
+# Implementation Plan - Configuration Cleanup and Domain Aliasing
 
-The goal is to finalize the project for production launch on Vercel by addressing the remaining gaps identified in the Production Checklist, specifically focusing on Security, Performance, and Reliability.
+The goal is to resolve minor build warnings and successfully alias the latest production deployment to the canonical domains.
 
 ## User Review Required
 
-> [!WARNING]
-> I am implementing **Rate Limiting** on the API. While this protects against abuse, legitimate users behind a shared corporate IP might occasionally hit limits if the threshold is too low. I am setting a generous default (100 requests per 15 minutes) but this may need adjustment based on your actual traffic.
+> [!NOTE]
+> I am updating the Node.js engine requirement to `>=22.x` to suppress the "Unsupported engine" warning on your local machine (Node 24) while maintaining compatibility with Vercel's Node 22 runtime.
 
 ## Proposed Changes
 
-### Backend Security & Reliability
+### Configuration Cleanup
+
+#### [MODIFY] [vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/vercel.json)
+- Remove the `memory` property from the `functions` block. As noted in your build logs, this is ignored on Vercel's Active CPU billing and generates a warning.
 
 #### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/package.json)
-- Add `express-rate-limit` dependency.
+- Update `engines` to `"node": ">=22.x"`.
 
-#### [MODIFY] [server.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/server.ts)
-- Integrate `express-rate-limit` middleware for all `/api/` routes.
-- Implement a dedicated `GET /api/health` endpoint for uptime monitoring services.
-- Add detailed request logging for better traceability in production logs.
+### Domain Aliasing
 
-### Performance Optimization
-
-#### [MODIFY] [index.html](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/index.html)
-- Optimize font loading by adding `crossorigin` to preconnect hints.
-- Ensure all static assets are served with optimal caching headers (handled via Vercel config).
-
-### Operational Excellence
-
-#### [NEW] [README_PROD.md](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/README_PROD.md)
-- Create a production operations guide including:
-    - **Rollback Procedure**: How to use `vercel rollback`.
-    - **Log Analysis**: How to access and filter Vercel Log Drains.
-    - **Secret Management**: Guidelines for rotating API keys.
-    - **Uptime Monitoring**: Recommended configuration for the `/api/health` endpoint.
+#### [EXECUTE] Alias Command
+- I will run the `vercel alias` command for your latest deployment (`displaycellproscom-refractored-3gumd1cwb-dcpllc.vercel.app`) to both `displaycellpros.com` and `www.displaycellpros.com`.
+- **Note**: The `https://` prefix is not used in the alias command target.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` and `npm run lint` to ensure production stability.
-- Verify the `/api/health` endpoint returns a `200 OK` status locally.
+- Run `npm run build` to confirm the warning is gone and the build still passes.
 
 ### Manual Verification
-- Review the `README_PROD.md` for operational clarity.
-- Verify that the rate limiter returns a `429 Too Many Requests` response after exceeding the threshold (simulated locally).
+- Verify the live site URLs directly in the browser.
