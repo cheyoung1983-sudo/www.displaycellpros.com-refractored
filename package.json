@@ -19,6 +19,7 @@
     "@auth0/nextjs-auth0": "^4.25.0",
     "@aws-sdk/rds-signer": "^3.1089.0",
     "@google-cloud/recaptcha-enterprise": "^6.4.2",
+    "@openai/codex-sdk": "^0.145.0",
     "@vercel/edge-config": "^1.4.3",
     "@vercel/functions": "^3.7.5",
     "@vercel/node": "^5.1.0",
