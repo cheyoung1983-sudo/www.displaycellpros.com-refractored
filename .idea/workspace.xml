@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="build: add clean script to package.json&#10;&#10;- Add `clean` script to remove `.next` and `out` build directories." />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="refactor: update component imports to use relative paths&#10;&#10;- Replace `@/components/` path alias with relative paths in `src/app/b2b/page.tsx` and `src/app/lab/page.tsx`." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -88,22 +88,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1784653343126</updated>
-    </task>
-    <task id="LOCAL-00014" summary="Add Google Analytics tracking script to index.html">
-      <option name="closed" value="true" />
-      <created>1784666032426</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1784666032426</updated>
-    </task>
-    <task id="LOCAL-00015" summary="Add Google Search Console and Analytics tracking">
-      <option name="closed" value="true" />
-      <created>1784668099889</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1784668099889</updated>
     </task>
     <task id="LOCAL-00016" summary="backend stability and error handling&#10;&#10;- Implement global error handler and try-catch blocks in `server.ts` to prevent unhandled rejections.&#10;- Add catch-all 404 JSON response for unhandled `/api/*` routes.&#10;- Add `/api/auth/session` mock endpoint to improve client-side compatibility.&#10;- Update `bypassPaths` and implementation plan to reflect stability and performance focus.">
       <option name="closed" value="true" />
@@ -481,7 +465,23 @@
       <option name="project" value="LOCAL" />
       <updated>1784712706221</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="config: initialize Next.js configuration and update TypeScript resolution&#10;&#10;- Add `next.config.mjs` with default configuration.&#10;- Update `tsconfig.json` to include `&quot;baseUrl&quot;: &quot;.&quot;` for absolute module resolution.&#10;- Update IDE workspace metadata and regenerate Next.js build manifests and cache artifacts.">
+      <option name="closed" value="true" />
+      <created>1784712952855</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1784712952855</updated>
+    </task>
+    <task id="LOCAL-00064" summary="refactor: update component imports to use relative paths&#10;&#10;- Replace `@/components/` path alias with relative paths in `src/app/b2b/page.tsx` and `src/app/lab/page.tsx`.">
+      <option name="closed" value="true" />
+      <created>1784712970423</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1784712970423</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -496,8 +496,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Production launch best practices&#10;&#10;- Add rate limiting to API routes and implement `/api/health` endpoint.&#10;- Add request logging middleware for traceability.&#10;- Create `README_PROD.md` and optimize font loading in `index.html`." />
-    <MESSAGE value="config: cleanup and domain finalization&#10;&#10;- Remove `memory` property from `vercel.json` to resolve Vercel build warnings.&#10;- Update Node.js engine requirement to `&gt;=22.x` in `package.json` for broader environment compatibility.&#10;- Update `lastmod` dates in `public/sitemap.xml` to `2026-07-22`.&#10;- Update project implementation artifacts and walkthroughs to reflect deployment aliasing and final configuration tasks." />
     <MESSAGE value="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies." />
     <MESSAGE value="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes." />
     <MESSAGE value="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure." />
@@ -521,6 +519,8 @@
     <MESSAGE value="feat: register service worker and update precache assets&#10;&#10;- Add service worker registration script to `src/app/layout.tsx`.&#10;- Remove `/index.html` from the `ASSETS_TO_PRECACHE` list in `public/sw.js`." />
     <MESSAGE value="cleanup: remove service worker and static assets&#10;&#10;- Delete `sw.js` and its associated service worker caching logic.&#10;- Remove `favicon.svg`, `favicon.ico`, and the Google site verification HTML file.&#10;- Clean up `assets/.aistudio/.gitignore`." />
     <MESSAGE value="build: add clean script to package.json&#10;&#10;- Add `clean` script to remove `.next` and `out` build directories." />
-    <option name="LAST_COMMIT_MESSAGE" value="build: add clean script to package.json&#10;&#10;- Add `clean` script to remove `.next` and `out` build directories." />
+    <MESSAGE value="config: initialize Next.js configuration and update TypeScript resolution&#10;&#10;- Add `next.config.mjs` with default configuration.&#10;- Update `tsconfig.json` to include `&quot;baseUrl&quot;: &quot;.&quot;` for absolute module resolution.&#10;- Update IDE workspace metadata and regenerate Next.js build manifests and cache artifacts." />
+    <MESSAGE value="refactor: update component imports to use relative paths&#10;&#10;- Replace `@/components/` path alias with relative paths in `src/app/b2b/page.tsx` and `src/app/lab/page.tsx`." />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: update component imports to use relative paths&#10;&#10;- Replace `@/components/` path alias with relative paths in `src/app/b2b/page.tsx` and `src/app/lab/page.tsx`." />
   </component>
 </project>
