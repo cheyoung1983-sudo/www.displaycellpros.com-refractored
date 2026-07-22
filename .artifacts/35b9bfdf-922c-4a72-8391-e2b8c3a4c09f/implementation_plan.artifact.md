@@ -1,41 +1,29 @@
-# Implementation Plan - Fix Vercel Build Failure (OpenAI Credentials)
+# Implementation Plan - Fix Vercel Build (Module Resolution)
 
-The goal is to resolve the Vercel build failure caused by top-level initialization of the OpenAI client without an API key during the build phase. We will also address build-time warnings from the Auth0 SDK and ensure API routes are correctly handled as dynamic.
+The goal is to resolve the `Module not found` errors in the Vercel build by correctly configuring the path aliases and Tailwind content scanning for the new `src/` directory structure.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> The OpenAI SDK throws a fatal error during build because it attempts to validate the `OPENAI_API_KEY` at the module level. I will refactor the code to initialize the client lazily only when a request is made.
->
-> I will also add `export const dynamic = 'force-dynamic'` to the affected API routes to prevent Next.js from attempting to statically optimize them during build, which can trigger these credential checks.
+> [!NOTE]
+> I am updating the project's configuration to recognize that all source files (app, components, lib) have been moved into the `src/` directory. This is necessary for both TypeScript and Tailwind CSS to find your files correctly.
 
 ## Proposed Changes
 
-### API Routes
+### Configuration Fixes
 
-#### [MODIFY] [app/api/triage/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/api/triage/route.ts)
-- Move `new OpenAI(...)` initialization inside a helper function or the `POST` handler.
-- Add `export const dynamic = 'force-dynamic';`.
+#### [MODIFY] [tsconfig.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/tsconfig.json)
+- Update the `paths` alias from `@/*: ["./*"]` to `@/*: ["./src/*"]`.
+- This ensures that imports like `@/components/...` correctly resolve to `src/components/...`.
 
-#### [MODIFY] [app/api/tickets/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/api/tickets/route.ts)
-- Add `export const dynamic = 'force-dynamic';` to ensure it doesn't attempt static analysis of the database/auth logic during build.
+#### [MODIFY] [tailwind.config.js](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/tailwind.config.js)
+- Update the `content` array to include the `src/` prefix for all scanned paths.
+- New paths: `./src/app/**/*.{...}` and `./src/components/**/*.{...}`.
 
-#### [MODIFY] [app/api/generate-quote/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/api/generate-quote/route.ts)
-- Add `export const dynamic = 'force-dynamic';`.
-
-#### [MODIFY] [app/api/tax-lookup/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/api/tax-lookup/route.ts)
-- Add `export const dynamic = 'force-dynamic';`.
-
-### Auth0 Configuration
-
-#### [MODIFY] [lib/auth0.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/lib/auth0.ts)
-- Add a defensive check or lazy initialization for `Auth0Client` if warnings persist, though primarily focusing on OpenAI as it is the fatal build error.
-
-## Verification Plan
+### Verification Plan
 
 ### Automated Tests
-- Run `npm run build` locally without `.env` keys (or with dummy keys) to verify the build no longer crashes.
+- Run `npm run build` locally to verify that all modules are now resolved correctly.
+- Run `npm run lint` to check for any remaining import issues.
 
 ### Manual Verification
-- Deploy to Vercel and confirm the build succeeds.
-- Verify the `/api/triage` endpoint still works correctly in the preview environment.
+- Confirm that the Vercel build succeeds after pushing these changes.
