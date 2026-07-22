@@ -1,51 +1,52 @@
-# Implementation Plan - Auth0 Best Practices for Next.js
+# Implementation Plan - Modern Auth0 "Quantum" Integration
 
-The goal is to refine the Auth0 integration to follow the latest Next.js 15 and App Router best practices, including zero-config environment variables, server-side protection, and standardized authentication routes.
+The goal is to align the project with the Auth0 "Quantum" design and middleware proxy pattern as described in the provided guide. This leverages the `Auth0Client` and `proxy` middleware for a cleaner, more standardized integration.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> I am switching to the standard `@auth0/nextjs-auth0` imports for App Router. This removes the need for a custom client instance in most cases and leverages Next.js's built-in security features.
->
-> **Secrets Needed**: Please ensure the following are set in your environment (I will update `.env.local` with the values you provided):
-> - `AUTH0_SECRET`: A 32+ character random string.
-> - `AUTH0_BASE_URL`: `https://www.displaycellpros.com`
-> - `AUTH0_ISSUER_BASE_URL`: `https://icfg-lpfzl6ejhmeudwfnf0rviy2r.us.auth0.com`
-> - `AUTH0_CLIENT_ID`: `iHyCQzrHYenv4lrkCFy4v9528jtJUUHl`
-> - `AUTH0_CLIENT_SECRET`: `[Provided Secret]`
+> This will replace the current root `app/page.tsx` (Landing Page) with the **Auth0 Login Card** design.
+> I will move your existing "Driveway Lab" landing page (`HomeView`) to [**`/welcome`**](https://www.displaycellpros.com/welcome) so your marketing content is preserved.
 
 ## Proposed Changes
 
-### Configuration
+### 1. Auth0 Configuration & Proxy
 
-#### [MODIFY] [.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/.env.local)
-- Add/Update standard Auth0 environment variables to enable zero-config SDK features.
+#### [MODIFY] [lib/auth0.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/lib/auth0.ts)
+- Switch from `initAuth0` to the modern `Auth0Client` from `@auth0/nextjs-auth0/server`.
+- This enables zero-config initialization from environment variables.
 
-### Frontend Security (`app/` directory)
+#### [NEW] [proxy.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/proxy.ts)
+- Implement the Auth0 middleware proxy to handle authentication handshakes at the edge.
 
-#### [MODIFY] [app/lab/page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/lab/page.tsx)
-- Wrap the page export with `withPageAuthRequired`.
-- Remove legacy mock login/sign-out logic and bypass buttons.
-- Use `user` from `withPageAuthRequired` (Server Component) or `useUser` (Client Component) consistently.
+#### [MODIFY] [middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/middleware.ts)
+- Integrate the new `proxy` logic with your existing Edge Config handling.
 
-### API Security (`app/api/` directory)
+### 2. UI Components ("Quantum" Design)
 
-#### [MODIFY] [app/api/tickets/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/api/tickets/route.ts)
-- Refactor to use `withApiAuthRequired` for automatic protection and session retrieval.
+#### [NEW] [components/LoginButton.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/components/LoginButton.tsx)
+#### [NEW] [components/LogoutButton.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/components/LogoutButton.tsx)
+#### [NEW] [components/Profile.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/components/Profile.tsx)
+- Implement the styled components provided in the guide using the "Quantum" aesthetic (blur-3xl, glassmorphism, etc.).
 
-### UI Enhancements
+### 3. Page Refactoring
 
-#### [MODIFY] [components/Navbar.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/components/Navbar.tsx)
-- Update "Book Mission" and profile links to use standard `/api/auth/login` and `/api/auth/logout` routes.
-- Integrate the `useUser` hook to show/hide authentication-related UI elements.
+#### [MODIFY] [app/page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/page.tsx)
+- Replace current home page with the centralized Auth0 Login/Profile dashboard.
+
+#### [NEW] [app/welcome/page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/welcome/page.tsx)
+- Re-host the `HomeView` here to maintain your public-facing marketing lab portal.
+
+#### [MODIFY] [app/layout.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/www.displaycellpros.com-refractored/app/layout.tsx)
+- Update `UserProvider` to `Auth0Provider` from the client SDK.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` and `npm run lint`.
-- Verify that the Auth0 routes are correctly provisioned.
+- Run `npm run build` to ensure the new `Auth0Client` and `proxy` patterns are compiled correctly.
+- Verify TypeScript types for the `auth0.middleware` call.
 
 ### Manual Verification
-- Test the login flow: navigate to `/lab`, verify redirect to Auth0, login, and verify return to `/lab`.
-- Test the logout flow: click logout and verify session termination.
-- Verify that API routes return `401` when accessed without an active session.
+- Verify that the home page renders the Auth0 "Quantum" card.
+- Test login/logout using the new buttons.
+- Confirm `/welcome` still displays the original mobile lab marketing content.
