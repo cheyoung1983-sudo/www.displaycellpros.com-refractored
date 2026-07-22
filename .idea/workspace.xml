@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure.">
-      <change afterPath="$PROJECT_DIR$/components/AIAssistantWidget.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/AuthLoadingOverlay.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/StoreView.tsx" afterDir="false" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="feat: add core UI components and global layout wrapper&#10;&#10;- Implement `LayoutWrapper` to manage global state for the AI widget and toast notifications.&#10;- Add `Navbar` and `Footer` components with responsive design and mobile menus.&#10;- Create `AIAssistantWidget` for interactive device triage and hardware diagnostic simulation.&#10;- Implement `StoreView` for product listings and `AuthLoadingOverlay` for authentication transitions.&#10;- Update root layout and page routes (Home, B2B, Services) to utilize the new modular component architecture.">
+      <change afterPath="$PROJECT_DIR$/app/lab/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/privacy/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/store/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -317,11 +318,18 @@
       <option name="project" value="LOCAL" />
       <updated>1784688253227</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="feat: add core UI components and global layout wrapper&#10;&#10;- Implement `LayoutWrapper` to manage global state for the AI widget and toast notifications.&#10;- Add `Navbar` and `Footer` components with responsive design and mobile menus.&#10;- Create `AIAssistantWidget` for interactive device triage and hardware diagnostic simulation.&#10;- Implement `StoreView` for product listings and `AuthLoadingOverlay` for authentication transitions.&#10;- Update root layout and page routes (Home, B2B, Services) to utilize the new modular component architecture.">
+      <option name="closed" value="true" />
+      <created>1784688628748</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1784688628748</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files." />
     <MESSAGE value="fix: resolve Vercel runtime configuration error&#10;&#10;- Specify Node.js version 22.x in `package.json` engines.&#10;- Remove manual `runtime` override from `vercel.json` to fix deployment validation issues.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect configuration changes." />
     <MESSAGE value="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS." />
     <MESSAGE value="chore: update IDEA workspace configuration and task history" />
@@ -346,6 +354,7 @@
     <MESSAGE value="fix: enhance API stability and resolve CSP violations&#10;&#10;- Add `manifest-src 'self' https://vercel.com` to Content-Security-Policy in `vercel.json` to resolve manifest blocking.&#10;- Set `trust proxy` in `server.ts` to ensure `express-rate-limit` functions correctly behind Vercel's proxy.&#10;- Enhance the global error handler to log detailed request context and return unique error IDs for easier debugging.&#10;- Add diagnostic logging to `/api/tax-lookup`, `/api/generate-quote`, and `/api/pos-sync-logs` routes.&#10;- Update the implementation plan to reflect resource blocking and API mitigation strategies." />
     <MESSAGE value="feat: optimize canonical domain and add node server example&#10;&#10;- Update canonical URL and Open Graph metadata to use `www.displaycellpros.com` in `index.html` and `robots.txt`.&#10;- Add a standalone Node.js server example in the `node/` directory, including configuration and documentation.&#10;- Update `OAuthDocumentationPanel` to include Vercel OAuth registration tasks and UI components.&#10;- Adjust Node.js engine requirement to `&gt;=22.x` in `package-lock.json`.&#10;- Refresh implementation plans and walkthrough artifacts to reflect canonical domain optimization and API stability changes." />
     <MESSAGE value="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure." />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: migrate to Next.js App Router and integrate Auth0&#10;&#10;- Port Vite + Express architecture to Next.js App Router.&#10;- Implement Auth0 for authentication and session management.&#10;- Migrate backend logic to `app/api/` routes (generate-quote, triage, tax-lookup, tickets).&#10;- Refactor frontend into modular components (`HomeView`, `B2BView`, `ServicesView`).&#10;- Update `package.json` dependencies and scripts for Next.js.&#10;- Remove legacy components and root configuration files in favor of the new `app/` structure." />
+    <MESSAGE value="feat: add core UI components and global layout wrapper&#10;&#10;- Implement `LayoutWrapper` to manage global state for the AI widget and toast notifications.&#10;- Add `Navbar` and `Footer` components with responsive design and mobile menus.&#10;- Create `AIAssistantWidget` for interactive device triage and hardware diagnostic simulation.&#10;- Implement `StoreView` for product listings and `AuthLoadingOverlay` for authentication transitions.&#10;- Update root layout and page routes (Home, B2B, Services) to utilize the new modular component architecture." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: add core UI components and global layout wrapper&#10;&#10;- Implement `LayoutWrapper` to manage global state for the AI widget and toast notifications.&#10;- Add `Navbar` and `Footer` components with responsive design and mobile menus.&#10;- Create `AIAssistantWidget` for interactive device triage and hardware diagnostic simulation.&#10;- Implement `StoreView` for product listings and `AuthLoadingOverlay` for authentication transitions.&#10;- Update root layout and page routes (Home, B2B, Services) to utilize the new modular component architecture." />
   </component>
 </project>
