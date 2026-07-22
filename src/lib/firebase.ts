@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 const env = (import.meta as any).env as Record<string, any>;
 const firebaseConfig = {
@@ -14,50 +13,48 @@ const firebaseConfig = {
   measurementId: env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Core App
-export const app = initializeApp(firebaseConfig);
+const isFirebaseConfigured =
+  typeof firebaseConfig.apiKey === "string" &&
+  firebaseConfig.apiKey.trim().length > 0 &&
+  !firebaseConfig.apiKey.includes("YOUR_") &&
+  !firebaseConfig.apiKey.includes("MY_");
 
-/**
- * 🛡️ APP CHECK (Security Best Practice)
- * Prevents "Firebase App Check token is invalid" errors in production.
- */
-if (typeof window !== "undefined") {
-  if (env.DEV) {
-    // @ts-ignore
-    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+export let app: any = null;
+export let db: any = null;
+export let auth: any = null;
+export const googleProvider: any = null; // Google Provider Removed
+
+if (isFirebaseConfigured) {
+  try {
+    console.log(`[FIREBASE] Initializing with Project ID: ${firebaseConfig.projectId}`);
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+
+    // App Check / reCAPTCHA Removed
+  } catch (err) {
+    console.error("⚠️ Failed to initialize Firebase SDK:", err);
   }
-
-  initializeAppCheck(app, {
-    provider: new ReCaptchaEnterpriseProvider(
-      env.VITE_RECAPTCHA_SITE_KEY || "6LcgWy4tAAAAABP-_hU5ngbkKF5scb2DnI2_bscl"
-    ),
-    isTokenAutoRefreshEnabled: true
-  });
+} else {
+  console.warn("⚠️ Firebase is not configured. Telemetry-First operations will fallback to offline sandbox mode.");
+  
+  auth = {
+    currentUser: null,
+    onAuthStateChanged: (callback: any) => {
+      if (typeof callback === "function") {
+        callback(null);
+      }
+      return () => {};
+    },
+    signOut: async () => {
+      console.log("[MOCK AUTH] Simulated Sign-out executed.");
+    }
+  };
 }
 
-// Initialize Services
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-
-/**
- * 🏢 MULTI-TENANCY HANDLER
- * Use this to scope the Auth session to a specific B2B client tenant.
- */
 export const setAuthTenant = (tenantId: string | null) => {
-  auth.tenantId = tenantId;
+  if (auth && 'tenantId' in auth) {
+    auth.tenantId = tenantId;
+  }
   console.log(`[AUTH] Scoped to tenant: ${tenantId || 'Default'}`);
 };
-
-export const googleProvider = new GoogleAuthProvider();
-
-/**
- * 🔐 HARDENED IDENTITY GATEWAY (OIDC)
- * Purged Restricted Scopes (Drive, Gmail, Docs, etc.) to expedite Google Trust & Safety approval.
- * We retreat to the Identity-Only Tier to bypass CASA audit requirements.
- */
-googleProvider.addScope("https://www.googleapis.com/auth/userinfo.email");
-googleProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
-googleProvider.addScope("openid");
-
-// Standardized Google Sign-In with popup
-googleProvider.setCustomParameters({ prompt: "select_account" });

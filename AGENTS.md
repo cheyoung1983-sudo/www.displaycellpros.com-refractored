@@ -205,7 +205,7 @@ const ForensicsView = React.lazy(() =>
 ### 5. Role-Based Access Control with Session Boundaries
 **File:** `src/App.tsx` (lines 1736-1855)
 **Security Enforced:**
-- Technician role (email === "cheyoung1983@gmail.com" OR admin custom claim) → `lab` view access
+- Technician role (email === "ryan@displaycellpros.com" OR "cheyoung1983@gmail.com" OR admin custom claim) → `lab` view access
 - Customer role → `customer-hub` only
 - Unauthorized lab access → immediate signOut() + modal warning
 - Session reset on role switch (clears diagnostics state, leads, tickets)

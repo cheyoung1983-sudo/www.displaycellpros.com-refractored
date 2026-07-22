@@ -21,7 +21,7 @@ export const useAdminAuth = () => {
       const emailLower = currentUser.email?.trim().toLowerCase();
 
       // 1. Direct hardcoded credential audit mapping
-      if (emailLower === "cheyoung1983@gmail.com") {
+      if (emailLower === "cheyoung1983@gmail.com" || emailLower === "ryan@displaycellpros.com") {
         adminStatus = true;
       }
 
@@ -43,7 +43,8 @@ export const useAdminAuth = () => {
           if (
             userData.role === "admin" ||
             userData.isAdmin === true ||
-            userData.email?.trim().toLowerCase() === "cheyoung1983@gmail.com"
+            userData.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" ||
+            userData.email?.trim().toLowerCase() === "ryan@displaycellpros.com"
           ) {
             adminStatus = true;
           }

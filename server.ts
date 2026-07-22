@@ -1,12 +1,11 @@
 import express from "express";
 import path from "path";
 import crypto from "crypto";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, ThinkingLevel, GenerateVideosOperation } from "@google/genai";
 import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
 import { adminDb } from "./src/lib/firebase-admin";
 
-async function startServer() {
+export async function createAppInstance() {
   const app = express();
   const PORT = 3000;
 
@@ -3209,13 +3208,310 @@ Construct an authoritative, scientific audit report detailing the exact physical
     });
   });
 
+  // ===========================================================================
+  // AUTH0 MCP SERVER — FORENSIC IDENTITY MANAGEMENT API GATEWAY
+  // ===========================================================================
+  // Express proxy that mirrors the full Auth0 MCP Server tool surface so that
+  // AI clients (Claude Desktop, Cursor, Windsurf, Antigravity) can also reach
+  // these endpoints via the platform's own gateway when the MCP stdio transport
+  // is not available.
+  //
+  // Auth: OAuth 2.0 Client Credentials → Management API v2
+  // Req. env: AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET
+  // Principle: Least-privilege — only reads/writes tenant resources.
+  // ===========================================================================
+  {
+    const { getAuth0McpService, Auth0McpService } = await import("./src/services/auth0McpService.js");
+    type Auth0Svc = InstanceType<typeof Auth0McpService>;
+
+    /**
+     * Thin guard: checks whether Auth0 env-vars are present before routing.
+     * Returns 503 with a clear diagnostic message when unconfigured.
+     */
+    function withAuth0(
+      handler: (
+        req: import("express").Request,
+        res: import("express").Response,
+        svc: Auth0Svc
+      ) => Promise<void>
+    ): import("express").RequestHandler {
+      return async (req, res) => {
+        try {
+          const svc = getAuth0McpService();
+          await handler(req, res, svc);
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          const isMissing = msg.includes("Missing required environment variables");
+          res.status(isMissing ? 503 : 500).json({
+            error: "Auth0 Forensic Identity Bridge Error",
+            detail: msg,
+            resolution: isMissing
+              ? "Set AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET in your environment."
+              : "Inspect AUTH0_DOMAIN management API connectivity.",
+          });
+        }
+      };
+    }
+
+    // ── APPLICATION MANAGEMENT ──────────────────────────────────────────────
+
+    /** auth0_list_applications */
+    app.get(
+      "/api/auth0/applications",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.listApplications({
+          per_page: Number(req.query.per_page ?? 50),
+          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          q: req.query.q as string | undefined,
+          include_totals: req.query.include_totals === "true",
+        });
+        res.json(result);
+      })
+    );
+
+    /** auth0_get_application */
+    app.get(
+      "/api/auth0/applications/:clientId",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.getApplication(req.params.clientId);
+        res.json(result);
+      })
+    );
+
+    /** auth0_create_application */
+    app.post(
+      "/api/auth0/applications",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.createApplication(req.body);
+        res.status(201).json(result);
+      })
+    );
+
+    /** auth0_update_application */
+    app.patch(
+      "/api/auth0/applications/:clientId",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.updateApplication(req.params.clientId, req.body);
+        res.json(result);
+      })
+    );
+
+    // ── RESOURCE SERVER (API) MANAGEMENT ────────────────────────────────────
+
+    /** auth0_list_resource_servers */
+    app.get(
+      "/api/auth0/resource-servers",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.listResourceServers({
+          per_page: Number(req.query.per_page ?? 50),
+          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          include_totals: req.query.include_totals === "true",
+        });
+        res.json(result);
+      })
+    );
+
+    /** auth0_get_resource_server */
+    app.get(
+      "/api/auth0/resource-servers/:id",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.getResourceServer(
+          decodeURIComponent(req.params.id)
+        );
+        res.json(result);
+      })
+    );
+
+    /** auth0_create_resource_server */
+    app.post(
+      "/api/auth0/resource-servers",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.createResourceServer(req.body);
+        res.status(201).json(result);
+      })
+    );
+
+    /** auth0_update_resource_server */
+    app.patch(
+      "/api/auth0/resource-servers/:id",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.updateResourceServer(
+          decodeURIComponent(req.params.id),
+          req.body
+        );
+        res.json(result);
+      })
+    );
+
+    // ── ACTIONS MANAGEMENT ──────────────────────────────────────────────────
+
+    /** auth0_list_actions */
+    app.get(
+      "/api/auth0/actions",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.listActions({
+          per_page: Number(req.query.per_page ?? 50),
+          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          triggerId: req.query.triggerId as string | undefined,
+          actionName: req.query.actionName as string | undefined,
+          deployed:
+            req.query.deployed !== undefined
+              ? req.query.deployed === "true"
+              : undefined,
+        });
+        res.json(result);
+      })
+    );
+
+    /** auth0_get_action */
+    app.get(
+      "/api/auth0/actions/:actionId",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.getAction(req.params.actionId);
+        res.json(result);
+      })
+    );
+
+    /** auth0_create_action */
+    app.post(
+      "/api/auth0/actions",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.createAction(req.body);
+        res.status(201).json(result);
+      })
+    );
+
+    /** auth0_update_action */
+    app.patch(
+      "/api/auth0/actions/:actionId",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.updateAction(req.params.actionId, req.body);
+        res.json(result);
+      })
+    );
+
+    /** auth0_deploy_action */
+    app.post(
+      "/api/auth0/actions/:actionId/deploy",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.deployAction(req.params.actionId);
+        res.json(result);
+      })
+    );
+
+    // ── LOGS MANAGEMENT ─────────────────────────────────────────────────────
+
+    /** auth0_list_logs */
+    app.get(
+      "/api/auth0/logs",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.listLogs({
+          per_page: Number(req.query.per_page ?? 50),
+          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          q: req.query.q as string | undefined,
+          from: req.query.from as string | undefined,
+          sort: req.query.sort as string | undefined,
+          include_totals: req.query.include_totals === "true",
+        });
+        res.json(result);
+      })
+    );
+
+    /** auth0_get_log */
+    app.get(
+      "/api/auth0/logs/:logId",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.getLog(req.params.logId);
+        res.json(result);
+      })
+    );
+
+    // ── FORMS MANAGEMENT ────────────────────────────────────────────────────
+
+    /** auth0_list_forms */
+    app.get(
+      "/api/auth0/forms",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.listForms({
+          per_page: Number(req.query.per_page ?? 50),
+          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+        });
+        res.json(result);
+      })
+    );
+
+    /** auth0_get_form */
+    app.get(
+      "/api/auth0/forms/:formId",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.getForm(req.params.formId);
+        res.json(result);
+      })
+    );
+
+    /** auth0_create_form */
+    app.post(
+      "/api/auth0/forms",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.createForm(req.body);
+        res.status(201).json(result);
+      })
+    );
+
+    /** auth0_update_form */
+    app.patch(
+      "/api/auth0/forms/:formId",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.updateForm(req.params.formId, req.body);
+        res.json(result);
+      })
+    );
+
+    /** auth0_publish_form */
+    app.post(
+      "/api/auth0/forms/:formId/publish",
+      withAuth0(async (req, res, svc) => {
+        const result = await svc.publishForm(req.params.formId);
+        res.json(result);
+      })
+    );
+
+    // ── HEALTH / STATUS ENDPOINT ────────────────────────────────────────────
+
+    /** Connectivity check — returns Auth0 domain and token validity */
+    app.get(
+      "/api/auth0/status",
+      withAuth0(async (req, res, svc) => {
+        const token = await svc.getAccessToken();
+        const domain = process.env.AUTH0_DOMAIN ?? "unconfigured";
+        res.json({
+          status: "online",
+          domain,
+          tokenAcquired: Boolean(token),
+          protocol: "OAuth 2.0 Client Credentials",
+          managementApiVersion: "v2",
+          mcpServerPackage: "@auth0/auth0-mcp-server",
+          toolCount: 17,
+          toolCategories: [
+            "Application Management (4)",
+            "Resource Server Management (4)",
+            "Actions Management (5)",
+            "Logs Management (2)",
+            "Forms Management (5)",
+          ],
+        });
+      })
+    );
+  }
+
   // Catch-all for other unimplemented API routes to prevent crash/timeouts
   app.all("/api/*", (req, res) => {
     res.json({ message: "Mock endpoint", status: "OK", data: [] });
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== "production" && !process.env.NETLIFY) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -3229,9 +3525,7 @@ Construct an authoritative, scientific audit report detailing the exact physical
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
 // --- RESOLVE QUOTE DETERMINISTICALLY ---
@@ -3416,4 +3710,14 @@ function calculateLocalQuote(issueType: string, deviceTier: string, zipCode: str
   };
 }
 
-startServer();
+if (!process.env.NETLIFY && !process.env.VERCEL && process.env.NODE_ENV !== "test") {
+  createAppInstance().then(app => {
+    const PORT = Number(process.env.PORT) || 3000;
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Forensic Local Server running on http://localhost:${PORT}`);
+    });
+  }).catch(err => {
+    console.error("Failed to start logic board diagnostic server:", err);
+  });
+}
+

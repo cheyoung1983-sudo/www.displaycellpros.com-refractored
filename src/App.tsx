@@ -114,6 +114,7 @@ import { useAdminAuth } from "./hooks/useAdminAuth";
 import { useAuth } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { EmailVerificationStatus } from "./components/EmailVerificationStatus";
+import { Analytics } from "@vercel/analytics/react";
 
 // --- DATA MODELS ---
 
@@ -922,17 +923,20 @@ export default function App() {
 
   const handleSandboxLogin = () => {
     const mockUser = {
-      uid: "sandbox-customer-999",
-      displayName: "Spokane Test Client",
+      uid: "sandbox-super-admin-001",
+      displayName: "Ryan (Super Admin)",
       email: "ryan@displaycellpros.com",
       photoURL: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80",
       isAnonymous: false,
     };
     setAuthUser(mockUser as any);
-    setCustomerName("Spokane Test Client");
+    setUserRole("technician");
+    setActiveTab("lab");
+    setLabTab("triage");
+    setCustomerName("Ryan (Super Admin)");
     setProfilePhone("(509) 903-6139");
-    setProfilePreferredDevice("iPhone 15 Pro Max");
-    addToast("Sandbox Credentials Generated", "Simulated forensic analyst session loaded. All operations linked to test profile.", "success");
+    setProfilePreferredDevice("System Control Terminal");
+    addToast("Super Admin Elevated Access", "Credentials match administrative key ryan@displaycellpros.com. Welcome, Lead Forensic Architect.", "success");
   };
 
   const handleSignOut = async () => {
@@ -1343,7 +1347,7 @@ export default function App() {
           
           // Retrieve custom claims or firestore document to check admin role mappings
           let isAdmin = false;
-          if (user.email?.trim().toLowerCase() === "cheyoung1983@gmail.com") {
+          if (user.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || user.email?.trim().toLowerCase() === "ryan@displaycellpros.com") {
             isAdmin = true;
           }
           
@@ -1361,7 +1365,7 @@ export default function App() {
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
               const userData = userDocSnap.data();
-              if (userData.role === "admin" || userData.isAdmin === true || userData.email?.trim().toLowerCase() === "cheyoung1983@gmail.com") {
+              if (userData.role === "admin" || userData.isAdmin === true || userData.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || userData.email?.trim().toLowerCase() === "ryan@displaycellpros.com") {
                 isAdmin = true;
               }
             }
@@ -1734,7 +1738,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com") || isAdminClaim || isHookAdmin;
+    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || authUser?.email?.trim().toLowerCase() === "ryan@displaycellpros.com") || isAdminClaim || isHookAdmin;
     if (userRole === "technician" && !isTechnician) {
       setUserRole("customer");
       setActiveTab("customer-hub");
@@ -1821,7 +1825,7 @@ export default function App() {
 
   // Strict Force Out and Redirect Security Protocol
   useEffect(() => {
-    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com") || isAdminClaim || isHookAdmin;
+    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || authUser?.email?.trim().toLowerCase() === "ryan@displaycellpros.com") || isAdminClaim || isHookAdmin;
     
     // Explicit security boundary: Reject if "customer" tries to force "lab" view, 
     // or if a non-technician authenticated user tries to load the technician workspace.
@@ -3843,7 +3847,7 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                   title="Switch to Technician view"
                   type="button"
                   onClick={() => {
-                    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com") || isAdminClaim || isHookAdmin;
+                    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || authUser?.email?.trim().toLowerCase() === "ryan@displaycellpros.com") || isAdminClaim || isHookAdmin;
                     if (!isTechnician) {
                       setShowAccessDeniedModal(true);
                       return;
@@ -4004,7 +4008,7 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                 </button>
                 <button
                   onClick={() => {
-                    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com") || isAdminClaim || isHookAdmin;
+                    const isTechnician = (authUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || authUser?.email?.trim().toLowerCase() === "ryan@displaycellpros.com") || isAdminClaim || isHookAdmin;
                     if (!isTechnician) {
                       setShowAccessDeniedModal(true);
                       setMobileMenuOpen(false);
@@ -8683,7 +8687,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   🚨 <strong className="text-white">Silicon-Layer Security Directive:</strong> The requested view requires elevated administrative privileges. Standard customer sessions are locked out to safeguard telemetry-first diagnostics, proprietary S2C circuits, and NIST SP 800-88 R1 storage clearing engines.
                 </p>
                 <div className="pt-2 border-t border-amber-500/10 text-[10.5px] text-slate-400 font-mono">
-                  REQUIRED CREDENTIALS: <span className="text-amber-400 font-bold">cheyoung1983@gmail.com</span>
+                  REQUIRED CREDENTIALS: <span className="text-amber-400 font-bold">ryan@displaycellpros.com</span>
                 </div>
               </div>
 
@@ -8736,13 +8740,13 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         await handleGoogleSignIn();
                         // Close modal if auth becomes correct or we handle state check reactively
                         setTimeout(() => {
-                          const isNowAdmin = (auth.currentUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com");
+                          const isNowAdmin = (auth.currentUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || auth.currentUser?.email?.trim().toLowerCase() === "ryan@displaycellpros.com");
                           if (isNowAdmin) {
                             setIsAdminClaim(true);
                             setUserRole("technician");
                             setActiveTab("home");
                             setShowAccessDeniedModal(false);
-                            addToast("Workspace Dynamic Elevation", "Credentials match administrative key cheyoung1983@gmail.com. Access granted.", "success");
+                            addToast("Workspace Dynamic Elevation", "Credentials match administrative key ryan@displaycellpros.com... Accessing Forensic Laboratory.", "success");
                           }
                         }, 1200);
                       } catch (err: any) {
@@ -8765,7 +8769,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       setShowAccessDeniedModal(false);
                       addToast(
                         "Simulation Authorization Granted",
-                        "Elevated Sandbox Custom Claims mapped to 'cheyoung1983@gmail.com'. Welcome, Lead Forensic Engineer.",
+                        "Elevated Sandbox Custom Claims mapped to 'ryan@displaycellpros.com'. Welcome, Lead Forensic Engineer.",
                         "success"
                       );
                     }}
@@ -8786,7 +8790,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 <form 
                   onSubmit={async (e) => {
                     e.preventDefault();
-                    if (simulatedAdminEmail.trim().toLowerCase() === "cheyoung1983@gmail.com" || simulatedAdminEmail.trim().toLowerCase().includes("admin")) {
+                    if (simulatedAdminEmail.trim().toLowerCase() === "cheyoung1983@gmail.com" || simulatedAdminEmail.trim().toLowerCase() === "ryan@displaycellpros.com" || simulatedAdminEmail.trim().toLowerCase().includes("admin")) {
                       setIsAdminClaim(true);
                       setUserRole("technician");
                       setActiveTab("home");
@@ -8797,7 +8801,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         "success"
                       );
                     } else {
-                      addToast("Validation Failed", "Simulation email must match authorized profile cheyoung1983@gmail.com", "error");
+                      addToast("Validation Failed", "Simulation email must match authorized profile ryan@displaycellpros.com", "error");
                     }
                   }} 
                   className="flex gap-2"
@@ -8805,7 +8809,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   <input
                     type="email"
                     required
-                    placeholder="Enter authorized email (cheyoung1983@gmail.com)"
+                    placeholder="Enter authorized email (ryan@displaycellpros.com)"
                     value={simulatedAdminEmail}
                     onChange={(e) => setSimulatedAdminEmail(e.target.value)}
                     className="flex-1 bg-slate-950 border border-slate-800 focus:border-teal-500/80 rounded px-3 py-1.5 text-xs font-mono text-white placeholder-slate-600 outline-none transition-colors"
@@ -9474,8 +9478,10 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onGoogleSignIn={handleGoogleSignIn}
+        onSuperAdminLogin={handleSandboxLogin}
         addToast={addToast}
       />
+      <Analytics />
     </div>
   );
 }
