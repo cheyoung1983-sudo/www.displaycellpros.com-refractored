@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="update device streaming cache and refactor build implementation plan&#10;&#10;- Update `deviceStreaming.xml` with new device definitions for HONOR, OPPO, Xiaomi, and others.&#10;- Refactor implementation plan to focus on `src/` directory module resolution in `tsconfig.json` and `tailwind.config.js`.&#10;- Update IDE workspace settings and account configurations.">
-      <change beforePath="$PROJECT_DIR$/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="build update">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,22 +90,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1784653343126</updated>
-    </task>
-    <task id="LOCAL-00001" summary="chore: migrate from Gemini to OpenAI and update dependencies&#10;&#10;- Replace Gemini references with OpenAI across UI components and server logs.&#10;- Update AI models to `o3-mini` for diagnostics and `gpt-4o` for computer vision.&#10;- Update `README.md` instructions to use `OPENAI_API_KEY` and improve formatting.&#10;- Add missing dependencies: `firebase`, `ai`, `@ai-sdk/openai`, and `@vercel` libraries.&#10;- Fix database pool imports in `scripts/test-db.ts`.&#10;- Update `tsconfig.json` to include Vite client types.&#10;- Add project artifacts and IDEA configuration files.">
-      <option name="closed" value="true" />
-      <created>1784654659246</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1784654659246</updated>
-    </task>
-    <task id="LOCAL-00002" summary="fix: resolve Vercel runtime configuration error&#10;&#10;- Specify Node.js version 22.x in `package.json` engines.&#10;- Remove manual `runtime` override from `vercel.json` to fix deployment validation issues.&#10;- Update project implementation plan, task list, and walkthrough artifacts to reflect configuration changes.">
-      <option name="closed" value="true" />
-      <created>1784657609855</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1784657609855</updated>
     </task>
     <task id="LOCAL-00003" summary="chore: implement Vercel deployment best practices and security enhancements&#10;&#10;- Add `helmet` and `compression` middleware to `server.ts` for improved security and performance.&#10;- Implement Edge Network caching headers for idempotent GET endpoints (`/api/welcome`, `/api/movies`, etc.).&#10;- Configure comprehensive security headers (CSP, HSTS, X-Frame-Options) and `maxDuration` in `vercel.json`.&#10;- Set Node.js engine to `22.x` in `package.json` and remove manual runtime overrides.&#10;- Create `.vercelignore` to optimize deployment upload speed.&#10;- Add `vercel-deploy.sh` automation script for streamlined environment syncing and deployment.&#10;- Expand `.env.example` with detailed configuration for Firebase, reCAPTCHA, and AWS RDS.">
       <option name="closed" value="true" />
@@ -468,7 +451,39 @@
       <option name="project" value="LOCAL" />
       <updated>1784709726533</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="update device streaming cache and refactor build implementation plan&#10;&#10;- Update `deviceStreaming.xml` with new device definitions for HONOR, OPPO, Xiaomi, and others.&#10;- Refactor implementation plan to focus on `src/` directory module resolution in `tsconfig.json` and `tailwind.config.js`.&#10;- Update IDE workspace settings and account configurations.">
+      <option name="closed" value="true" />
+      <created>1784709833287</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1784709833287</updated>
+    </task>
+    <task id="LOCAL-00049" summary="refactor: move app, components, and lib to src directory&#10;&#10;- Move `app/`, `components/`, and `lib/` directories into a new `src/` folder.&#10;- Update import paths in `scripts/setup-db.ts` to point to `../src/lib/db`.&#10;- Regenerate Next.js build manifests and cache to reflect the updated project structure.">
+      <option name="closed" value="true" />
+      <created>1784709868964</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1784709868964</updated>
+    </task>
+    <task id="LOCAL-00050" summary="build: update production artifacts for technical lab and Auth0 integration">
+      <option name="closed" value="true" />
+      <created>1784710012888</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1784710012889</updated>
+    </task>
+    <task id="LOCAL-00051" summary="build update">
+      <option name="closed" value="true" />
+      <created>1784710062331</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1784710062331</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -483,9 +498,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add Google Search Console verification meta tag&#10;&#10;- Update verification comment in `index.html`&#10;- Add `google-site-verification` meta tag for domain ownership verification" />
-    <MESSAGE value="Add Google Analytics tracking script to index.html" />
-    <MESSAGE value="Add Google Search Console and Analytics tracking" />
     <MESSAGE value="backend stability and error handling&#10;&#10;- Implement global error handler and try-catch blocks in `server.ts` to prevent unhandled rejections.&#10;- Add catch-all 404 JSON response for unhandled `/api/*` routes.&#10;- Add `/api/auth/session` mock endpoint to improve client-side compatibility.&#10;- Update `bypassPaths` and implementation plan to reflect stability and performance focus." />
     <MESSAGE value="align Edge Config implementation with Vercel best practices&#10;&#10;- Add `dotenv-expand` and update `vite.config.ts` to correctly populate `process.env` during local development.&#10;- Refactor `middleware.ts` and `server.ts` to use defensive `has()` checks before retrieving values from Edge Config.&#10;- Update project documentation and implementation artifacts to reflect focus on Edge Config stability and performance.&#10;- Improve fallback handling for the `/welcome` route when Edge Config keys are missing." />
     <MESSAGE value="Add Dockerfile for Vercel deployment&#10;&#10;- Create `Dockerfile.vercel` for multi-stage production builds.&#10;- Update `server.ts` to use `process.env.PORT` with a fallback to 3000." />
@@ -508,6 +520,9 @@
     <MESSAGE value="update build artifacts" />
     <MESSAGE value="feat: initialize project scaffolding and core lab portal features&#10;&#10;- Set up Next.js App Router structure with Auth0 integration and middleware proxying.&#10;- Implement AWS RDS PostgreSQL connection logic using IAM OIDC authentication.&#10;- Create a diagnostic Lab Portal including a USB hardware simulator, QR/barcode scanner, and Recharts-based telemetry visualizations.&#10;- Add an AI triage assistant widget and dynamic quote generation engine with Washington state tax calculations.&#10;- Implement specialized UI components for cache management, RDS diagnostics, and repair ticket templates.&#10;- Establish core API routes for hardware triage, tax lookup, and ticketing.&#10;- Add global styling, custom toast notifications, and responsive navigation components." />
     <MESSAGE value="update device streaming cache and refactor build implementation plan&#10;&#10;- Update `deviceStreaming.xml` with new device definitions for HONOR, OPPO, Xiaomi, and others.&#10;- Refactor implementation plan to focus on `src/` directory module resolution in `tsconfig.json` and `tailwind.config.js`.&#10;- Update IDE workspace settings and account configurations." />
-    <option name="LAST_COMMIT_MESSAGE" value="update device streaming cache and refactor build implementation plan&#10;&#10;- Update `deviceStreaming.xml` with new device definitions for HONOR, OPPO, Xiaomi, and others.&#10;- Refactor implementation plan to focus on `src/` directory module resolution in `tsconfig.json` and `tailwind.config.js`.&#10;- Update IDE workspace settings and account configurations." />
+    <MESSAGE value="refactor: move app, components, and lib to src directory&#10;&#10;- Move `app/`, `components/`, and `lib/` directories into a new `src/` folder.&#10;- Update import paths in `scripts/setup-db.ts` to point to `../src/lib/db`.&#10;- Regenerate Next.js build manifests and cache to reflect the updated project structure." />
+    <MESSAGE value="build: update production artifacts for technical lab and Auth0 integration" />
+    <MESSAGE value="build update" />
+    <option name="LAST_COMMIT_MESSAGE" value="build update" />
   </component>
 </project>
