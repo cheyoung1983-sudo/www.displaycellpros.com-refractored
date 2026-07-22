@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="build: update production artifacts and transition to ESM configuration&#10;&#10;- Update production build artifacts and manifests in the `.next` directory.&#10;- Transition Next.js configuration source from `next.config.js` to `next.config.mjs`.&#10;- Add pre-rendered HTML, RSC payloads, and metadata for `/b2b`, `/lab`, `/services`, `/store`, `/privacy`, and `/welcome` routes.&#10;- Update the application path routes manifest and build ID.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="3e76fcb0-21f3-487b-a13a-480a44116243" name="Changes" comment="build: update production artifacts and transition to ESM configuration&#10;&#10;- Update production build artifacts and manifests in the `.next` directory.&#10;- Transition Next.js configuration source from `next.config.js` to `next.config.mjs`.&#10;- Add pre-rendered HTML, RSC payloads, and metadata for `/b2b`, `/lab`, `/services`, `/store`, `/privacy`, and `/welcome` routes.&#10;- Update the application path routes manifest and build ID." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -90,14 +88,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1784653343126</updated>
-    </task>
-    <task id="LOCAL-00022" summary="Production launch best practices&#10;&#10;- Add rate limiting to API routes using `express-rate-limit`.&#10;- Implement a `/api/health` endpoint for uptime monitoring.&#10;- Add request logging middleware for improved traceability.&#10;- Create `README_PROD.md` with operational guides for rollbacks, monitoring, and secret management.&#10;- Optimize font loading in `index.html`.">
-      <option name="closed" value="true" />
-      <created>1784675696520</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1784675696520</updated>
     </task>
     <task id="LOCAL-00023" summary="Production launch best practices&#10;&#10;- Add rate limiting to API routes and implement `/api/health` endpoint.&#10;- Add request logging middleware for traceability.&#10;- Create `README_PROD.md` and optimize font loading in `index.html`.">
       <option name="closed" value="true" />
@@ -483,7 +473,15 @@
       <option name="project" value="LOCAL" />
       <updated>1784713886815</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="build: update production artifacts and transition to ESM configuration&#10;&#10;- Update production build artifacts and manifests in the `.next` directory.&#10;- Transition Next.js configuration source from `next.config.js` to `next.config.mjs`.&#10;- Add pre-rendered HTML, RSC payloads, and metadata for `/b2b`, `/lab`, `/services`, `/store`, `/privacy`, and `/welcome` routes.&#10;- Update the application path routes manifest and build ID.">
+      <option name="closed" value="true" />
+      <created>1784714660142</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1784714660142</updated>
+    </task>
+    <option name="localTasksCounter" value="72" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
