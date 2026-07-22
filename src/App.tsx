@@ -79,15 +79,10 @@ const CspManualView = React.lazy(() => import("./components/CspManualView").then
 const LegalView = React.lazy(() => import("./components/LegalView").then(module => ({ default: module.LegalView })));
 const SignaturePad = React.lazy(() => import("./components/SignaturePad").then(module => ({ default: module.SignaturePad })));
 const FormsIntegrationView = React.lazy(() => import("./components/FormsIntegrationView").then(module => ({ default: module.FormsIntegrationView })));
-const GmailIntegrationView = React.lazy(() => import("./components/GmailIntegrationView").then(module => ({ default: module.GmailIntegrationView })));
-const GoogleWorkspaceHubView = React.lazy(() => import("./components/GoogleWorkspaceHubView").then(module => ({ default: module.GoogleWorkspaceHubView })));
-const ApiGatewayDashboard = React.lazy(() => import("./components/ApiGatewayDashboard").then(module => ({ default: module.ApiGatewayDashboard })));
 const QuoteBuilderDashboard = React.lazy(() => import("./components/QuoteBuilderDashboard"));
 const SmdComponentLibrary = React.lazy(() => import("./components/SmdComponentLibrary").then(module => ({ default: module.SmdComponentLibrary })));
 const BrandLogo = React.lazy(() => import("./components/BrandLogo").then(module => ({ default: module.BrandLogo })));
-const FirebaseUserAuditor = React.lazy(() => import("./components/FirebaseUserAuditor").then(module => ({ default: module.FirebaseUserAuditor })));
 import { QrTicketScanner } from "./components/QrTicketScanner";
-import { AuthStatus } from "./components/AuthStatus";
 import { IntakeSpecialistButton } from "./components/IntakeSpecialistButton";
 
 const AboutView = React.lazy(() => import("./components/AboutView").then(module => ({ default: module.AboutView })));
@@ -99,21 +94,15 @@ const BlogView = React.lazy(() => import("./components/BlogView").then(module =>
 
 // Dynamically imported Triage AI Modules to reduce initial bundle size
 const ForensicsView = React.lazy(() => import("./modules/triage-ai/ForensicsView").then(module => ({ default: module.ForensicsView })));
-const FirebaseAiWorkbenchView = React.lazy(() => import("./modules/triage-ai/FirebaseAiWorkbenchView").then(module => ({ default: module.FirebaseAiWorkbenchView })));
 const TelemetryDashboard = React.lazy(() => import("./modules/triage-ai/TelemetryDashboard").then(module => ({ default: module.TelemetryDashboard })));
 import { motion, AnimatePresence } from "motion/react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line, BarChart, Bar } from "recharts";
 import { jsPDF } from "jspdf";
-import { signInWithPopup, signInAnonymously, onAuthStateChanged, signOut, User as FirebaseUser, GoogleAuthProvider } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from "firebase/firestore";
-import { auth, db, googleProvider } from "./lib/firebase";
-import { handleFirestoreError, OperationType } from "./lib/firebase-errors";
 import { MarketingFirewall } from "./components/MarketingFirewall";
 import { AuthModal } from "./components/AuthModal";
 import { useAdminAuth } from "./hooks/useAdminAuth";
-import { useAuth } from "./hooks/useAuth";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { EmailVerificationStatus } from "./components/EmailVerificationStatus";
 import { Analytics } from "@vercel/analytics/react";
 
 // --- DATA MODELS ---
@@ -282,10 +271,7 @@ export default function App() {
   });
 
   // --- DIAGNOSTIC HUB STATES ---
-  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "escalation" | "forensics" | "forms" | "gmail" | "firebase_ai" | "workspace_hub" | "gateway" | "quote_builder" | "telemetry" | "smd_library" | "marketing_firewall">("telemetry");
-  const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(null);
-  const [leads, setLeads] = useState<HighPriorityLead[]>([]);
-  const [isLoadingLeads, setIsLoadingLeads] = useState<boolean>(false);
+  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "directory" | "forensics" | "gateway" | "quote_builder" | "telemetry" | "smd_library" | "marketing_firewall">("telemetry");
 
   // Google Cloud Service Directory state variables
   const [sdStatus, setSdStatus] = useState<{ active: boolean; usingFallback: boolean; error: string | null; message: string; mode?: string }>({
@@ -602,71 +588,10 @@ export default function App() {
   });
   const [isCalculatingQuote, setIsCalculatingQuote] = useState<boolean>(false);
 
-  // --- FIREBASE SSO AUTH & FIRESTORE CLOUD STATES ---
-  const { sendVerification } = useAuth();
-  const [authUser, setAuthUser] = useState<FirebaseUser | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+  // --- AUTH0 AUTH STATES ---
+  const { user: auth0User, isLoading: isAuthLoading } = useUser();
+  const authUser = useMemo(() => auth0User ? { ...auth0User, uid: auth0User.sub } as any : null, [auth0User]);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [firestoreTickets, setFirestoreTickets] = useState<RepairTicket[]>([]);
-  const [firestoreError, setFirestoreError] = useState<string | null>(null);
-
-  // Email verification manual check states
-  const [isRefreshingVerification, setIsRefreshingVerification] = useState<boolean>(false);
-  const [isSendingVerification, setIsSendingVerification] = useState<boolean>(false);
-
-  const handleRefreshVerification = async () => {
-    if (!auth.currentUser) return;
-    setIsRefreshingVerification(true);
-    try {
-      await auth.currentUser.reload();
-      const updatedUser = auth.currentUser;
-      setAuthUser({ ...updatedUser } as any);
-      if (updatedUser.emailVerified) {
-        addToast(
-          "Verification Confirmed",
-          "Your cryptographic identity has been verified. Welcome to the S2C Intelligence Dashboard!",
-          "success"
-        );
-      } else {
-        addToast(
-          "Verification Pending",
-          "We could not confirm verification yet. Please check your inbox and click the confirmation link.",
-          "warning"
-        );
-      }
-    } catch (err: any) {
-      console.error("Error refreshing email verification:", err);
-      addToast(
-        "Refresh Failed",
-        err.message || "An error occurred while communicating with the security gateway.",
-        "error"
-      );
-    } finally {
-      setIsRefreshingVerification(false);
-    }
-  };
-
-  const handleResendVerification = async () => {
-    if (!auth.currentUser) return;
-    setIsSendingVerification(true);
-    try {
-      await sendVerification();
-      addToast(
-        "Verification Dispatched",
-        `A new secure validation token has been transmitted to ${auth.currentUser.email}.`,
-        "success"
-      );
-    } catch (err: any) {
-      console.error("Error sending verification email:", err);
-      addToast(
-        "Dispatch Failed",
-        err.message || "An error occurred while transmitting the secure token.",
-        "error"
-      );
-    } finally {
-      setIsSendingVerification(false);
-    }
-  };
 
   // --- MULTI-MODAL & ADVANCED DIAGNOSTIC SUB-MODE STATES ---
   const [diagnosticMode, setDiagnosticMode] = useState<"standard" | "thinking" | "vision">("standard");
@@ -878,250 +803,9 @@ export default function App() {
     }, 800);
   };
 
-  const handleGoogleSignIn = async () => {
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error("GATEWAY_TIMEOUT"));
-      }, 8000);
-    });
-
-    try {
-      const result = await Promise.race([
-        signInWithPopup(auth, googleProvider),
-        timeoutPromise
-      ]) as any;
-
-      // Extract OAuth Credentials Access Token for Google Workspace Integrations
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
-      if (token) {
-        setGoogleAccessToken(token);
-      }
-
-      addToast("Authentication Success", `Signed in as ${result.user.displayName}`, "success");
-    } catch (err: any) {
-      console.warn("Authentication Error/Notice:", err);
-      if (err.message === "GATEWAY_TIMEOUT") {
-        addToast("Gateway Latency", "Our login gateway is experiencing high latency. Please try again in a few moments.", "warning");
-      } else if (err.code === "auth/unauthorized-domain" || (err.message && err.message.includes("unauthorized-domain"))) {
-        setUnauthorizedDomainError({
-          domain: window.location.hostname || "localhost",
-          projectId: "displaycellpros-com",
-        });
-        addToast("Authorization Error", "This domain is not authorized in Firebase Console settings. Please check authorized domains.", "error");
-      } else if (err.code === "auth/popup-closed-by-user" || (err.message && err.message.includes("popup-closed-by-user"))) {
-        addToast("Authentication Closed", "The sign-in popup was closed before completion. Please try again.", "info");
-      } else if (err.code === "auth/cancelled-popup-request" || (err.message && err.message.includes("cancelled-popup-request"))) {
-        addToast("Authentication Swapped", "A newer sign-in request was initiated, cancelling the old one.", "info");
-      } else if (err.code === "auth/popup-blocked" || (err.message && err.message.includes("popup-blocked"))) {
-        addToast("Popup Blocked", "Your browser blocked the sign-in popup. Please allow popups for this site.", "warning");
-      } else {
-        addToast("Login Failed", err.message || "An authentication error occurred.", "error");
-      }
-    }
-  };
-
-  const handleSandboxLogin = () => {
-    const mockUser = {
-      uid: "sandbox-super-admin-001",
-      displayName: "Ryan (Super Admin)",
-      email: "ryan@displaycellpros.com",
-      photoURL: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80",
-      isAnonymous: false,
-    };
-    setAuthUser(mockUser as any);
-    setUserRole("technician");
-    setActiveTab("lab");
-    setLabTab("triage");
-    setCustomerName("Ryan (Super Admin)");
-    setProfilePhone("(509) 903-6139");
-    setProfilePreferredDevice("System Control Terminal");
-    addToast("Super Admin Elevated Access", "Credentials match administrative key ryan@displaycellpros.com. Welcome, Lead Forensic Architect.", "success");
-  };
 
   const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      setAuthUser(null);
-      handleSessionReset();
-      addToast("Signed Out", "Successfully signed out of the workspace.", "info");
-    } catch (err: any) {
-      console.error(err);
-      addToast("Logout Failed", err.message, "error");
-    }
-  };
-
-  // Fetch Firestore backup logs
-  const fetchFirestoreTickets = async (uid: string) => {
-    setActiveSyncCount(prev => prev + 1);
-    try {
-      setFirestoreError(null);
-      
-      if (!auth.currentUser) {
-        console.warn("Skipping Firestore tickets fetch: No authenticated user session active.");
-        return;
-      }
-      const ticketsRef = collection(db, "tickets");
-      const q = query(ticketsRef, where("userId", "==", uid));
-      const querySnapshot = await getDocs(q);
-      const fetched: RepairTicket[] = [];
-      querySnapshot.forEach((docSnap) => {
-        fetched.push(docSnap.data() as RepairTicket);
-      });
-      setFirestoreTickets(fetched);
-    } catch (err) {
-      console.error("Failed to load Firestore tickets:", err);
-      try {
-        handleFirestoreError(err, OperationType.LIST, "tickets");
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
-      }
-    } finally {
-      setActiveSyncCount(prev => Math.max(0, prev - 1));
-    }
-  };
-
-  const fetchFirestoreLeads = async (uid: string) => {
-    setActiveSyncCount(prev => prev + 1);
-    try {
-      setIsLoadingLeads(true);
-      setFirestoreError(null);
-      
-      if (!auth.currentUser) {
-        console.warn("Skipping Firestore leads fetch: No authenticated user session active.");
-        return;
-      }
-      const leadsRef = collection(db, "high-priority-leads");
-      const q = query(leadsRef, where("userId", "==", uid));
-      const querySnapshot = await getDocs(q);
-      const fetched: HighPriorityLead[] = [];
-      querySnapshot.forEach((docSnap) => {
-        fetched.push(docSnap.data() as HighPriorityLead);
-      });
-      setLeads(fetched);
-    } catch (err) {
-      console.error("Failed to load Firestore leads:", err);
-      try {
-        handleFirestoreError(err, OperationType.LIST, "high-priority-leads");
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
-      }
-    } finally {
-      setIsLoadingLeads(false);
-      setActiveSyncCount(prev => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleCreateLead = async (customerName: string, phone: string, deviceModel: string) => {
-    if (!authUser) {
-      addToast("Auth Required", "Please login with Google or use Sandbox bypass to submit high-priority escalations.", "warning");
-      return;
-    }
-    const leadId = `LEAD-${Math.floor(100000 + Math.random() * 900000)}`;
-    const newLead: HighPriorityLead = {
-      id: leadId,
-      customerName: customerName || "Spokane Lead Client",
-      phone: phone || "(509) 903-6139",
-      deviceModel: deviceModel || "Generic Device",
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      userId: authUser.uid
-    };
-
-    setActiveSyncCount(prev => prev + 1);
-    try {
-      setFirestoreError(null);
-      const docRef = doc(db, "high-priority-leads", leadId);
-      await setDoc(docRef, newLead);
-      addToast("Escalation Created", "Your high-priority motherboard callback case has been securely queued!", "success");
-      fetchFirestoreLeads(authUser.uid);
-    } catch (err) {
-      console.error("Failed to sync lead on Firestore:", err);
-      try {
-        handleFirestoreError(err, OperationType.CREATE, `high-priority-leads/${leadId}`);
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
-      }
-    } finally {
-      setActiveSyncCount(prev => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleUpdateLeadStatus = async (leadId: string, newStatus: "pending" | "in_progress" | "contacted" | "completed" | "cancelled") => {
-    if (!authUser) return;
-
-    setActiveSyncCount(prev => prev + 1);
-    try {
-      setFirestoreError(null);
-      const docRef = doc(db, "high-priority-leads", leadId);
-      const leadSnap = await getDoc(docRef);
-      if (!leadSnap.exists()) {
-        addToast("Update Fail", "The selected lead does not exist on Firestore.", "error");
-        return;
-      }
-      
-      const currentLead = leadSnap.data() as HighPriorityLead;
-      const updatedLead = {
-        ...currentLead,
-        status: newStatus
-      };
-
-      await setDoc(docRef, updatedLead);
-      addToast("Status Updated", `Callback case updated to ${newStatus}.`, "success");
-      fetchFirestoreLeads(authUser.uid);
-    } catch (err) {
-      console.error("Failed to update status on Firestore:", err);
-      try {
-        handleFirestoreError(err, OperationType.WRITE, `high-priority-leads/${leadId}`);
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
-      }
-    } finally {
-      setActiveSyncCount(prev => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleCreateFirestoreTicket = async () => {
-    if (!authUser) {
-      alert("Please authenticate using your Google account to enable secure cloud backups.");
-      return;
-    }
-    const ticketId = "DCP-" + Math.floor(100000 + Math.random() * 900000);
-    const newTicket: RepairTicket = {
-      id: ticketId,
-      customerName: customerName || "Jane Miller",
-      companyName: isCorporate ? companyName : "",
-      device: `${deviceBrand} ${deviceModel}`,
-      issueType: issueType,
-      status: "open",
-      quotedPrice: quote.baseQuote.subtotal,
-      tax: quote.taxInfo.calculatedTax,
-      discount: quote.discountInfo.amount,
-      total: quote.grandTotal,
-      createdAt: new Date().toISOString(),
-      userId: authUser.uid,
-      internalNotes: internalNotes.trim() || undefined
-    };
-
-    setActiveSyncCount(prev => prev + 1);
-    try {
-      setFirestoreError(null);
-      const docRef = doc(db, "tickets", ticketId);
-      await setDoc(docRef, newTicket);
-      setTicketCreationSuccess(true);
-      setInternalNotes("");
-      setTimeout(() => setTicketCreationSuccess(false), 3000);
-      fetchFirestoreTickets(authUser.uid);
-    } catch (err) {
-      console.error("Failed to sync ticket on Firestore:", err);
-      try {
-        handleFirestoreError(err, OperationType.CREATE, `tickets/${ticketId}`);
-      } catch (formattedError: any) {
-        setFirestoreError(formattedError.message);
-      }
-    } finally {
-      setActiveSyncCount(prev => Math.max(0, prev - 1));
-    }
+    window.location.href = "/api/auth/logout";
   };
 
   
@@ -1333,97 +1017,24 @@ export default function App() {
     { zip: "98501", city: "Olympia", rate: "9.5%" }
   ];
 
-  // Fetch Sync Logs & Tickets on Mount, plus load Service Directory Status
+  // Sync Logs & Status on Mount
   useEffect(() => {
     fetchPOSLogs();
     fetchSdStatus();
     handleListNamespaces("displaycellpros", "us-central1");
 
-    // Reactive subscription to Firebase Authentication state for session/badge clarity
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user) {
-          setAuthUser(user);
-          
-          // Retrieve custom claims or firestore document to check admin role mappings
-          let isAdmin = false;
-          if (user.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || user.email?.trim().toLowerCase() === "ryan@displaycellpros.com") {
-            isAdmin = true;
-          }
-          
-          try {
-            const idTokenResult = await user.getIdTokenResult();
-            if (idTokenResult.claims?.admin === true || idTokenResult.claims?.role === "admin") {
-              isAdmin = true;
-            }
-          } catch (e) {
-            console.error("Error retrieving custom claims during session sync:", e);
-          }
-
-          try {
-            const userDocRef = doc(db, "users", user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists()) {
-              const userData = userDocSnap.data();
-              if (userData.role === "admin" || userData.isAdmin === true || userData.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || userData.email?.trim().toLowerCase() === "ryan@displaycellpros.com") {
-                isAdmin = true;
-              }
-            }
-          } catch (e) {
-            console.error("Error reading Firestore user admin claims during session sync:", e);
-          }
-
-          setIsAdminClaim(isAdmin);
-          if (isAdmin) {
-            setUserRole("technician");
-          }
-
-          // Update user profile info dynamically if not anonymous
-          if (!user.isAnonymous) {
-            setCustomerName(user.displayName || user.email?.split("@")[0] || "Authenticated Client");
-            fetchFirestoreTickets(user.uid);
-          }
-        } else {
-          setIsAdminClaim(false);
-          setAuthUser(null);
-          // Fallback to anonymous auth to allow public access while maintaining best practices for Firestore rules
-          try {
-            await signInAnonymously(auth);
-          } catch (error: any) {
-            console.error("Anonymous sign-in failed during session fallback:", error);
-            
-            // Step B: Self-healing local/SessionStorage State Check & Graceful Offline Fallback
-            let localOfflineToken = localStorage.getItem("dcp_offline_guest_token");
-            if (!localOfflineToken) {
-              localOfflineToken = "offline_guest_" + Math.random().toString(36).substring(2, 11);
-              localStorage.setItem("dcp_offline_guest_token", localOfflineToken);
-            }
-            
-            // Inject a local safe mock user so the portal interface remains usable and offline resilient
-            setAuthUser({
-              uid: localOfflineToken,
-              isAnonymous: true,
-              email: null,
-              displayName: "Local Offline Guest",
-              emailVerified: false,
-            } as any);
-            
-            addToast("Offline Mode Engaged", "Authentication server unreachable. Secure local offline guest session initialized.", "info");
-          }
-        }
-      } catch (authError: any) {
-        console.error("CRITICAL error in auth state listener:", authError);
-        addToast("Authentication Interruption", "A secure state disruption occurred. Attempting self-healing recovery.", "error");
-      } finally {
-        setIsAuthLoading(false);
+    if (authUser) {
+      const emailLower = authUser.email?.trim().toLowerCase();
+      const isAdmin = (emailLower === "cheyoung1983@gmail.com" || emailLower === "ryan@displaycellpros.com");
+      setIsAdminClaim(isAdmin);
+      if (isAdmin) {
+        setUserRole("technician");
       }
-    }, (error) => {
-      console.error("Firebase auth subscription error:", error);
-      addToast("Connection Error", "Secure auth channel failed. Please reload the page.", "error");
-      setIsAuthLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+      setCustomerName(authUser.name || authUser.email?.split("@")[0] || "Authenticated Client");
+    } else {
+      setIsAdminClaim(false);
+    }
+  }, [authUser]);
 
   const checkDnsPropagation = async (domainName: string, isManual = false) => {
     if (!domainName || domainName.trim() === "") return;
@@ -1491,73 +1102,14 @@ export default function App() {
 
     setPosLogs(prev => [newLogItem, ...prev]);
 
-    if (authUser?.uid) {
-      setActiveSyncCount(prev => prev + 1);
-      try {
-        const { doc, setDoc } = await import("firebase/firestore");
-        const logRef = doc(db, "pos-logs", logId);
-        await setDoc(logRef, newLogItem);
-        console.log(`[FIREBASE] POS Sync Log saved to 'pos-logs' Firestore:`, logId);
-      } catch (err: any) {
-        console.error("Failed to push POS log to Firestore:", err);
-        handleFirestoreError(err, OperationType.UPDATE, `pos-logs/${logId}`);
-      } finally {
-        setActiveSyncCount(prev => Math.max(0, prev - 1));
-      }
-    } else {
-      const existing = localStorage.getItem("dcp_sandbox_pos_logs");
-      const list = existing ? JSON.parse(existing) : [];
-      list.unshift(newLogItem);
-      localStorage.setItem("dcp_sandbox_pos_logs", JSON.stringify(list));
-    }
+    const existing = localStorage.getItem("dcp_sandbox_pos_logs");
+    const list = existing ? JSON.parse(existing) : [];
+    list.unshift(newLogItem);
+    localStorage.setItem("dcp_sandbox_pos_logs", JSON.stringify(list));
   };
 
   const fetchPOSLogs = async () => {
     setIsLoadingLogs(true);
-    setFirestoreError(null);
-
-    // 1. If we have a logged-in production user session, fetch logs from Firestore 'pos-logs' and 'tickets'
-    if (authUser?.uid) {
-      setActiveSyncCount(prev => prev + 1);
-      try {
-        const ticketsRef = collection(db, "tickets");
-        const qTickets = query(ticketsRef, where("userId", "==", authUser.uid));
-        const ticketSnapshot = await getDocs(qTickets);
-        const fbTickets: RepairTicket[] = [];
-        ticketSnapshot.forEach((docSnap) => {
-          fbTickets.push(docSnap.data() as RepairTicket);
-        });
-
-        const logsRef = collection(db, "pos-logs");
-        const qLogs = query(logsRef, where("userId", "==", authUser.uid));
-        const logSnapshot = await getDocs(qLogs);
-        const fbLogs: any[] = [];
-        logSnapshot.forEach((docSnap) => {
-          fbLogs.push(docSnap.data());
-        });
-
-        fbLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-        // Sort tickets by reverse chronological index
-        fbTickets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-        setTickets(fbTickets);
-        setPosLogs(fbLogs);
-        setIsLoadingLogs(false);
-        return;
-      } catch (err: any) {
-        console.error("Failed to load POS/Tickets from Firestore, falling back to mock endpoint.", err);
-        try {
-          handleFirestoreError(err, OperationType.LIST, "pos-logs");
-        } catch (formatted: any) {
-          setFirestoreError(formatted.message);
-        }
-      } finally {
-        setActiveSyncCount(prev => Math.max(0, prev - 1));
-      }
-    }
-
-    // 2. Fetch from default mock endpoint and merge with sandbox local storage if sandbox or error occurred
     try {
       const res = await fetch("/api/pos-sync-logs");
       if (res.ok) {
@@ -1582,6 +1134,9 @@ export default function App() {
     } catch (err) {
       console.error("Error fetching POS data:", err);
     } finally {
+      setIsLoadingLogs(false);
+    }
+  };
       setIsLoadingLogs(false);
     }
   };
@@ -1754,12 +1309,6 @@ export default function App() {
 
     if (userRole === "customer") {
       setActiveTab("customer-hub");
-      
-      if (authUser) {
-        // Logged-in customer: reload only their owned Firestore tickets and leads
-        fetchFirestoreTickets(authUser.uid);
-        fetchFirestoreLeads(authUser.uid);
-      }
     } else {
       // Forensic RAG Session Restore: Implement 'login-redirect' guard for authenticated technicians
       const savedTab = localStorage.getItem("dcp_last_visited_tab");
@@ -1780,10 +1329,6 @@ export default function App() {
       }
       
       fetchPOSLogs();
-      if (authUser) {
-        fetchFirestoreLeads(authUser.uid);
-        fetchFirestoreTickets(authUser.uid);
-      }
     }
   }, [userRole, authUser]);
 
@@ -4163,10 +3708,6 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
             setProfilePhone={setProfilePhone}
             profilePreferredDevice={profilePreferredDevice}
             setProfilePreferredDevice={setProfilePreferredDevice}
-            tickets={firestoreTickets}
-            setTickets={setFirestoreTickets}
-            leads={leads}
-            setLeads={setLeads}
             customerMessages={customerMessages}
             setCustomerMessages={setCustomerMessages}
             customerChatInput={customerChatInput}
@@ -4181,9 +3722,6 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
             setDeviceModel={setDeviceModel}
             setIssueType={setIssueType}
             setDeviceTier={setDeviceTier}
-            handleGoogleSignIn={handleGoogleSignIn}
-            handleSandboxLogin={handleSandboxLogin}
-            googleAccessToken={googleAccessToken}
             onSignOut={handleSignOut}
             onSignInClick={() => setIsAuthModalOpen(true)}
           />
@@ -4229,23 +3767,16 @@ If short is confirmed, replace C247_W immediately. Check sandwich layers interfa
                 ) : (
                   <>
                     <button 
-                      onClick={handleGoogleSignIn}
+                      onClick={() => window.location.href = "/api/auth/login"}
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-2 transition-colors border border-blue-500/20"
                     >
-                      Connect with Google (SSO)
+                      Sign In with Auth0
                     </button>
                     
                   </>
                 )}
               </div>
             </div>
-
-            {firestoreError && (
-              <div className="bg-red-950/40 border border-red-950/50 p-3 rounded-lg text-xs text-red-300 font-mono flex items-center gap-2 mb-4 leading-relaxed">
-                <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-                <span>[FIRESTORE EXCEPTION LOG]: {firestoreError}</span>
-              </div>
-            )}
 
             {/* Header section representing Lab identity */}
             <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
@@ -4744,7 +4275,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         name: "Forensic AI Core",
                         icon: <Brain className="w-4 h-4 text-purple-400 shrink-0 animate-pulse" />,
                         tabs: [
-                          { id: "firebase_ai", name: "Forensic AI Workbench", badge: "SDK" },
                           { id: "telemetry", name: "Triage-AI Live Telemetry", badge: "LIVE" },
                           { id: "triage", name: "Hardware Sandbox", badge: "CHAT" },
                           { id: "forensics", name: "[S2C Intelligence]", badge: "RAG" },
@@ -4760,21 +4290,10 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         ]
                       },
                       {
-                        id: "workspace",
-                        name: "Google Workspace Hub",
-                        icon: <Layers className="w-4 h-4 text-sky-450 shrink-0" />,
-                        tabs: [
-                          { id: "workspace_hub", name: "Workspace Main Hub", badge: "GWS" },
-                          { id: "forms", name: "Google Forms Intake", badge: "GWS" },
-                          { id: "gmail", name: "Gmail Communications", badge: "GWS" },
-                        ]
-                      },
-                      {
                         id: "admin",
                         name: "Operations & Admin",
                         icon: <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />,
                         tabs: [
-                          { id: "escalation", name: "Audit Callbacks", badge: "CALL" },
                           { id: "tax", name: "WA Tax Compliance", badge: "TAX" },
                           { id: "directory", name: "GCP Service Directory", badge: "GCP" },
                           { id: "gateway", name: "NIST Security Gateway", badge: "GW" },
@@ -4892,44 +4411,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   )}
                 </div>
 
-                {/* Cloud Firestore Sync Trigger Card */}
-                <div className="bg-slate-900 rounded-lg p-3.5 border border-slate-800 space-y-2.5">
-                  <div className="flex items-center gap-1.5">
-                    <Database className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Durable Cloud Sync</span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 leading-snug">
-                    Persist diagnostic quotes and customer device state records across external sessions in Google Cloud Firestore.
-                  </p>
-                  {authUser ? (
-                    <button
-                      type="button"
-                      onClick={handleCreateFirestoreTicket}
-                      disabled={ticketCreationSuccess}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[10.5px] uppercase tracking-wider rounded-md font-mono transition-all"
-                    >
-                      <Database className="w-3 h-3" />
-                      Back up Quote
-                    </button>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <button
-                        type="button"
-                        onClick={handleGoogleSignIn}
-                        className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-[10.5px] uppercase tracking-wider rounded-md font-mono transition-all"
-                      >
-                        <User className="w-3.5 h-3.5 text-blue-400" />
-                        Login with Google
-                      </button>
-                      
-                    </div>
-                  )}
-                  {ticketCreationSuccess && (
-                     <p className="text-[9px] text-emerald-400 font-bold font-mono tracking-wider text-center animate-bounce mt-1">
-                       ✔️ BACKUP PERSISTED SECURELY
-                     </p>
-                  )}
-                </div>
               </aside>
 
               {/* === CENTRAL ACTIVE PANEL: MODULE VIEWPORTS (Col-span 6) === */}
@@ -5092,10 +4573,10 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                             <span>To sync and load diagnostic runs on other tech tablets:</span>
                             <button
                               type="button"
-                              onClick={handleGoogleSignIn}
+                              onClick={() => window.location.href = "/api/auth/login"}
                               className="text-blue-400 hover:text-blue-300 font-extrabold uppercase font-mono cursor-pointer"
                             >
-                              Connect Google Auth
+                              Connect Auth0
                             </button>
                           </div>
                         ) : (
@@ -5312,7 +4793,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
                           <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-none justify-center">
                             <button
-                              onClick={handleGoogleSignIn}
+                              onClick={() => window.location.href = "/api/auth/login"}
                               className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/10 inline-flex items-center gap-2 w-full sm:w-auto justify-center cursor-pointer"
                             >
                               <User className="w-4 h-4" />
@@ -5409,7 +4890,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
                           <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-none justify-center">
                             <button
-                              onClick={handleGoogleSignIn}
+                              onClick={() => window.location.href = "/api/auth/login"}
                               className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/10 inline-flex items-center gap-2 w-full sm:w-auto justify-center cursor-pointer"
                             >
                               <User className="w-4 h-4" />
@@ -5744,79 +5225,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       </div>
                     </div>
 
-                    {/* Durable Cloud backups (Firestore) */}
-                    <div className="mb-6">
-                      <div className="flex justify-between items-center mb-3 border-t border-slate-700/80 pt-5">
-                        <h3 className="text-xs font-extrabold text-blue-350 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                          <Database className="w-4 h-4 text-emerald-450" />
-                          Durable Cloud backups (Firestore)
-                          {authUser && (
-                            <span className="bg-emerald-950/50 text-emerald-300 text-[10px] px-1 py-0.5 rounded font-mono font-bold border border-emerald-800/40">
-                              {firestoreTickets.length} BACKUPS
-                            </span>
-                          )}
-                        </h3>
-                      </div>
-
-                      {authUser ? (
-                        firestoreTickets.length === 0 ? (
-                          <div className="bg-slate-900 border border-slate-850 rounded-lg p-5 text-center font-mono text-[11px] text-slate-400">
-                            [System notice: No ticket backups stored for user {authUser.displayName || authUser.email} in Cloud Firestore yet. Run 'Back up Quote' in the standard sidebar panel to generate persistent data.]
-                          </div>
-                        ) : (
-                          <div className="border border-slate-700/80 rounded-lg overflow-hidden bg-slate-950 shadow-inner max-h-[220px] overflow-y-auto">
-                            <table className="w-full text-left border-collapse text-xs">
-                              <thead>
-                                <tr className="bg-slate-950 text-slate-400 font-mono text-[9px] uppercase border-b border-slate-800">
-                                  <th className="p-3">Doc Ref</th>
-                                  <th className="p-3">Device Target</th>
-                                  <th className="p-3">Grand Total</th>
-                                  <th className="p-3">Backup Date</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-850 font-mono text-[10.5px]">
-                                {firestoreTickets.map((ft) => (
-                                  <tr key={ft.id} className="hover:bg-slate-900/40 transition-colors">
-                                    <td className="p-3 font-semibold text-emerald-400 flex items-center gap-1">
-                                      <Database className="w-3 h-3 text-emerald-500" />
-                                      <span>{ft.id}</span>
-                                    </td>
-                                    <td className="p-3 text-slate-300 font-sans">
-                                      {ft.device}
-                                      <div className="text-[9px] text-slate-500 uppercase mt-0.5">{ft.issueType}</div>
-                                      {ft.internalNotes && (
-                                        <div className="text-[9.5px] text-emerald-400 border-l-2 border-emerald-500 bg-emerald-500/5 px-1.5 py-0.5 rounded mt-1 select-all font-mono leading-relaxed max-w-[180px] break-words" title={ft.internalNotes}>
-                                          ✍️ {ft.internalNotes}
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="p-3 text-white font-bold">
-                                      ${ft.total.toFixed(2)}
-                                    </td>
-                                    <td className="p-3 text-slate-400 text-[10px]">
-                                      {new Date(ft.createdAt).toLocaleString()}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )
-                      ) : (
-                        <div className="bg-slate-900/65 border border-slate-800 rounded-xl p-5 text-center font-mono text-xs text-slate-400 leading-relaxed">
-                          <p className="font-sans mb-3 text-xs">Unlock persistent multi-device sync, cloud billing pipelines, and custom Spokane service backups.</p>
-                          <div className="flex flex-wrap items-center justify-center gap-3">
-                            <button
-                              onClick={handleGoogleSignIn}
-                              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-[10.5px] font-bold uppercase tracking-wider rounded-lg shadow-md font-mono inline-flex items-center gap-1.5"
-                            >
-                              Connect via Google Sign-In
-                            </button>
-                            
-                          </div>
-                        </div>
-                      )}
-                    </div>
 
                     {/* Sync logs console & Record-Keeping Exporter */}
                     <div className="grid grid-cols-12 gap-5 mt-4 pt-4 border-t border-slate-700/60">
@@ -6589,192 +5997,11 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   </section>
                 )}
 
-                {/* 5. HIGH-PRIORITY LEAD CALLBACK MODULE */}
-                {labTab === "escalation" && (
-                  <section className="bg-slate-800 border border-slate-700 rounded-xl flex flex-col flex-1 shadow-md p-5 animate-in fade-in duration-300">
-                    <div className="flex flex-col xl:flex-row xl:items-center justify-between border-b border-slate-700 pb-4 mb-5 gap-3">
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-5 h-5 text-amber-500 animate-pulse" />
-                        <div>
-                          <h2 className="text-sm font-bold text-white uppercase tracking-tight">Tier 3 Hardware Escalation Callbacks</h2>
-                          <p className="text-xs text-slate-400">Manage high-priority diagnostic leads for complex board-level and moisture repairs.</p>
-                        </div>
-                      </div>
-                      
-                      {authUser && (
-                        <div className="flex items-center gap-2">
-                          <span className="bg-amber-950/80 border border-amber-900 px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold text-amber-300 uppercase">
-                            Firestore sync active
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-12 gap-5 mb-5 flex-1 items-stretch">
-                      
-                      {/* Left Side: Create Callback Escalation Lead Form (Col-span 5) */}
-                      <div className="col-span-12 lg:col-span-5 bg-slate-900/45 border border-slate-755 rounded-xl p-4 flex flex-col justify-between">
-                        <div>
-                          <div className="border-b border-slate-700/60 pb-2.5 mb-3.5 flex items-center justify-between">
-                            <span className="text-[10.5px] font-bold text-amber-400 uppercase tracking-widest font-mono">Create Escalation</span>
-                            <span className="text-[9px] text-slate-500 font-mono">*Route to Tier 3 queue</span>
-                          </div>
-
-                          <form onSubmit={(e) => {
-                            e.preventDefault();
-                            const form = e.currentTarget;
-                            const fd = new FormData(form);
-                            const name = fd.get("leadCustomer") as string;
-                            const phone = fd.get("leadPhone") as string;
-                            const model = fd.get("leadModel") as string;
-                            
-                            const phoneRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
-                            if (!phoneRegex.test(phone.trim())) {
-                              addToast("Validation Failed", "Please enter a valid phone number format (e.g. 509-555-1234).", "warning");
-                              return;
-                            }
-                            
-                            handleCreateLead(name, phone, model);
-                            form.reset();
-                          }} className="space-y-4">
-                            <div>
-                              <label htmlFor="leadCustomer" className="block text-[10px] text-slate-400 font-bold uppercase mb-1.5 font-mono">Customer Name</label>
-                              <input 
-                                id="leadCustomer"
-                                name="leadCustomer"
-                                type="text"
-                                required 
-                                className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-slate-650"
-                                placeholder="Sarah Jenkins"
-                              />
-                            </div>
-
-                            <div>
-                              <label htmlFor="leadPhone" className="block text-[10px] text-slate-400 font-bold uppercase mb-1.5 font-mono">Callback Phone</label>
-                              <input 
-                                id="leadPhone"
-                                name="leadPhone"
-                                type="tel"
-                                required 
-                                className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-slate-650 font-mono"
-                                placeholder="509-535-4200"
-                              />
-                            </div>
-
-                            <div>
-                              <label htmlFor="leadModel" className="block text-[10px] text-slate-400 font-bold uppercase mb-1.5 font-mono">Device Model</label>
-                              <input 
-                                id="leadModel"
-                                name="leadModel"
-                                type="text"
-                                required
-                                defaultValue={`${deviceBrand} ${deviceModel}`}
-                                className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-slate-650 font-mono"
-                                placeholder="iPhone 15 Pro Max"
-                              />
-                            </div>
-
-                            <button
-                              type="submit"
-                              className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-md font-mono transition-colors flex items-center justify-center gap-2 mt-4"
-                            >
-                              <Phone className="w-3.5 h-3.5" />
-                              Submit to Callback Queue
-                            </button>
-                          </form>
-                        </div>
-                        
-                        <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-3 text-[10px] text-slate-400 mt-4 leading-relaxed font-sans mt-auto">
-                          <strong className="text-amber-300 block mb-0.5 font-mono">Tier 3 Board Diagnostics:</strong>
-                          Requires manual thermal camera scan and micro-soldering. Field technician will call customer within 24 hours to confirm quoted laboratory costs.
-                        </div>
-                      </div>
-
-                      {/* Right Side: Leads Queue & Status Tracker (Col-span 7) */}
-                      <div className="col-span-12 lg:col-span-7 bg-slate-900/45 border border-slate-755 rounded-xl p-4 flex flex-col justify-between">
-                        <div className="flex-1 flex flex-col">
-                          <div className="flex items-center justify-between border-b border-slate-700/60 pb-2.5 mb-3.5">
-                            <span className="text-[10.5px] font-bold text-amber-400 uppercase tracking-widest font-mono">Active Callback Leads</span>
-                            <span className="bg-amber-950/80 border border-amber-900 px-1.5 py-0.2 rounded font-mono text-[9px] text-amber-300 block font-bold">{leads.length} LEADS</span>
-                          </div>
-
-                          {isLoadingLeads ? (
-                            <div className="flex-1 flex items-center justify-center p-8 text-xs text-slate-400 font-mono">
-                              <span className="animate-pulse">Loading leads from Firestore...</span>
-                            </div>
-                          ) : leads.length === 0 ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-955 border border-dashed border-slate-850 rounded">
-                              <Phone className="w-8 h-8 text-slate-650 mb-2" />
-                              <div className="text-slate-500 font-mono text-[10px]">No high-priority leads mapped to this credential.</div>
-                              <p className="text-[9px] text-slate-500 max-w-sm mt-1">Submit the left form or trigger motherboard damage triage to add callback tickets.</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-3.5 max-h-[360px] overflow-y-auto pr-1 flex-1">
-                              {leads.map((lead) => (
-                                <div key={lead.id} className="bg-slate-950/60 border border-slate-850 p-3.5 rounded-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 transition-all hover:border-amber-900/40">
-                                  <div className="space-y-1 text-left">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-mono text-[9px] font-bold text-amber-400 select-all">{lead.id}</span>
-                                      <span className="bg-slate-900 text-slate-400 border border-slate-800 text-[8px] px-1.5 py-[1px] rounded font-mono">
-                                        {new Date(lead.createdAt).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                    <h4 className="text-xs font-bold text-white leading-relaxed">{lead.customerName}</h4>
-                                    <p className="text-[10.5px] font-mono text-slate-400 flex items-center gap-1">
-                                      <span className="text-slate-500">Device:</span> <strong className="text-slate-350">{lead.deviceModel}</strong>
-                                    </p>
-                                    <p className="text-[10.5px] font-mono text-slate-400 flex items-center gap-1">
-                                      <span className="text-slate-500">Phone:</span> <strong className="text-emerald-450 select-all">{lead.phone}</strong>
-                                    </p>
-                                  </div>
-
-                                  <div className="flex lg:flex-col items-start lg:items-end gap-2 shrink-0">
-                                    <span className={`px-2 py-0.5 rounded font-mono text-[9.5px] font-extrabold uppercase tracking-wide inline-block border ${
-                                      lead.status === "pending" ? "bg-red-950/50 text-red-450 border-red-900" :
-                                      lead.status === "in_progress" ? "bg-yellow-950/50 text-yellow-450 border-yellow-905" :
-                                      lead.status === "contacted" ? "bg-amber-955/50 text-amber-350 border-amber-900" :
-                                      lead.status === "completed" ? "bg-emerald-950/50 text-emerald-450 border-emerald-900" :
-                                      "bg-slate-900 text-slate-500 border-slate-700"
-                                    }`}>
-                                      {lead.status.replace("_", " ")}
-                                    </span>
-
-                                    <div className="flex items-center gap-1.5">
-                                      <label htmlFor={`status-select-${lead.id}`} className="sr-only">Update Status</label>
-                                      <select
-                                        id={`status-select-${lead.id}`}
-                                        value={lead.status}
-                                        onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value as any)}
-                                        className="bg-slate-950 text-slate-300 font-mono text-[9.5px] rounded border border-slate-800 px-1.5 py-1 outline-none focus:border-amber-600 cursor-pointer"
-                                      >
-                                        <option value="pending">Pending Call</option>
-                                        <option value="in_progress">In Progress</option>
-                                        <option value="contacted">Contacted</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="cancelled">Cancelled</option>
-                                      </select>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="text-[9.5px] text-slate-500 font-mono mt-4 leading-normal select-none">
-                          *Manual callbacks prevent RMA leaks and fulfill sovereign customer relations compliance.
-                        </div>
-                      </div>
-
-                    </div>
-                  </section>
-                )}
 
                 {labTab === "telemetry" && (
                   <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing Telemetry Subsystem...</div>}>
                     <TelemetryDashboard
                       authUser={authUser}
-                      handleGoogleSignIn={handleGoogleSignIn}
                       addToast={addToast}
                     />
                   </React.Suspense>
@@ -6863,48 +6090,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       pass={pass}
                     />
                   </React.Suspense>
-                )}
-
-                {labTab === "forms" && (
-                  <FormsIntegrationView
-                    accessToken={googleAccessToken}
-                    authUser={authUser}
-                    onLinkGoogleAuth={handleGoogleSignIn}
-                    addToast={addToast}
-                    onAddNewTicket={handleAddNewTicketFromForms}
-                    onAddNewLead={handleAddNewLeadFromForms}
-                  />
-                )}
-
-                {labTab === "gmail" && (
-                  <GmailIntegrationView
-                    accessToken={googleAccessToken}
-                    authUser={authUser}
-                    onLinkGoogleAuth={handleGoogleSignIn}
-                    addToast={addToast}
-                    tickets={tickets}
-                    leads={leads}
-                  />
-                )}
-
-                {labTab === "firebase_ai" && (
-                  <React.Suspense fallback={<div className="p-8 flex items-center justify-center text-slate-500 font-mono text-xs animate-pulse">Initializing Firebase AI Workbench...</div>}>
-                    <FirebaseAiWorkbenchView
-                      addToast={addToast}
-                    />
-                  </React.Suspense>
-                )}
-
-                {labTab === "workspace_hub" && (
-                  <GoogleWorkspaceHubView
-                    accessToken={googleAccessToken}
-                    authUser={authUser}
-                    onLinkGoogleAuth={handleGoogleSignIn}
-                    addToast={addToast}
-                    tickets={tickets}
-                    leads={leads}
-                    onAddNewTicket={handleAddNewTicketFromForms}
-                  />
                 )}
 
                 {labTab === "quote_builder" && (
@@ -8737,7 +7922,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                     type="button"
                     onClick={async () => {
                       try {
-                        await handleGoogleSignIn();
+                        window.location.href = "/api/auth/login";
                         // Close modal if auth becomes correct or we handle state check reactively
                         setTimeout(() => {
                           const isNowAdmin = (auth.currentUser?.email?.trim().toLowerCase() === "cheyoung1983@gmail.com" || auth.currentUser?.email?.trim().toLowerCase() === "ryan@displaycellpros.com");
@@ -9477,7 +8662,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
       <AuthModal 
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onGoogleSignIn={handleGoogleSignIn}
+        onGoogleSignIn={() => window.location.href = "/api/auth/login"}
         onSuperAdminLogin={handleSandboxLogin}
         addToast={addToast}
       />
@@ -10931,9 +10116,6 @@ interface CustomerHubViewProps {
   setDeviceModel: (m: string) => void;
   setIssueType: (i: "screen" | "battery" | "button") => void;
   setDeviceTier: (t: "flagship" | "midrange" | "budget") => void;
-  handleGoogleSignIn: () => Promise<void>;
-  handleSandboxLogin: () => void;
-  googleAccessToken: string | null;
   onSignOut?: () => void;
   onSignInClick?: () => void;
 }
@@ -10946,10 +10128,6 @@ function CustomerHubView({
   setProfilePhone,
   profilePreferredDevice,
   setProfilePreferredDevice,
-  tickets,
-  setTickets,
-  leads,
-  setLeads,
   customerMessages,
   setCustomerMessages,
   customerChatInput,
@@ -10964,9 +10142,6 @@ function CustomerHubView({
   setDeviceModel,
   setIssueType,
   setDeviceTier,
-  handleGoogleSignIn,
-  handleSandboxLogin,
-  googleAccessToken,
   onSignOut,
   onSignInClick
 }: CustomerHubViewProps) {
@@ -11039,10 +10214,10 @@ function CustomerHubView({
         delete (window as any).onSubmitBooking;
       }
     };
-  }, [bookDate, bookTime, bookRemarks, customerName, profilePhone, profilePreferredDevice, authUser, googleAccessToken]);
+  }, [bookDate, bookTime, bookRemarks, customerName, profilePhone, profilePreferredDevice, authUser]);
 
   // Requirement: block customer from accessing diagnostic features until they sign up
-  if (!authUser || authUser.isAnonymous) {
+  if (!authUser) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 animate-in fade-in duration-300">
         <div className="bg-gradient-to-r from-blue-900/40 via-slate-900 to-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden text-center">
@@ -11086,7 +10261,7 @@ function CustomerHubView({
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               id="customer-google-signin"
-              onClick={handleGoogleSignIn}
+              onClick={() => window.location.href = "/api/auth/login"}
               className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/20 inline-flex items-center gap-2 w-full sm:w-auto justify-center cursor-pointer"
             >
               <User className="w-4 h-4" />
@@ -11255,75 +10430,7 @@ function CustomerHubView({
   };
 
   const handleDirectCalendarPush = async () => {
-    if (!bookDate) {
-      addToast("Field Required", "Please choose a desired dispatch date before pushing to Google Calendar.", "error");
-      return;
-    }
-
-    let token = googleAccessToken;
-    if (!token) {
-      addToast("SSO Authentication Initiated", "Redirecting to authorize Google Workspace integration...", "info");
-      try {
-        await handleGoogleSignIn();
-        addToast("Authentication Success", "Session linked! Press 'Push to Google Calendar' again to finalize database transmission.", "success");
-        return;
-      } catch (authErr: any) {
-        addToast("Authorization Fault", authErr.message || "Failed to link Google account.", "error");
-        return;
-      }
-    }
-
-    setIsPushingCalendarItem(true);
-    try {
-      // Parse time windows
-      let startHour = "10:00";
-      let endHour = "12:00";
-      if (bookTime.includes("12:00 PM")) {
-        startHour = "12:00";
-        endHour = "14:00";
-      } else if (bookTime.includes("2:00 PM")) {
-        startHour = "14:00";
-        endHour = "16:00";
-      } else if (bookTime.includes("4:00 PM")) {
-        startHour = "16:00";
-        endHour = "18:00";
-      }
-
-      const startDateTime = `${bookDate}T${startHour}:00`;
-      const endDateTime = `${bookDate}T${endHour}:00`;
-
-      const eventBody = {
-        summary: `🛠️ D&CP Diagnostic/Lab Surgery: ${profilePreferredDevice}`,
-        description: `Lab Diagnostic - Board forensics and hardware rescue.\nClient: ${customerName}\nPhone: ${profilePhone}\nDirections & Remarks: ${bookRemarks || "No special instructions."}\nManual synchronization triggered on workbench.`,
-        start: { dateTime: startDateTime, timeZone: "America/Los_Angeles" },
-        end: { dateTime: endDateTime, timeZone: "America/Los_Angeles" }
-      };
-
-      const res = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(eventBody)
-      });
-
-      if (res.ok) {
-        addToast(
-          "Google Calendar Event Synced!", 
-          `Registered custom appointment for ${bookDate} (${bookTime}) directly inside your google calendar details!`, 
-          "success"
-        );
-      } else {
-        const errObj = await res.json().catch(() => ({}));
-        throw new Error(errObj?.error?.message || `HTTP ${res.status}`);
-      }
-    } catch (err: any) {
-      console.error(err);
-      addToast("Manual Sync Failed", err.message || "Could not push to Google Calendar.", "error");
-    } finally {
-      setIsPushingCalendarItem(false);
-    }
+    addToast("Feature Unavailable", "Google Calendar integration is currently disabled.", "info");
   };
 
   const handleBookAppointmentWithToken = async (token: string) => {
@@ -11369,54 +10476,6 @@ function CustomerHubView({
       }
       
       setLeads(prev => [newLead, ...prev]);
-
-      let calendarSyncSuccess = false;
-
-      // --- INTERACTIVE GOOGLE CALENDAR SYNC DISPATCHER ---
-      if (googleAccessToken) {
-        try {
-          // Parse time window
-          let startHour = "10:00";
-          let endHour = "12:00";
-          if (bookTime.includes("12:00 PM")) {
-            startHour = "12:00";
-            endHour = "14:00";
-          } else if (bookTime.includes("2:00 PM")) {
-            startHour = "14:00";
-            endHour = "16:00";
-          } else if (bookTime.includes("4:00 PM")) {
-            startHour = "16:00";
-            endHour = "18:00";
-          }
-
-          const startDateTime = `${bookDate}T${startHour}:00`;
-          const endDateTime = `${bookDate}T${endHour}:00`;
-
-          const bodyContent = {
-            summary: `🛠️ D&CP Diagnostic/Lab Surgery: ${profilePreferredDevice}`,
-            description: `Lab Diagnostic - Board forensics and hardware rescue.\nClient: ${customerName}\nPhone: ${profilePhone}\nDirections & Remarks: ${bookRemarks || "No special instructions."}\nSystem Verification ID: ${newLead.id}`,
-            start: { dateTime: startDateTime, timeZone: "America/Los_Angeles" },
-            end: { dateTime: endDateTime, timeZone: "America/Los_Angeles" }
-          };
-
-          const calRes = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${googleAccessToken}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(bodyContent)
-          });
-
-          if (calRes.ok) {
-            calendarSyncSuccess = true;
-          } else {
-            console.warn("Google Calendar non-200 status response:", calRes.status);
-          }
-        } catch (calErr) {
-          console.error("Error creating Google Calendar appointment:", calErr);
-        }
-      }
 
       setBookRemarks("");
       localStorage.removeItem("dcp_draft_bookDate");
@@ -11520,7 +10579,6 @@ function CustomerHubView({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
       <div className="mb-4 flex justify-end gap-2">
-        <AuthStatus />
         <IntakeSpecialistButton />
       </div>
       
@@ -11538,7 +10596,7 @@ function CustomerHubView({
         <div className="flex flex-col items-start sm:items-end gap-2 shrink-0 z-10 font-mono">
           <div className="text-xs text-slate-400 flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
             <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            GCP Datacenter Node Online
+            Auth0 Session Active
           </div>
           <p className="text-[11px] text-slate-500">Device linked: {profilePreferredDevice}</p>
         </div>
@@ -11694,13 +10752,6 @@ function CustomerHubView({
                 </div>
               </div>
 
-              {authUser && onSignOut && (
-                <FirebaseUserAuditor 
-                  user={authUser} 
-                  addToast={addToast} 
-                  onLogout={onSignOut} 
-                />
-              )}
             </div>
           )}
 
@@ -12016,100 +11067,6 @@ function CustomerHubView({
                       </div>
                     </div>
 
-                    {/* Google Calendar Direct Push Integration Segment */}
-                    <div className="p-4 rounded-xl border text-left flex flex-col gap-4 transition-all text-xs bg-slate-950/70 border-slate-800 shadow-xl">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" />
-                          <h4 className="font-extrabold uppercase font-mono tracking-wider text-[11px] text-slate-200">
-                            Sync to Google Calendar
-                          </h4>
-                        </div>
-                        {googleAccessToken ? (
-                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md font-bold uppercase font-mono">
-                            Connected
-                          </span>
-                        ) : (
-                          <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-bold uppercase font-mono">
-                            Offline
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Display the selected date and time beautifully in an explicit preview box */}
-                      <div className="bg-slate-900/90 border border-slate-800 rounded-lg p-3.5 space-y-2">
-                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest block">Selected Appointment Info</span>
-                        
-                        <div className="grid grid-cols-2 gap-3 pt-1">
-                          <div>
-                            <span className="text-[10px] text-slate-400 uppercase font-mono block">Scheduled Date</span>
-                            <span className="text-xs font-extrabold text-blue-400 font-mono block mt-0.5">
-                              {bookDate ? (
-                                new Date(bookDate + "T00:00:00").toLocaleDateString(undefined, {
-                                  weekday: 'short',
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric'
-                                })
-                              ) : (
-                                "⚠️ No Date Selected"
-                              )}
-                            </span>
-                          </div>
-
-                          <div>
-                            <span className="text-[10px] text-slate-400 uppercase font-mono block">Time Window</span>
-                            <span className="text-xs font-extrabold text-teal-400 font-mono block mt-0.5">
-                              {bookTime}
-                            </span>
-                          </div>
-                        </div>
-
-                        {bookDate && (
-                          <div className="text-[10px] text-slate-450 border-t border-slate-850 pt-2 flex items-center justify-between">
-                            <span>Target Device: <strong className="text-slate-300 font-mono">{profilePreferredDevice || "Diagnostic Lab Unit"}</strong></span>
-                            <span className="text-slate-500">Duration: 2 Hours</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <p className="text-[11px] text-slate-400 leading-normal">
-                        Click the button below to publish this appointment slot directly to your primary Google Calendar.
-                      </p>
-
-                      <div className="flex flex-col gap-2">
-                        {googleAccessToken ? (
-                          <button
-                            type="button"
-                            onClick={handleDirectCalendarPush}
-                            disabled={isPushingCalendarItem}
-                            className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-lg shadow-md flex items-center justify-center gap-2 cursor-pointer transition-transform"
-                          >
-                            {isPushingCalendarItem ? (
-                              <>
-                                <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                Syncing to Google Calendar...
-                              </>
-                            ) : (
-                              <>
-                                📅 Sync to Google Calendar
-                              </>
-                            )}
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={handleDirectCalendarPush}
-                            className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-lg shadow-md flex items-center justify-center gap-2 cursor-pointer transition-transform"
-                          >
-                            ⚡ Authorize & Sync to Google Calendar
-                          </button>
-                        )}
-                      </div>
-                    </div>
 
                     {/* reCAPTCHA Telemetry feedback log inside booking container */}
                     {(bookingRecaptchaLog || bookingRecaptchaScore !== null) && (
