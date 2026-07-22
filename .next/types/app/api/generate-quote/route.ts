@@ -1,8 +1,8 @@
-// File: C:\Users\cheyo\OneDrive\Documents\GitHub\www.displaycellpros.com-refractored\app\api\generate-quote\route.ts
-import * as entry from '../../../../../app/api/generate-quote/route.js'
+// File: C:\Users\cheyo\OneDrive\Documents\GitHub\www.displaycellpros.com-refractored\src\app\api\generate-quote\route.ts
+import * as entry from '../../../../../src/app/api/generate-quote/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../app/api/generate-quote/route.js')
+type TEntry = typeof import('../../../../../src/app/api/generate-quote/route.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

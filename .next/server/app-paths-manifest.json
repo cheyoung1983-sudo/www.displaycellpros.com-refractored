@@ -1,15 +1,15 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/api/health/route": "app/api/health/route.js",
-  "/api/generate-quote/route": "app/api/generate-quote/route.js",
-  "/api/tickets/route": "app/api/tickets/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/tax-lookup/route": "app/api/tax-lookup/route.js",
   "/api/triage/route": "app/api/triage/route.js",
+  "/api/tickets/route": "app/api/tickets/route.js",
+  "/api/generate-quote/route": "app/api/generate-quote/route.js",
+  "/services/page": "app/services/page.js",
+  "/privacy/page": "app/privacy/page.js",
+  "/store/page": "app/store/page.js",
   "/b2b/page": "app/b2b/page.js",
   "/lab/page": "app/lab/page.js",
-  "/page": "app/page.js",
-  "/services/page": "app/services/page.js",
   "/welcome/page": "app/welcome/page.js",
-  "/privacy/page": "app/privacy/page.js",
-  "/store/page": "app/store/page.js"
+  "/page": "app/page.js"
 }

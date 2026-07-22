@@ -1,8 +1,8 @@
-// File: C:\Users\cheyo\OneDrive\Documents\GitHub\www.displaycellpros.com-refractored\app\privacy\page.tsx
-import * as entry from '../../../../app/privacy/page.js'
+// File: C:\Users\cheyo\OneDrive\Documents\GitHub\www.displaycellpros.com-refractored\src\app\privacy\page.tsx
+import * as entry from '../../../../src/app/privacy/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../app/privacy/page.js')
+type TEntry = typeof import('../../../../src/app/privacy/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

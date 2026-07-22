@@ -1,8 +1,8 @@
-// File: C:\Users\cheyo\OneDrive\Documents\GitHub\www.displaycellpros.com-refractored\app\api\tax-lookup\route.ts
-import * as entry from '../../../../../app/api/tax-lookup/route.js'
+// File: C:\Users\cheyo\OneDrive\Documents\GitHub\www.displaycellpros.com-refractored\src\app\api\tax-lookup\route.ts
+import * as entry from '../../../../../src/app/api/tax-lookup/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../app/api/tax-lookup/route.js')
+type TEntry = typeof import('../../../../../src/app/api/tax-lookup/route.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
