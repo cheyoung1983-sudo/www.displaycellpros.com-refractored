@@ -1,48 +1,40 @@
-# Implementation Plan: Repository Cleanup & Vercel-Native Transition
+# Implementation Plan: Vercel + Aurora PostgreSQL Integration (Final Steps)
 
-The goal is to fix the GitHub repository by cleaning up the commit history, removing untracked build artifacts, and fully transitioning the project to a Vercel-native architecture (Auth0 + Next.js + Vercel Postgres) while removing all Google/Firebase dependencies as requested.
+The goal is to finalize the Aurora PostgreSQL integration by setting up the `comments` table, implementing the modern database access pattern, and creating a page to display comments.
 
 ## User Review Required
 
-> [!CAUTION]
-> **Repository Sync Strategy:** The local and remote branches have diverged significantly (by over 240 commits, mostly build artifacts). I propose using a `reset --soft` strategy to flatten the local changes into a single clean commit on top of the remote history. This will "fix" the repository history while preserving all your current work.
+> [!IMPORTANT]
+> **Page Replacement:** The guide suggests updating `page.tsx`. In your current project, `src/app/page.tsx` is your Auth0 Login Portal. I will create a new route at `src/app/comments/page.tsx` to preserve your portal while fulfilling the guide's requirements.
 >
-> **Firebase Removal:** I will be deleting all Firebase and Google-specific code (Auth, Firestore, Analytics). Please ensure you have backed up any data from the Firebase console if needed.
+> **Database Credentials:** This implementation relies on `PGHOST`, `PGPORT`, `PGUSER`, `PGDATABASE`, and `AWS_ROLE_ARN` being correctly set in your environment.
 
 ## Proposed Changes
 
-### [Repository Integrity]
+### [Database Setup]
 
-#### [MODIFY] [.gitignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.gitignore)
-- Add `.next/`, `.idea/`, `.vercel/`, `out/`, and `dist/` to ensure build artifacts and IDE settings are never tracked again.
+#### [NEW] [setup-comments.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/scripts/setup-comments.ts)
+- A one-time script to create the `comments` table in RDS using your existing IAM credentials.
 
-#### [ACTION] Git Index Cleanup
-- Stop tracking `.next/`, `.idea/`, and `.vercel/` folders that are currently in the Git index.
-- Flatten the diverged history into a single clean "Next.js + Auth0 Migration" commit.
+### [Database Library]
 
-### [Vercel-Native Transition]
+#### [MODIFY] [db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/db.ts)
+- Replace the existing logic with the provided singleton pattern using `@vercel/functions/oidc`.
+- Export `query` and `withConnection` as standardized access functions.
 
-#### [DELETE] Firebase Files
-- Remove `src/lib/firebase.ts`, `src/lib/firebase-admin.ts`, and `src/lib/firebase-errors.ts`.
+### [Frontend]
 
-#### [MODIFY] [layout.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/layout.tsx)
-- Remove Google Analytics (`gtag.js`) scripts.
-- Remove the `google-site-verification` meta tag.
-
-#### [MODIFY] [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx)
-- Remove all Firebase imports (`firebase/auth`, `firebase/firestore`).
-- Remove `FirebaseUserAuditor` and `FirebaseAiWorkbenchView` logic.
-- Replace Firebase Auth state management with Auth0 (where applicable, though the new `page.tsx` already handles this).
-
-#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
-- Remove `firebase` and `firebase-admin` dependencies.
+#### [NEW] [page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/comments/page.tsx)
+- Create a new page that fetches and displays records from the `comments` table.
+- Implements the "Next.js + Aurora PostgreSQL" UI from the guide.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run lint` to ensure no broken references remain after removing Firebase.
-- Run `npm run build` locally to verify the Next.js build succeeds without errors.
+- Run the setup script to confirm table creation.
+- Run `npm run build` to ensure the new `comments` route and `db.ts` refactor are valid.
 
 ### Manual Verification
-- Verify that the new Auth0 login screen loads correctly.
-- Ensure no "Google" or "Firebase" related logs appear in the browser console.
+1. Start the app with `npm run dev`.
+2. Navigate to `http://localhost:3000/comments`.
+3. Verify that the "Next.js + Aurora PostgreSQL" heading is visible and (if data exists) comments are displayed.

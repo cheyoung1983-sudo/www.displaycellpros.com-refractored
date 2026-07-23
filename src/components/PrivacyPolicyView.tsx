@@ -178,7 +178,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
               To ensure transparency and conform with industry standard User Data Policies, we explicitly document
               the exact scope and usage of requested User Data:
             </p>
-            <div className="bg-slate-900 border border-slate-750 rounded-xl p-4 space-y-4">
+            <div className="bg-slate-900 border border-slate-755 rounded-xl p-4 space-y-4">
               <div className="flex items-start gap-3">
                 <Info className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
                 <div className="space-y-1.5">
@@ -319,7 +319,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
           </section>
 
           {/* Section 4: Direct Verification Link instructions */}
-          <section className="bg-blue-950/20 border border-blue-500/20 rounded-xl p-5 space-y-3">
+          <section className="bg-blue-955/20 border border-blue-500/20 rounded-xl p-5 space-y-3">
             <h3 className="text-sm font-bold text-blue-350 flex items-center gap-1.5 uppercase font-mono">
               <Scale className="w-4.5 h-4.5 text-blue-400" />
               Trust & Safety Quick-Link

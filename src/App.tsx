@@ -4422,7 +4422,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                                   </span>
-                                  ANALYZING GOOGLE SEARCH GROUNDING DATA SOURCES...
+                                  ANALYZING CLOUD SEARCH GROUNDING DATA SOURCES...
                                 </span>
                               </div>
                             </div>
@@ -4431,9 +4431,9 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
                         {/* Grounding Citations rendering */}
                         {groundingSources.length > 0 && (
-                          <div className="px-5 py-3 border-t border-slate-750 bg-slate-900/50">
+                          <div className="px-5 py-3 border-t border-slate-755 bg-slate-900/50">
                             <span className="text-[9px] text-blue-450 uppercase font-extrabold font-mono tracking-widest block mb-1.5">
-                              🌐 GOOGLE SEARCH GROUNDING SOURCES USED:
+                              🌐 CLOUD SEARCH GROUNDING SOURCES USED:
                             </span>
                             <div className="flex flex-wrap gap-1.5">
                               {groundingSources.map((source, index) => (
@@ -4499,7 +4499,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                           </form>
                           <div className="flex items-center gap-2 mt-2 px-1 justify-between text-[9px] text-slate-500 font-mono">
                             <span className="flex items-center gap-2">
-                              <span>Google Grounded live query mode active. Spokane-focused local indexes applied.</span>
+                              <span>Cloud Grounded live query mode active. Spokane-focused local indexes applied.</span>
                               {chatInput.trim() && (
                                 <span className="text-amber-500 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 animate-pulse">
                                   ● DRAFT AUTO-SAVED
@@ -5287,7 +5287,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       <div className="flex items-center gap-2">
                         <Database className="w-5 h-5 text-blue-400" />
                         <div>
-                          <h2 className="text-sm font-bold text-white uppercase tracking-tight">GCP Service Directory Console</h2>
+                          <h2 className="text-sm font-bold text-white uppercase tracking-tight">Cloud Sync Registry Console</h2>
                           <p className="text-xs text-slate-400">Discover and manage registered microservices, endpoints, and metadata labels.</p>
                         </div>
                       </div>
@@ -8050,9 +8050,9 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
           {
             type: "TXT",
             host: subdomain === "@" ? "@" : subdomain,
-            value: `google-site-verification=gcr-uscentral1-${rootDomain.replace(/\./g, "-")}-VerificationToken5528`,
+            value: `cloud-sync-site-verification=gcr-uscentral1-${rootDomain.replace(/\./g, "-")}-VerificationToken5528`,
             ttl: "3600 (1 Hr)",
-            purpose: "Google Cloud Platform Domain Security & Ownership Verification",
+            purpose: "Cloud Sync Domain Security & Ownership Verification",
             status: "Ready to Verify"
           },
           {
@@ -8068,7 +8068,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             host: "@",
             value: "216.239.32.21",
             ttl: "3600 (1 Hr)",
-            purpose: "Google Global Anycast Front-End Gateway Routing (Primary)",
+            purpose: "Cloud Sync Anycast Front-End Gateway Routing (Primary)",
             status: "Direct Connect"
           },
           {
@@ -8076,7 +8076,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             host: "@",
             value: "216.239.34.21",
             ttl: "3600 (1 Hr)",
-            purpose: "Google Global Anycast Front-End Gateway Routing (Secondary)",
+            purpose: "Cloud Sync Anycast Front-End Gateway Routing (Secondary)",
             status: "Direct Connect"
           },
           {
@@ -8084,7 +8084,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             host: "@",
             value: "216.239.36.21",
             ttl: "3600 (1 Hr)",
-            purpose: "Google Global Anycast Front-End Gateway Routing (Tertiary)",
+            purpose: "Cloud Sync Anycast Front-End Gateway Routing (Tertiary)",
             status: "Direct Connect"
           },
           {
@@ -8092,7 +8092,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             host: "@",
             value: "216.239.38.21",
             ttl: "3600 (1 Hr)",
-            purpose: "Google Global Anycast Front-End Gateway Routing (Backup)",
+            purpose: "Cloud Sync Anycast Front-End Gateway Routing (Backup)",
             status: "Direct Connect"
           },
           {
@@ -8133,7 +8133,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                     <Globe className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-white text-base font-extrabold font-mono tracking-wide uppercase">Google Cloud Run DNS Configuration</h3>
+                    <h3 className="text-white text-base font-extrabold font-mono tracking-wide uppercase">Cloud Sync DNS Configuration</h3>
                     <p className="text-[10px] text-slate-400 font-mono tracking-tight uppercase">
                       US-Central1 (Iowa) Region Availability Edge Cluster • Custom Domain Mapping
                     </p>
@@ -8158,7 +8158,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                     Architectural Infrastructure Verification Loop
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                    Google Cloud Run uses global anycast front-ends to route TLS traffic to the target environment Container. By mapping a custom domain to custom DNS records, GCP provisions automatic, managed Let's Encrypt certificates and routes requests efficiently through Iowa's high-speed local fibers.
+                    Cloud Sync uses global anycast front-ends to route TLS traffic to the target environment Container. By mapping a custom domain to custom DNS records, the cloud provider provisions automatic, managed Let's Encrypt certificates and routes requests efficiently through high-speed local fibers.
                   </p>
                   <div className="text-[10px] text-slate-400 font-mono flex flex-wrap items-center gap-x-4 gap-y-1 pt-1.5 border-t border-slate-800/60">
                     <div>
@@ -8360,7 +8360,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         SSL Handshake
                       </div>
                       <p className="text-[11px] text-slate-360 leading-relaxed font-sans">
-                        Once validated, the Google Cloud Run load balancer automatically issues a managed cryptographically secure Let's Encrypt SSL/TLS certificate.
+                        Once validated, the Vercel Core load balancer automatically issues a managed cryptographically secure Let's Encrypt SSL/TLS certificate.
                       </p>
                     </div>
                   </div>
@@ -10003,7 +10003,7 @@ function CustomerHubView({
               className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/20 inline-flex items-center gap-2 w-full sm:w-auto justify-center cursor-pointer"
             >
               <User className="w-4 h-4" />
-              Sign Up / Connect with Google
+              Continue with Auth0
             </button>
             
             <button
@@ -10018,7 +10018,7 @@ function CustomerHubView({
 
           <div className="mt-8">
             <span className="text-[10px] text-slate-500 uppercase tracking-wider">
-              Google SSO & Secure Credentialed Authentication
+              Auth0 SSO & Secure Credentialed Authentication
             </span>
           </div>
         </div>
@@ -10813,7 +10813,7 @@ function CustomerHubView({
 
                     <div className="text-[10px] text-slate-500 font-mono text-center py-1 flex items-center justify-center gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-                      Protected by Google Cloud reCAPTCHA Enterprise.
+                      Protected by Vercel Shield Enterprise.
                     </div>
 
                     <button
