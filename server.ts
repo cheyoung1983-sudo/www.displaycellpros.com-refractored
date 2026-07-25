@@ -20,7 +20,7 @@ process.on("uncaughtException", (err) => {
 
 // Initialize Express
 export const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const PORT = 3000;
 
 // Middleware
 app.use(express.json());

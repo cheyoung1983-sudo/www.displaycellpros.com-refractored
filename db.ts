@@ -170,13 +170,15 @@ export async function getAuthTokenForDatabase2(): Promise<string> {
  * is passed, it connects via an isolated single-client instance to avoid polluting or leaking the main Pool.
  */
 export async function queryWithToken(sql: string, params: any[] = [], token?: string): Promise<any> {
-  const host = DATABASE_2_HOST;
-  const user = DATABASE_2_USER;
-  const database = DATABASE_2_DB;
-  const port = 5432;
+  const host = process.env.PGHOST || DATABASE_2_HOST;
+  const user = process.env.PGUSER || DATABASE_2_USER;
+  const database = process.env.PGDATABASE || DATABASE_2_DB;
+  const port = Number(process.env.PGPORT) || 5432;
+
+  const { host: normalizedHost, isUnixSocket } = normalizeHost(host);
 
   let activeToken = token;
-  if (!activeToken) {
+  if (!activeToken && !isUnixSocket && process.env.AWS_ACCESS_KEY_ID) {
     try {
       activeToken = await getAuthTokenForDatabase2();
     } catch (err: any) {
@@ -184,16 +186,23 @@ export async function queryWithToken(sql: string, params: any[] = [], token?: st
     }
   }
 
-  if (activeToken && host && user) {
-    console.log(`[Database] Query executing via explicit token connection to ${host}:${port}/${database} as user ${user}`);
-    const client = new Client({
-      host,
+  if (activeToken) {
+    console.log(`[Database] Query executing via explicit token connection to ${isUnixSocket ? 'Unix Socket ' + normalizedHost : normalizedHost + ':' + port}/${database} as user ${user}`);
+    const clientConfig: any = {
+      host: normalizedHost,
       user,
       database,
       password: activeToken,
       port,
-      ssl: { rejectUnauthorized: false },
-    });
+    };
+
+    if (isUnixSocket) {
+      clientConfig.ssl = false;
+    } else {
+      clientConfig.ssl = { rejectUnauthorized: false };
+    }
+
+    const client = new Client(clientConfig);
     await client.connect();
     try {
       const result = await client.query(sql, params);
