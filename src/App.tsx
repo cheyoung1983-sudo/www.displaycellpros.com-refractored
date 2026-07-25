@@ -54,6 +54,7 @@ import { UsbSimulator } from "./components/UsbSimulator";
 import { RdsDiagnosticPanel } from "./components/RdsDiagnosticPanel";
 import { jsPDF } from "jspdf";
 import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
+import { QuotesView } from "./components/QuotesView";
 import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
 import CacheManagement from "./components/CacheManagement";
 import QrScannerModal from "./components/QrScannerModal";
@@ -106,8 +107,35 @@ export default function App() {
     if (path.includes("b2b") || path.includes("fleet")) return "b2b";
     if (path.includes("store")) return "store";
     if (path.includes("lab")) return "lab";
+    if (path.includes("quote") || path.includes("quotes")) return "quotes";
     return "home";
   });
+
+  const navigateTab = (tab: string) => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      const targetPath = tab === "home" ? "/" : `/${tab}`;
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({ tab }, "", targetPath);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes("privacy")) setActiveTab("privacy");
+      else if (path.includes("services")) setActiveTab("services");
+      else if (path.includes("b2b") || path.includes("fleet")) setActiveTab("b2b");
+      else if (path.includes("store")) setActiveTab("store");
+      else if (path.includes("lab")) setActiveTab("lab");
+      else if (path.includes("quote") || path.includes("quotes")) setActiveTab("quotes");
+      else setActiveTab("home");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
@@ -1535,11 +1563,12 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             {/* Desktop Menu */}
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-6">
-                <NavButton active={activeTab === "home"} onClick={() => setActiveTab("home")}>Home</NavButton>
-                <NavButton active={activeTab === "services"} onClick={() => setActiveTab("services")}>Services</NavButton>
-                <NavButton active={activeTab === "b2b"} onClick={() => setActiveTab("b2b")}>B2B Fleet</NavButton>
-                <NavButton active={activeTab === "store"} onClick={() => setActiveTab("store")}>Store</NavButton>
-                <NavButton active={activeTab === "privacy"} onClick={() => setActiveTab("privacy")}>Privacy & Consent</NavButton>
+                <NavButton active={activeTab === "home"} onClick={() => navigateTab("home")}>Home</NavButton>
+                <NavButton active={activeTab === "services"} onClick={() => navigateTab("services")}>Services</NavButton>
+                <NavButton active={activeTab === "quotes"} onClick={() => navigateTab("quotes")}>Quotes / Request Received</NavButton>
+                <NavButton active={activeTab === "b2b"} onClick={() => navigateTab("b2b")}>B2B Fleet</NavButton>
+                <NavButton active={activeTab === "store"} onClick={() => navigateTab("store")}>Store</NavButton>
+                <NavButton active={activeTab === "privacy"} onClick={() => navigateTab("privacy")}>Privacy & Consent</NavButton>
                 
                 {/* Diagnostics Embedded Laboratory Link */}
                 <button
@@ -1581,11 +1610,12 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
         {mobileMenuOpen && (
           <div className="md:hidden bg-slate-800 border-b border-slate-700">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <MobileNavButton onClick={() => { setActiveTab("home"); setMobileMenuOpen(false); }}>Home</MobileNavButton>
-              <MobileNavButton onClick={() => { setActiveTab("services"); setMobileMenuOpen(false); }}>Services</MobileNavButton>
-              <MobileNavButton onClick={() => { setActiveTab("b2b"); setMobileMenuOpen(false); }}>B2B Fleet</MobileNavButton>
-              <MobileNavButton onClick={() => { setActiveTab("store"); setMobileMenuOpen(false); }}>Store</MobileNavButton>
-              <MobileNavButton onClick={() => { setActiveTab("privacy"); setMobileMenuOpen(false); }}>Privacy & Consent</MobileNavButton>
+              <MobileNavButton onClick={() => { navigateTab("home"); setMobileMenuOpen(false); }}>Home</MobileNavButton>
+              <MobileNavButton onClick={() => { navigateTab("services"); setMobileMenuOpen(false); }}>Services</MobileNavButton>
+              <MobileNavButton onClick={() => { navigateTab("quotes"); setMobileMenuOpen(false); }}>Quotes / Request Received</MobileNavButton>
+              <MobileNavButton onClick={() => { navigateTab("b2b"); setMobileMenuOpen(false); }}>B2B Fleet</MobileNavButton>
+              <MobileNavButton onClick={() => { navigateTab("store"); setMobileMenuOpen(false); }}>Store</MobileNavButton>
+              <MobileNavButton onClick={() => { navigateTab("privacy"); setMobileMenuOpen(false); }}>Privacy & Consent</MobileNavButton>
               
               <button 
                   onClick={() => { setActiveTab("lab"); setMobileMenuOpen(false); }}
@@ -1607,8 +1637,17 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
       {/* CORE CONTENT ROUTING AREA */}
       <main className="flex-1 pb-16">
-        {activeTab === "home" && <HomeView onBookClick={() => setIsAiOpen(true)} onLabClick={() => setActiveTab("lab")} />}
+        {activeTab === "home" && <HomeView onBookClick={() => setIsAiOpen(true)} onLabClick={() => navigateTab("lab")} />}
         {activeTab === "services" && <ServicesView onBookClick={() => setIsAiOpen(true)} />}
+        {activeTab === "quotes" && (
+          <QuotesView 
+            onBookClick={() => setIsAiOpen(true)} 
+            onNavigateHome={() => navigateTab("home")}
+            deviceBrand={deviceBrand}
+            deviceModel={deviceModel}
+            issueType={issueType}
+          />
+        )}
         {activeTab === "b2b" && <B2BView onBookClick={() => setIsAiOpen(true)} />}
         {activeTab === "store" && <StoreView />}
         {activeTab === "privacy" && (

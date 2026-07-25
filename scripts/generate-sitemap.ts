@@ -17,6 +17,7 @@ interface Route {
 const routes: Route[] = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
   { path: '/services', priority: '0.8', changefreq: 'monthly' },
+  { path: '/quotes', priority: '0.9', changefreq: 'weekly' },
   { path: '/b2b', priority: '0.8', changefreq: 'monthly' },
   { path: '/store', priority: '0.7', changefreq: 'weekly' },
   { path: '/privacy', priority: '0.5', changefreq: 'monthly' },

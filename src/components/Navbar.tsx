@@ -14,6 +14,7 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Services', href: '/services' },
+    { name: 'Quotes', href: '/quotes' },
     { name: 'B2B Fleet', href: '/b2b' },
     { name: 'Store', href: '/store' },
     { name: 'Privacy & Consent', href: '/privacy' },
