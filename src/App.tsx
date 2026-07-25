@@ -171,10 +171,72 @@ export default function App() {
   const [hasScanned, setHasScanned] = useState<boolean>(false);
   const [isReportExpanded, setIsReportExpanded] = useState<boolean>(true);
   const [copiedTelemetry, setCopiedTelemetry] = useState<boolean>(false);
+  const [isSavingToRds, setIsSavingToRds] = useState<boolean>(false);
+  const [showRdsConfirmModal, setShowRdsConfirmModal] = useState<boolean>(false);
+  const [rdsSaveSuccess, setRdsSaveSuccess] = useState<{ recordId?: number; createdAt?: string } | null>(null);
   const [scanStep, setScanStep] = useState<string>("");
   const [scanProgress, setScanProgress] = useState<number>(0);
   const [forceScanTimeout, setForceScanTimeout] = useState<boolean>(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const saveReportToRdsDatabase2 = async () => {
+    setIsSavingToRds(true);
+    try {
+      const telemetryCode = `${deviceBrand.toUpperCase()}-${deviceModel.slice(0, 8).replace(/\s+/g, "").toUpperCase()}-${issueType.toUpperCase()}`;
+      const telemetryTrace = `--- TELEMETRY TRACE ---
+ID: COM-CORE-USB-01
+Timestamp: ${new Date().toLocaleString()}
+Manufacturer: ${deviceBrand}
+Model: ${deviceModel}
+Tier: ${deviceTier}
+Fault: ${issueType.toUpperCase()}
+Battery Health: ${issueType === "battery" ? "76%" : "94%"}
+Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
+
+      const res = await fetch("/api/scan-reports", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          deviceBrand,
+          deviceModel,
+          issueType,
+          deviceTier,
+          customerName,
+          telemetryCode,
+          telemetryTrace,
+          status: "PERSISTED_TO_AWS_RDS_DATABASE_2"
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setRdsSaveSuccess({
+          recordId: data.recordId,
+          createdAt: data.createdAt
+        });
+        addToast(
+          "Persisted to AWS RDS",
+          `Scan report saved to database-2 (Record ID: #${data.recordId || "N/A"})`,
+          "success",
+          5000
+        );
+      } else {
+        throw new Error(data.message || "Failed to persist report.");
+      }
+    } catch (err: any) {
+      console.error("[Save RDS Error]:", err);
+      addToast(
+        "RDS Save Error",
+        err.message || "Could not persist report to AWS RDS database-2.",
+        "error",
+        5000
+      );
+    } finally {
+      setIsSavingToRds(false);
+    }
+  };
 
   const addToast = (title: string, message: string, type: ToastType = "info", duration = 4000) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -2006,11 +2068,44 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                                 </div>
                               </div>
                               
-                              <div className="mt-3.5 pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2.5">
-                                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">
-                                  ID: COM-CORE-USB-01
-                                </span>
+                              <div className="mt-3.5 pt-3 border-t border-slate-800/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                                 <div className="flex items-center gap-2">
+                                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">
+                                    ID: COM-CORE-USB-01
+                                  </span>
+                                  {rdsSaveSuccess && (
+                                    <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/80 px-2 py-0.5 rounded">
+                                      <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                      <span>RDS DB-2 RECORD #{rdsSaveSuccess.recordId} SAVED</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <button
+                                    type="button"
+                                    id="btn-persist-rds-database-2"
+                                    onClick={() => setShowRdsConfirmModal(true)}
+                                    disabled={isSavingToRds}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-mono text-[9px] font-extrabold uppercase tracking-wider rounded transition-all shadow border border-emerald-500/30 cursor-pointer disabled:opacity-50"
+                                    title="Persist current scan report directly to AWS RDS database-2"
+                                  >
+                                    {isSavingToRds ? (
+                                      <>
+                                        <RefreshCw className="w-3.5 h-3.5 text-emerald-200 animate-spin" />
+                                        <span>Persisting to RDS...</span>
+                                      </>
+                                    ) : rdsSaveSuccess ? (
+                                      <>
+                                        <Check className="w-3.5 h-3.5 text-emerald-200" />
+                                        <span>Saved to RDS DB-2 (#{rdsSaveSuccess.recordId})</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Database className="w-3.5 h-3.5 text-emerald-100" />
+                                        <span>Persist to AWS RDS (database-2)</span>
+                                      </>
+                                    )}
+                                  </button>
                                   <button
                                     type="button"
                                     id="btn-share-email-report"
@@ -3462,6 +3557,72 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
           );
         }}
       />
+
+      {/* RDS Database Persistence Confirmation Dialog */}
+      {showRdsConfirmModal && (
+        <div 
+          id="rds-confirm-dialog"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div className="bg-slate-900 border border-slate-755 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden transform transition-all p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <Database className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white leading-snug">
+                  Persist to AWS RDS Confirmation
+                </h3>
+                <p className="text-xs text-slate-400 font-mono">
+                  AWS RDS Cluster (database-2)
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 mb-5 space-y-2">
+              <p className="text-sm font-semibold text-slate-200">
+                Are you sure you want to persist to RDS?
+              </p>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                This will save the active scan report and telemetry trace directly to the AWS RDS database-2 instance to prevent accidental writes.
+              </p>
+              <div className="pt-2.5 mt-2 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-[11px] font-mono">
+                <div>
+                  <span className="text-slate-500 block text-[10px]">DEVICE:</span>
+                  <span className="text-slate-300 font-semibold">{deviceBrand} {deviceModel}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[10px]">FAULT:</span>
+                  <span className="text-slate-300 font-semibold uppercase">{issueType}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                id="btn-cancel-rds-confirm"
+                onClick={() => setShowRdsConfirmModal(false)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-850 text-slate-300 hover:text-white font-mono text-xs font-bold rounded-lg transition-all border border-slate-700 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="btn-confirm-rds-persist"
+                onClick={() => {
+                  setShowRdsConfirmModal(false);
+                  saveReportToRdsDatabase2();
+                }}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-mono text-xs font-extrabold uppercase tracking-wider rounded-lg transition-all shadow-lg shadow-emerald-950/50 border border-emerald-500/30 flex items-center gap-1.5 cursor-pointer"
+              >
+                <Database className="w-3.5 h-3.5" />
+                <span>Confirm Persist</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Global Toast Notifications */}
       <ToastContainer toasts={toasts} onClose={removeToast} />

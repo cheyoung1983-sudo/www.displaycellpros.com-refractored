@@ -969,6 +969,122 @@ app.get("/api/movies", async (req, res) => {
   }
 });
 
+// Endpoint to persist scan report directly to AWS RDS database-2
+app.post(["/api/scan-reports", "/api/rds/scan-reports"], async (req, res) => {
+  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+  const {
+    deviceBrand,
+    deviceModel,
+    issueType,
+    deviceTier,
+    customerName,
+    telemetryCode,
+    telemetryTrace,
+    status = "PERSISTED"
+  } = req.body || {};
+
+  try {
+    // 1. Ensure table scan_reports exists in AWS RDS database-2
+    await queryWithToken(`
+      CREATE TABLE IF NOT EXISTS scan_reports (
+        id SERIAL PRIMARY KEY,
+        device_brand VARCHAR(100),
+        device_model VARCHAR(100),
+        issue_type VARCHAR(100),
+        device_tier VARCHAR(100),
+        customer_name VARCHAR(150),
+        telemetry_code VARCHAR(100),
+        telemetry_trace TEXT,
+        status VARCHAR(50) DEFAULT 'PERSISTED',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `, [], token);
+
+    // 2. Insert the scan report record
+    const insertResult = await queryWithToken(`
+      INSERT INTO scan_reports 
+        (device_brand, device_model, issue_type, device_tier, customer_name, telemetry_code, telemetry_trace, status)
+      VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id, created_at;
+    `, [
+      deviceBrand || "Generic",
+      deviceModel || "Unknown Device",
+      issueType || "diagnostic",
+      deviceTier || "Standard",
+      customerName || "Walk-in Customer",
+      telemetryCode || "TELEMETRY-01",
+      telemetryTrace || "",
+      status
+    ], token);
+
+    const savedRow = insertResult.rows[0];
+
+    return res.json({
+      success: true,
+      message: "Diagnostic scan report successfully persisted to AWS RDS database-2!",
+      recordId: savedRow?.id,
+      createdAt: savedRow?.created_at,
+      targetDatabase: "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com",
+      savedData: {
+        id: savedRow?.id,
+        deviceBrand,
+        deviceModel,
+        issueType,
+        customerName,
+        telemetryCode,
+        createdAt: savedRow?.created_at
+      }
+    });
+  } catch (err: any) {
+    console.error("[AWS RDS Persist Scan Report Error]:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to persist scan report to AWS RDS database-2.",
+      error: err.message || String(err)
+    });
+  }
+});
+
+// Endpoint to list persisted scan reports from AWS RDS database-2
+app.get(["/api/scan-reports", "/api/rds/scan-reports"], async (req, res) => {
+  const token = (req.headers["x-rds-auth-token"] || req.query.authToken) as string | undefined;
+
+  try {
+    await queryWithToken(`
+      CREATE TABLE IF NOT EXISTS scan_reports (
+        id SERIAL PRIMARY KEY,
+        device_brand VARCHAR(100),
+        device_model VARCHAR(100),
+        issue_type VARCHAR(100),
+        device_tier VARCHAR(100),
+        customer_name VARCHAR(150),
+        telemetry_code VARCHAR(100),
+        telemetry_trace TEXT,
+        status VARCHAR(50) DEFAULT 'PERSISTED',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `, [], token);
+
+    const result = await queryWithToken(`
+      SELECT * FROM scan_reports ORDER BY id DESC LIMIT 20;
+    `, [], token);
+
+    return res.json({
+      success: true,
+      reports: result.rows,
+      targetDatabase: "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com"
+    });
+  } catch (err: any) {
+    console.error("[AWS RDS Fetch Scan Reports Error]:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch scan reports from AWS RDS.",
+      error: err.message || String(err)
+    });
+  }
+});
+
 // Endpoint to query a movie by id
 app.get("/api/movies/:id", async (req, res) => {
   const idStr = req.params.id;
@@ -1025,20 +1141,20 @@ app.get("/api/movies/:id", async (req, res) => {
 // GET /api/welcome or /welcome to read greeting from Vercel Edge Config
 app.get(["/welcome", "/api/welcome"], async (req, res) => {
   try {
-    if (!process.env.EDGE_CONFIG) {
-      console.log("[Edge Config] EDGE_CONFIG environment variable is missing. Using offline fallback.");
+    const edgeConfigConn = process.env.EDGE_CONFIG;
+    if (!edgeConfigConn || !edgeConfigConn.startsWith("https://")) {
+      console.log("[Edge Config] EDGE_CONFIG environment variable is missing or unconfigured. Using offline fallback.");
       return res.json({
         greeting: "hello world",
         source: "local-fallback",
-        message: "Connect your Vercel Edge Config to enable live remote configuration."
+        message: "Connect your Vercel Edge Config connection string to enable live remote configuration."
       });
     }
 
     const greeting = await get("greeting");
     return res.json({
       greeting: greeting || "hello world",
-      source: "vercel-edge-config",
-      storeId: "ecfg_avyjx0msxddaqlhv19g1zrc0iyin"
+      source: "vercel-edge-config"
     });
   } catch (err: any) {
     console.error("[Edge Config Error]:", err);

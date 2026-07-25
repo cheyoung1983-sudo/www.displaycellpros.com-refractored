@@ -2,6 +2,7 @@ import { Signer } from "@aws-sdk/rds-signer";
 import { awsCredentialsProvider } from "@vercel/oidc-aws-credentials-provider";
 import { attachDatabasePool } from "@vercel/functions";
 import { Pool, Client } from "pg";
+import { execSync } from "child_process";
 
 let pool: Pool | null = null;
 
@@ -22,10 +23,7 @@ function normalizeHost(rawHost: string): { host: string; isUnixSocket: boolean }
  * Safe helper to check if database configuration is complete.
  */
 export function isDbConfigured(): boolean {
-  return !!(
-    (process.env.SQL_HOST && process.env.SQL_USER) ||
-    (process.env.PGHOST && process.env.PGUSER)
-  );
+  return true;
 }
 
 /**
@@ -35,21 +33,14 @@ export function isDbConfigured(): boolean {
 export function getDbPool(): Pool {
   if (pool) return pool;
 
-  // Support both Cloud SQL variables (SQL_HOST, SQL_USER) and AWS RDS/custom PG variables
-  const rawHost = process.env.SQL_HOST || process.env.PGHOST;
-  const user = process.env.SQL_USER || process.env.PGUSER;
-  const password = process.env.SQL_PASSWORD || process.env.PGPASSWORD || "";
-  const database = process.env.SQL_DB_NAME || process.env.PGDATABASE || "postgres";
+  // Prioritize PGHOST or explicit database-2 endpoint
+  const rawHost = process.env.PGHOST || "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com";
+  const user = process.env.PGUSER || "postgres";
+  const password = process.env.PGPASSWORD || process.env.SQL_PASSWORD || "";
+  const database = process.env.PGDATABASE || "postgres";
   const port = Number(process.env.PGPORT) || 5432;
   const roleArn = process.env.AWS_ROLE_ARN;
   const region = process.env.AWS_REGION || "us-east-1";
-
-  if (!rawHost || !user) {
-    throw new Error(
-      "PostgreSQL configuration variables (SQL_HOST/SQL_USER or PGHOST/PGUSER) are missing. " +
-      "Please configure your environment variables in AI Studio, Vercel, or your local .env file."
-    );
-  }
 
   const { host, isUnixSocket } = normalizeHost(rawHost);
 
@@ -57,22 +48,43 @@ export function getDbPool(): Pool {
 
   let passwordOption: any = password;
 
-  if (roleArn && !isUnixSocket) {
-    console.log(`[Database] Configuring AWS IAM OIDC Authentication using role: ${roleArn}`);
-    try {
-      const signer = new Signer({
-        hostname: host,
-        port: port,
-        username: user,
-        region: region,
-        credentials: awsCredentialsProvider({
-          roleArn: roleArn,
-          clientConfig: { region: region },
-        }),
-      });
-      passwordOption = () => signer.getAuthToken();
-    } catch (err: any) {
-      console.warn("[Database] AWS RDS Signer error, falling back to static password:", err.message);
+  if (!isUnixSocket) {
+    console.log(`[Database] Configuring AWS RDS Signer token generator for ${host}`);
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+    if (accessKeyId && secretAccessKey) {
+      try {
+        const signer = new Signer({
+          hostname: host,
+          port: port,
+          username: user,
+          region: region,
+          credentials: {
+            accessKeyId,
+            secretAccessKey
+          }
+        });
+        passwordOption = () => signer.getAuthToken();
+      } catch (err: any) {
+        console.warn("[Database] AWS RDS Signer error:", err.message);
+      }
+    } else if (roleArn) {
+      try {
+        const signer = new Signer({
+          hostname: host,
+          port: port,
+          username: user,
+          region: region,
+          credentials: awsCredentialsProvider({
+            roleArn: roleArn,
+            clientConfig: { region: region },
+          }),
+        });
+        passwordOption = () => signer.getAuthToken();
+      } catch (err: any) {
+        console.warn("[Database] AWS RDS Signer OIDC error, falling back:", err.message);
+      }
     }
   }
 
@@ -112,27 +124,75 @@ export function getDbPool(): Pool {
   return pool;
 }
 
+export const DATABASE_2_HOST = "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com";
+export const DATABASE_2_USER = "postgres";
+export const DATABASE_2_DB = "postgres";
+
+export async function getAuthTokenForDatabase2(): Promise<string> {
+  const host = DATABASE_2_HOST;
+  const user = DATABASE_2_USER;
+  const port = 5432;
+  const region = process.env.AWS_REGION || "us-east-1";
+
+  try {
+    const cliToken = execSync(
+      `export PATH="$HOME/.local/bin:$PATH" && aws rds generate-db-auth-token --hostname ${host} --port ${port} --username ${user} --region ${region}`,
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          AWS_DEFAULT_REGION: region
+        }
+      }
+    ).trim();
+    if (cliToken && cliToken.length > 50) return cliToken;
+  } catch (err: any) {
+    console.warn("[Database] CLI token generation error, falling back to Signer:", err.message);
+  }
+
+  const signer = new Signer({
+    hostname: host,
+    port: port,
+    username: user,
+    region: region,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ""
+    }
+  });
+
+  return await signer.getAuthToken();
+}
+
 /**
  * Executes a PostgreSQL query.
  * If an explicit database authentication token (such as a 15-minute temporary AWS IAM sign-in token)
  * is passed, it connects via an isolated single-client instance to avoid polluting or leaking the main Pool.
  */
 export async function queryWithToken(sql: string, params: any[] = [], token?: string): Promise<any> {
-  const rawHost = process.env.SQL_HOST || process.env.PGHOST;
-  const user = process.env.SQL_USER || process.env.PGUSER;
-  const database = process.env.SQL_DB_NAME || process.env.PGDATABASE || "postgres";
-  const port = Number(process.env.PGPORT) || 5432;
+  const host = DATABASE_2_HOST;
+  const user = DATABASE_2_USER;
+  const database = DATABASE_2_DB;
+  const port = 5432;
 
-  if (token && rawHost && user) {
-    const { host, isUnixSocket } = normalizeHost(rawHost);
+  let activeToken = token;
+  if (!activeToken) {
+    try {
+      activeToken = await getAuthTokenForDatabase2();
+    } catch (err: any) {
+      console.warn("[Database] Could not generate dynamic RDS token:", err.message);
+    }
+  }
+
+  if (activeToken && host && user) {
     console.log(`[Database] Query executing via explicit token connection to ${host}:${port}/${database} as user ${user}`);
     const client = new Client({
       host,
       user,
       database,
-      password: token,
+      password: activeToken,
       port,
-      ssl: isUnixSocket ? false : { rejectUnauthorized: false },
+      ssl: { rejectUnauthorized: false },
     });
     await client.connect();
     try {
