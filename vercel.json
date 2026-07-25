@@ -27,6 +27,18 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=31536000; includeSubDomains; preload"
+        },
+        {
+          "key": "Signature",
+          "value": "sig1=:5/HQDD5jvSTDvbJEMpDy4VmjcVvxiDDQrLa+g9rPPW/IzLQT6QSJfczYKxkJvALIYdrS1FdpUZX8s9V8aArxCQ==:"
+        },
+        {
+          "key": "Signature-Input",
+          "value": "sig1=(\"@authority\" \"signature-agent\");keyid=\"SjjyXvQ2cGhsRXs9DXEaV6ClyCun0Pj5yxjV67dLGOk\";nonce=\"yZhDJXFCVwpJMj8FxFBrx4QplAgRZv2+NbtSLlx/yPxo9247/q1chWIiA3oLHtxssAHYHgE/gzchAN2/c/l3Cw==\";tag=\"web-bot-auth\";created=1785016539;expires=1787608539"
+        },
+        {
+          "key": "Signature-Agent",
+          "value": "\"https://shopify.com\""
         }
       ]
     }
