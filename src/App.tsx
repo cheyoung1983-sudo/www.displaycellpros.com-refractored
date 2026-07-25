@@ -4346,13 +4346,6 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  </section>
-                  </div>
-                )}
 
                 {/* 3. TAX COMPLIANCE CONSOLE */}
                 {labTab === "tax" && (
@@ -8525,7 +8518,6 @@ function CustomerHubView({
     } catch (err: any) {
       addToast("Booking Fault", err.message || "Could not save appointment.", "error");
     }
-  };
   };
 
   const handleBookAppointment = async (e: React.FormEvent) => {

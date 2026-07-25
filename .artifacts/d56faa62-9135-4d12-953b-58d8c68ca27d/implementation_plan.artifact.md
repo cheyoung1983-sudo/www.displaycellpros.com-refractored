@@ -1,36 +1,30 @@
-# Implementation Plan: Secure Asset Delivery via AWS CloudFront
+# Implementation Plan: Fix Vercel Build - Module Resolution & Dependencies
 
-The goal is to integrate the provided AWS CloudFront Key Pairs into the project to enable secure, signed URL access for private assets (e.g., diagnostic reports or forensic data).
+The goal is to resolve the Vercel build failures caused by incorrect path mapping and missing dependencies. Specifically, fixing the `@/*` alias resolution and ensuring `react-is` is available for `recharts`.
 
 ## User Review Required
 
-> [!CAUTION]
-> **Secret Safety:** I have detected that you provided PEM files (private keys). Per project security rules (**AGENTS.md**), I will **NOT** read the contents of these files directly into the conversation.
+> [!IMPORTANT]
+> **Path Mapping Update:** I am updating the `tsconfig.json` paths to correctly point to the `src/` directory. This aligns the TypeScript compiler with the actual project structure.
 >
-> **Action Required:**
-> 1. You should upload these private keys to **AWS Secrets Manager**.
-> 2. Once uploaded, provide the **Secret ID/ARN** so I can configure the application to resolve them at runtime using the `{{resolve:secretsmanager:...}}` syntax.
-> 3. **NEVER** commit these `.pem` files to your Git repository.
+> **New Dependency:** Adding `react-is` as an explicit dependency to resolve build-time issues with `recharts`.
 
 ## Proposed Changes
 
-### [AWS Integration]
+### [Configuration]
 
-#### [NEW] [cloudfront.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/cloudfront.ts)
-- Implement a utility to generate **CloudFront Signed URLs**.
-- Use the `aws-sdk` (already in `package.json`) or a lightweight signing library.
-- Configure it to pull the `PrivateKey` from environment variables (which will be resolved from Secrets Manager).
+#### [MODIFY] [tsconfig.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/tsconfig.json)
+- Update `compilerOptions.paths` to point `@/*` to `./src/*`.
+- This will ensure imports like `@/lib/db` correctly resolve to `./src/lib/db.ts`.
 
-#### [MODIFY] [.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env.local)
-- Add placeholders for:
-  - `CLOUDFRONT_KEY_PAIR_ID_1="LHRE6C3FQAL7HR7UKFVNA72G3G6GD5MD"`
-  - `CLOUDFRONT_KEY_PAIR_ID_2="APKAX3LBP6Q6HAW6HRI5"`
-  - `CLOUDFRONT_PRIVATE_KEY="{{resolve:secretsmanager:prod/cloudfront-key:SecretString:private-key}}"`
+#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
+- Add `react-is` to the `dependencies` list.
 
 ## Verification Plan
 
 ### Automated Tests
-- Create a test script `scripts/test-cloudfront.ts` to verify that the signing logic correctly formats the URL.
+- Run `npx tsc --noEmit` locally to verify that all module resolution errors are cleared.
+- Run `npm run build` locally (if possible) to simulate the production build.
 
 ### Manual Verification
-- Attempt to access a private asset in an S3 bucket via the generated CloudFront signed URL.
+- Deploy the changes to Vercel and monitor the build logs to ensure "Creating an optimized production build" completes successfully.

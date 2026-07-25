@@ -1412,8 +1412,8 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
           {
             role: "user",
             content: [
-              { type: "text", text: userPrompt || "Analyze display damage" },
-              ...(imageBase64 ? [{ type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }] : [])
+              { type: "text" as const, text: userPrompt || "Analyze display damage" },
+              ...(imageBase64 ? [{ type: "image_url" as const, image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }] : [])
             ],
           },
         ],
@@ -1484,6 +1484,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
   });
 
   // --- TAX LOOKUP ENDPOINT ---
+  app.post("/api/tax-lookup", (req, res) => {
     const { zipCode } = req.body;
     const zip = String(zipCode || "").trim();
     
@@ -1564,7 +1565,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
   // Principle: Least-privilege — only reads/writes tenant resources.
   // ===========================================================================
   {
-    const { getAuth0McpService, Auth0McpService } = await import("./src/services/auth0McpService.js");
+    const { getAuth0McpService, Auth0McpService } = await import("./src/services/auth0McpService");
     type Auth0Svc = InstanceType<typeof Auth0McpService>;
 
     /**

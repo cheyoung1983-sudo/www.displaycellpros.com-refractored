@@ -1,6 +1,6 @@
-# Task: Secure Asset Delivery via AWS CloudFront
+# Task: Fix Vercel Build - Module Resolution & Dependencies
 
-- [ ] Configure environment variables in `.env.local`
-- [ ] Implement CloudFront signing utility in `src/lib/cloudfront.ts`
-- [ ] Create test script for CloudFront signed URLs
-- [ ] Verify signed URL generation
+- [x] Update `tsconfig.json` path mapping
+- [x] Add `react-is` dependency to `package.json`
+- [x] Run `npm install` to sync lockfile
+- [/] Verify with `npx tsc --noEmit`
