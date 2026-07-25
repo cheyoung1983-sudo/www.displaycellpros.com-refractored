@@ -185,23 +185,20 @@ export function QuotesView({
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
-              <a
-                href="https://app.squareup.com/appointments/buyer/widget/dvyno3qzfnlvek/LRDXJ4YQ6W96R"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => setIsSquareModalOpen(true)}
                 className="flex-1 sm:flex-none px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-1.5"
               >
                 <Calendar className="w-4 h-4" />
-                Schedule via Square
-                <ExternalLink className="w-3 h-3" />
-              </a>
+                Schedule Appointment
+              </button>
 
               <button
                 onClick={() => setIsSquareModalOpen(true)}
                 className="flex-1 sm:flex-none px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5"
               >
                 <CreditCard className="w-4 h-4 text-emerald-200" />
-                Pay via Square
+                Pay via POS Gateway
               </button>
 
               <a

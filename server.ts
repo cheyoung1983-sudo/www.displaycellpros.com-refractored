@@ -5,7 +5,7 @@ import { OpenAI } from "openai";
 import dotenv from "dotenv";
 import { getDbPool, isDbConfigured, queryWithToken } from "./db";
 import { get } from "@vercel/edge-config";
-import { squareRouter } from "./src/lib/squareRoutes";
+import { posRouter } from "./src/lib/posRoutes";
 
 dotenv.config();
 
@@ -25,8 +25,9 @@ const PORT = 3000;
 // Middleware
 app.use(express.json());
 
-// Mount Square Payments API router
-app.use("/api/square", squareRouter);
+// Mount POS Payments & Appointments API router
+app.use("/api/pos", posRouter);
+app.use("/api/square", posRouter); // Alias for backward compatibility
 
 // Health check endpoint for Cloud Run and load balancers
 app.get(["/health", "/api/health"], (req, res) => {

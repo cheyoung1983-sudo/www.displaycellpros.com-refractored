@@ -67,13 +67,13 @@ export function SquarePaymentModal({
 
   const fetchSquareConfig = async () => {
     try {
-      const res = await fetch("/api/square/config");
+      const res = await fetch("/api/pos/config");
       if (res.ok) {
         const data = await res.json();
         setConfig(data);
       }
     } catch (err) {
-      console.warn("Could not fetch Square public config:", err);
+      console.warn("Could not fetch POS config:", err);
     }
   };
 
@@ -85,10 +85,9 @@ export function SquarePaymentModal({
     setErrorMessage("");
 
     try {
-      // Simulate nonce generation from Web Payments SDK (or server-side authorization)
       const simulatedSourceId = "cnon:card-nonce-ok-" + Math.floor(100000 + Math.random() * 900000);
 
-      const res = await fetch("/api/square/create-payment", {
+      const res = await fetch("/api/pos/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -110,7 +109,7 @@ export function SquarePaymentModal({
         setErrorMessage(data.error || data.details || "Payment processing encountered an error.");
       }
     } catch (err: any) {
-      setErrorMessage("Network error connecting to Square Payment Gateway.");
+      setErrorMessage("Network error connecting to POS Payment Gateway.");
     } finally {
       setIsProcessing(false);
     }
@@ -121,7 +120,7 @@ export function SquarePaymentModal({
     setErrorMessage("");
 
     try {
-      const res = await fetch("/api/square/create-checkout", {
+      const res = await fetch("/api/pos/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -137,16 +136,16 @@ export function SquarePaymentModal({
       if (res.ok && data.success && data.checkoutUrl) {
         window.open(data.checkoutUrl, "_blank");
         setPaymentSuccess({
-          id: data.orderId || "sq_checkout",
+          id: data.orderId || "pos_checkout",
           status: "CHECKOUT_LINK_CREATED",
           checkoutUrl: data.checkoutUrl,
-          message: "Hosted Square Payment Link generated successfully."
+          message: "Hosted POS Payment Link generated successfully."
         });
       } else {
-        setErrorMessage(data.error || "Could not generate Square Payment Link.");
+        setErrorMessage(data.error || "Could not generate POS Payment Link.");
       }
     } catch (err) {
-      setErrorMessage("Network error generating Square payment link.");
+      setErrorMessage("Network error generating POS payment link.");
     } finally {
       setIsProcessing(false);
     }
@@ -157,7 +156,7 @@ export function SquarePaymentModal({
     setErrorMessage("");
 
     try {
-      const res = await fetch("/api/square/terminal-checkout", {
+      const res = await fetch("/api/pos/terminal-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -172,15 +171,15 @@ export function SquarePaymentModal({
       if (res.ok && data.success) {
         setTerminalStatus("pushed");
         setPaymentSuccess({
-          id: data.terminalCheckout.id,
+          id: data.checkout?.id || "pos_term",
           status: "TERMINAL_PROMPTED",
-          message: `Pushed $${amount.toFixed(2)} checkout prompt to mobile device [${terminalDeviceId}].`
+          message: `Pushed $${amount.toFixed(2)} checkout prompt to mobile terminal [${terminalDeviceId}].`
         });
       } else {
         setErrorMessage(data.error || "Terminal dispatch failed.");
       }
     } catch (err) {
-      setErrorMessage("Failed to reach Square Terminal dispatch API.");
+      setErrorMessage("Failed to reach POS Terminal dispatch API.");
     } finally {
       setIsProcessing(false);
     }
@@ -191,7 +190,7 @@ export function SquarePaymentModal({
     setErrorMessage("");
 
     try {
-      const res = await fetch("/api/square/create-invoice", {
+      const res = await fetch("/api/pos/create-invoice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -210,13 +209,13 @@ export function SquarePaymentModal({
           id: data.invoice.id,
           status: "INVOICE_SENT",
           publicUrl: data.invoice.publicUrl,
-          message: `Square Invoice sent to ${customerEmail}`
+          message: `POS Invoice sent to ${customerEmail}`
         });
       } else {
-        setErrorMessage(data.error || "Failed to generate Square invoice.");
+        setErrorMessage(data.error || "Failed to generate POS invoice.");
       }
     } catch (err) {
-      setErrorMessage("Network error creating Square invoice.");
+      setErrorMessage("Network error creating POS invoice.");
     } finally {
       setIsProcessing(false);
     }
@@ -234,9 +233,9 @@ export function SquarePaymentModal({
             </div>
             <div>
               <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
-                Square Payments Gateway
+                POS Payment Gateway
                 <span className="text-[10px] font-mono uppercase bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full">
-                  {config?.environment || "Sandbox"}
+                  {config?.providerName || "POS Ready"}
                 </span>
               </h3>
               <p className="text-xs text-slate-400">Ticket #{ticketId} • Display & Cell Pros Spokane</p>

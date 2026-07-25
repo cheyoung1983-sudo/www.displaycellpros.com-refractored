@@ -72,9 +72,9 @@ export function SquareAppointmentsModal({
             </div>
             <div>
               <h2 className="text-xl font-black text-white flex items-center gap-2">
-                Square Appointments Online Booking
+                POS Appointments System
                 <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">
-                  Official
+                  POS Ready
                 </span>
               </h2>
               <p className="text-xs text-slate-400 font-mono">
@@ -114,7 +114,7 @@ export function SquareAppointmentsModal({
             }`}
           >
             <Calendar className="w-4 h-4" />
-            Square Link
+            POS Portal Link
           </button>
 
           <button

@@ -118,7 +118,7 @@ export function ConfirmationView({
                 className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"
               >
                 <Calendar className="w-4 h-4" />
-                Square Appointments
+                POS Appointments Calendar
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
 

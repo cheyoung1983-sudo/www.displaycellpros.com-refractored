@@ -68,26 +68,26 @@ export function SquareMiniCalendar({ onOpenAppointmentsModal, compact = false }:
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [bookingSuccessMessage, setBookingSuccessMessage] = useState<string | null>(null);
 
-  // Fetch bookings from Square API endpoint
+  // Fetch bookings from POS API endpoint
   const fetchBookings = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/square/bookings");
+      const res = await fetch("/api/pos/bookings");
       if (!res.ok) {
-        throw new Error(`HTTP Error ${res.status}: Failed to load Square appointments`);
+        throw new Error(`HTTP Error ${res.status}: Failed to load POS appointments`);
       }
       const data = await res.json();
       if (data.bookings && Array.isArray(data.bookings)) {
         setBookings(data.bookings);
-        setSourceInfo(data.source || "Square API");
+        setSourceInfo(data.source || "POS Calendar API");
         setIsSimulated(data.simulated ?? true);
       } else {
         setBookings([]);
       }
     } catch (err: any) {
-      console.warn("Error fetching Square bookings:", err);
-      setError("Unable to sync Square calendar. Showing local cached bookings.");
+      console.warn("Error fetching POS bookings:", err);
+      setError("Unable to sync POS calendar. Showing local cached bookings.");
     } finally {
       setLoading(false);
     }
@@ -176,7 +176,7 @@ export function SquareMiniCalendar({ onOpenAppointmentsModal, compact = false }:
     }
 
     try {
-      const res = await fetch("/api/square/create-booking", {
+      const res = await fetch("/api/pos/create-booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -193,7 +193,7 @@ export function SquareMiniCalendar({ onOpenAppointmentsModal, compact = false }:
       const data = await res.json();
       if (data.booking) {
         setBookings(prev => [data.booking, ...prev]);
-        setBookingSuccessMessage("Square Appointment scheduled successfully!");
+        setBookingSuccessMessage("POS Appointment scheduled successfully!");
         setSelectedDate(targetDate);
         setCurrentMonth(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
         setTimeout(() => {
@@ -243,18 +243,18 @@ export function SquareMiniCalendar({ onOpenAppointmentsModal, compact = false }:
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-white tracking-wide uppercase font-mono">
-                Square Appointments Calendar
+                POS Appointments Calendar
               </h3>
               <span className={`px-2 py-0.5 text-[9px] font-extrabold font-mono rounded tracking-wider uppercase border ${
                 isSimulated
-                  ? "bg-amber-950/60 text-amber-300 border-amber-800/40"
+                  ? "bg-emerald-950/60 text-emerald-300 border-emerald-800/40"
                   : "bg-emerald-950/60 text-emerald-300 border-emerald-800/40"
               }`}>
-                {isSimulated ? "Square Sandbox" : "Square Live API"}
+                {isSimulated ? "POS READY" : "POS CONNECTED"}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Real-time technician scheduling calendar synced with Square Bookings engine.
+              Real-time technician scheduling calendar synced with POS system engine.
             </p>
           </div>
         </div>

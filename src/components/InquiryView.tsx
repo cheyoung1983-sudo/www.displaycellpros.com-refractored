@@ -122,7 +122,7 @@ export function InquiryView({
                 rel="noopener noreferrer"
                 className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"
               >
-                <span>Square Appointments</span>
+                <span>POS Appointments Calendar</span>
               </a>
 
               <a

@@ -1607,7 +1607,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-1.5"
                 >
                   <QrCode size={16} />
-                  Square Booking
+                  POS Booking
                 </button>
 
                 <button 
@@ -1651,7 +1651,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   onClick={() => { setIsSquareAppointmentsOpen(true); setMobileMenuOpen(false); }}
                   className="w-full text-left flex items-center gap-2 block px-3 py-3 rounded-md text-base font-bold text-white bg-emerald-600 mb-2"
                 >
-                  <QrCode size={18} /> Square Appointments Booking
+                  <QrCode size={18} /> POS Appointments Booking
               </button>
 
               <button 
@@ -3280,10 +3280,10 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
                 {/* Handshake Credentials Checkbox */}
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs font-mono shadow-xs">
-                  <span className="font-extrabold text-slate-300 uppercase tracking-widest block mb-2 text-[10px]">Square POS Handshake</span>
+                  <span className="font-extrabold text-slate-300 uppercase tracking-widest block mb-2 text-[10px]">Universal POS Handshake</span>
                   <div className="bg-slate-950 p-2.5 rounded border border-slate-850 text-[10.5px] text-slate-400 space-y-1 font-mono leading-relaxed">
                     <div className="flex justify-between">
-                      <span>SQUARE_WEB_HOOK:</span>
+                      <span>POS_WEB_HOOK:</span>
                       <span className="text-emerald-400 font-bold">ACTIVE</span>
                     </div>
                     <div className="flex justify-between">
@@ -3293,12 +3293,12 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   </div>
                 </div>
 
-                {/* Square Appointments Mini Calendar Quick Launcher */}
+                {/* POS Appointments Mini Calendar Quick Launcher */}
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs font-mono shadow-xs space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="font-extrabold text-white uppercase tracking-wider text-[10px] flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-                      Square Calendar
+                      POS Calendar
                     </span>
                     <span className="text-[9px] bg-emerald-950 text-emerald-300 font-bold px-1.5 py-0.5 rounded">
                       LIVE

@@ -200,7 +200,7 @@ export default function LabPortal() {
               <div className="flex items-center gap-2"><Terminal className="w-4 h-4" /> AI Diagnostic Console</div>
             </button>
             <button onClick={() => setLabTab("calendar")} className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold ${labTab === "calendar" ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}>
-              <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-400" /> Square Appointments</div>
+              <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-400" /> POS Appointments</div>
               <span className="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded font-mono font-bold">LIVE</span>
             </button>
             <button onClick={() => setLabTab("pos")} className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold ${labTab === "pos" ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}>
