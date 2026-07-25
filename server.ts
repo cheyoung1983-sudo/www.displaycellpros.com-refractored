@@ -5,6 +5,7 @@ import { OpenAI } from "openai";
 import dotenv from "dotenv";
 import { getDbPool, isDbConfigured, queryWithToken } from "./db";
 import { get } from "@vercel/edge-config";
+import { squareRouter } from "./src/lib/squareRoutes";
 
 dotenv.config();
 
@@ -24,6 +25,9 @@ const PORT = 3000;
 // Middleware
 app.use(express.json());
 
+// Mount Square Payments API router
+app.use("/api/square", squareRouter);
+
 // Health check endpoint for Cloud Run and load balancers
 app.get(["/health", "/api/health"], (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -33,6 +37,7 @@ app.get(["/health", "/api/health"], (req, res) => {
 app.use((req, res, next) => {
   const apiPaths = [
     "health",
+    "square",
     "tax-lookup",
     "generate-quote",
     "verify-b2b",

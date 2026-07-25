@@ -24,8 +24,10 @@ import {
   Zap,
   Building,
   Mail,
-  User
+  User,
+  CreditCard
 } from "lucide-react";
+import { SquarePaymentModal } from "./SquarePaymentModal";
 
 interface QuotesViewProps {
   onBookClick?: () => void;
@@ -43,6 +45,7 @@ export function QuotesView({
   issueType = "Screen Replacement"
 }: QuotesViewProps) {
   const [copiedQuoteId, setCopiedQuoteId] = useState(false);
+  const [isSquareModalOpen, setIsSquareModalOpen] = useState(false);
   const [searchRef, setSearchRef] = useState("");
   const [searchedTicket, setSearchedTicket] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -171,7 +174,15 @@ export function QuotesView({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+              <button
+                onClick={() => setIsSquareModalOpen(true)}
+                className="flex-1 sm:flex-none px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
+              >
+                <CreditCard className="w-4 h-4 text-emerald-200" />
+                Pay via Square
+              </button>
+
               <a
                 href="tel:5095550199"
                 className="flex-1 sm:flex-none px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2"
@@ -510,6 +521,15 @@ export function QuotesView({
           )}
         </div>
       </div>
+
+      {/* SQUARE PAYMENT MODAL */}
+      <SquarePaymentModal
+        isOpen={isSquareModalOpen}
+        onClose={() => setIsSquareModalOpen(false)}
+        ticketId={quoteReference}
+        amount={169.00}
+        itemDescription={`${deviceBrand} ${deviceModel} - ${issueType}`}
+      />
 
     </div>
   );
