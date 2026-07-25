@@ -185,7 +185,7 @@ export function QuotesView({
 
             <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
               <a
-                href="https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R"
+                href="https://app.squareup.com/appointments/buyer/widget/dvyno3qzfnlvek/LRDXJ4YQ6W96R"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 sm:flex-none px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-1.5"

@@ -112,7 +112,7 @@ export function ConfirmationView({
 
             <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
               <a
-                href="https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R"
+                href="https://app.squareup.com/appointments/buyer/widget/dvyno3qzfnlvek/LRDXJ4YQ6W96R"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"

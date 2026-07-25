@@ -29,10 +29,10 @@ interface SquareAppointmentsModalProps {
 export function SquareAppointmentsModal({
   isOpen,
   onClose,
-  locationQrUrl = "https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R",
+  locationQrUrl = "https://app.squareup.com/appointments/buyer/widget/dvyno3qzfnlvek/LRDXJ4YQ6W96R",
   locationId = "LRDXJ4YQ6W96R"
 }: SquareAppointmentsModalProps) {
-  const [activeTab, setActiveTab] = useState<"scheduler" | "qr" | "details">("scheduler");
+  const [activeTab, setActiveTab] = useState<"embed" | "scheduler" | "qr" | "details">("embed");
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [selectedService, setSelectedService] = useState("Mobile Driveway Screen & Battery Repair");
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -92,48 +92,111 @@ export function SquareAppointmentsModal({
         </div>
 
         {/* MODAL NAVIGATION TABS */}
-        <div className="flex border-b border-slate-800 bg-slate-950/50 p-1.5 gap-2 px-6">
+        <div className="flex border-b border-slate-800 bg-slate-950/50 p-1.5 gap-2 px-6 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab("embed")}
+            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === "embed"
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            Live Widget
+          </button>
+
           <button
             onClick={() => setActiveTab("scheduler")}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === "scheduler"
                 ? "bg-blue-600 text-white shadow-md"
                 : "text-slate-400 hover:text-white hover:bg-slate-800/50"
             }`}
           >
             <Calendar className="w-4 h-4" />
-            Square Scheduler
+            Square Link
           </button>
 
           <button
             onClick={() => setActiveTab("qr")}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === "qr"
                 ? "bg-blue-600 text-white shadow-md"
                 : "text-slate-400 hover:text-white hover:bg-slate-800/50"
             }`}
           >
             <QrCode className="w-4 h-4" />
-            Location QR Code
+            QR Code
           </button>
 
           <button
             onClick={() => setActiveTab("details")}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
               activeTab === "details"
                 ? "bg-blue-600 text-white shadow-md"
                 : "text-slate-400 hover:text-white hover:bg-slate-800/50"
             }`}
           >
             <Building className="w-4 h-4" />
-            Location Details
+            Location Info
           </button>
         </div>
 
         {/* MODAL BODY */}
         <div className="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto">
           
-          {/* TAB 1: SCHEDULER & QUICK BOOKING */}
+          {/* TAB 1: LIVE EMBEDDED WIDGET */}
+          {activeTab === "embed" && (
+            <div className="space-y-6">
+              <div className="bg-blue-950/40 border border-blue-500/30 rounded-2xl p-4 flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                  <div className="text-xs text-slate-300 leading-relaxed">
+                    <strong className="text-white block font-bold mb-0.5">Live Embedded Square Appointments Portal</strong>
+                    Book directly through Square's secure portal below or click the booking button.
+                  </div>
+                </div>
+
+                <a
+                  style={{
+                    backgroundColor: "#006aff",
+                    color: "white",
+                    height: "36px",
+                    textTransform: "uppercase",
+                    fontFamily: "'Square Market', 'helvetica neue', helvetica, arial, sans-serif",
+                    letterSpacing: "1px",
+                    lineHeight: "36px",
+                    padding: "0 20px",
+                    borderRadius: "6px",
+                    fontWeight: 600,
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    whiteSpace: "nowrap"
+                  }}
+                  href="https://app.squareup.com/appointments/buyer/widget/dvyno3qzfnlvek/LRDXJ4YQ6W96R"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleBookDirect}
+                >
+                  Book an appointment
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+
+              {/* Embedded Square Widget Frame Container */}
+              <div className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-inner min-h-[480px] flex flex-col relative">
+                <iframe
+                  src="https://app.squareup.com/appointments/buyer/widget/dvyno3qzfnlvek/LRDXJ4YQ6W96R"
+                  title="Square Appointments Booking Widget"
+                  className="w-full h-[520px] border-0 rounded-2xl bg-white"
+                  allow="payment"
+                />
+              </div>
+            </div>
+          )}
           {activeTab === "scheduler" && (
             <div className="space-y-6">
               <div className="bg-blue-950/40 border border-blue-500/30 rounded-2xl p-4 flex items-start gap-3">

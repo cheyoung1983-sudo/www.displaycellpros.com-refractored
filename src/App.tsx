@@ -3369,7 +3369,7 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
       <SquareAppointmentsModal 
         isOpen={isSquareAppointmentsOpen}
         onClose={() => setIsSquareAppointmentsOpen(false)}
-        locationQrUrl="https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R"
+        locationQrUrl="https://app.squareup.com/appointments/buyer/widget/dvyno3qzfnlvek/LRDXJ4YQ6W96R"
         locationId="LRDXJ4YQ6W96R"
       />
       
