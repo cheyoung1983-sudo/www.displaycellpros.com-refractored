@@ -29,6 +29,14 @@
   "exclude": [
     "github-mcp-server",
     "node_modules",
-    "dist"
+    "dist",
+    "**/app/**/*",
+    "**/middleware.ts",
+    "**/proxy.ts",
+    "**/auth0.ts",
+    "**/Footer.tsx",
+    "**/Navbar.tsx",
+    "**/Profile.tsx",
+    "**/LayoutWrapper.tsx"
   ]
 }

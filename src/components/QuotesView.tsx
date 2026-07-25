@@ -25,7 +25,8 @@ import {
   Building,
   Mail,
   User,
-  CreditCard
+  CreditCard,
+  ExternalLink
 } from "lucide-react";
 import { SquarePaymentModal } from "./SquarePaymentModal";
 import { trackGoogleAdsConversion } from "../lib/gtag";

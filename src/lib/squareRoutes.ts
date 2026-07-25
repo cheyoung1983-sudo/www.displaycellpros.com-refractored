@@ -69,7 +69,7 @@ squareRouter.post("/create-payment", async (req: Request, res: Response) => {
     const square = getSquareClient();
     const locationId = process.env.SQUARE_LOCATION_ID!;
 
-    const response = await square.paymentsApi.createPayment({
+    const response = await square.payments.create({
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       amountMoney: {
@@ -81,7 +81,8 @@ squareRouter.post("/create-payment", async (req: Request, res: Response) => {
       buyerEmailAddress: customerEmail || undefined,
     });
 
-    const serializedResult = serializeSquareResponse(response.result);
+    const resData = (response as any).result || response;
+    const serializedResult = serializeSquareResponse(resData);
     return res.json({
       success: true,
       simulated: false,
@@ -120,7 +121,7 @@ squareRouter.post("/create-checkout", async (req: Request, res: Response) => {
     const square = getSquareClient();
     const locationId = process.env.SQUARE_LOCATION_ID!;
 
-    const response = await square.checkoutApi.createPaymentLink({
+    const response = await square.checkout.paymentLinks.create({
       idempotencyKey: crypto.randomUUID(),
       order: {
         locationId,
@@ -142,12 +143,13 @@ squareRouter.post("/create-checkout", async (req: Request, res: Response) => {
       prePopulatedData: customerEmail ? { buyerEmail: customerEmail } : undefined,
     });
 
-    const serializedResult = serializeSquareResponse(response.result);
+    const resData = (response as any).result || response;
+    const serializedResult = serializeSquareResponse(resData);
     return res.json({
       success: true,
       simulated: false,
-      checkoutUrl: serializedResult.paymentLink.url,
-      orderId: serializedResult.paymentLink.orderId,
+      checkoutUrl: serializedResult.paymentLink?.url || (response as any).paymentLink?.url,
+      orderId: serializedResult.paymentLink?.orderId || (response as any).paymentLink?.orderId,
     });
   } catch (err: any) {
     console.error("[Square Checkout Error]:", err);
@@ -185,7 +187,7 @@ squareRouter.post("/terminal-checkout", async (req: Request, res: Response) => {
 
   try {
     const square = getSquareClient();
-    const response = await square.terminalApi.createTerminalCheckout({
+    const response = await square.terminal.checkouts.create({
       idempotencyKey: crypto.randomUUID(),
       checkout: {
         amountMoney: {
@@ -200,11 +202,12 @@ squareRouter.post("/terminal-checkout", async (req: Request, res: Response) => {
       },
     });
 
-    const serializedResult = serializeSquareResponse(response.result);
+    const resData = (response as any).result || response;
+    const serializedResult = serializeSquareResponse(resData);
     return res.json({
       success: true,
       simulated: false,
-      terminalCheckout: serializedResult.checkout,
+      terminalCheckout: serializedResult.checkout || (response as any).checkout,
     });
   } catch (err: any) {
     console.error("[Square Terminal Checkout Error]:", err);
@@ -245,7 +248,7 @@ squareRouter.post("/create-invoice", async (req: Request, res: Response) => {
     const square = getSquareClient();
     const locationId = process.env.SQUARE_LOCATION_ID!;
 
-    const invoiceResponse = await square.invoicesApi.createInvoice({
+    const invoiceResponse = await square.invoices.create({
       invoice: {
         locationId,
         title: title || "Display & Cell Pros Corporate Fleet Repair Invoice",
@@ -267,20 +270,22 @@ squareRouter.post("/create-invoice", async (req: Request, res: Response) => {
       idempotencyKey: crypto.randomUUID(),
     });
 
-    const invoiceId = invoiceResponse.result.invoice?.id;
-    if (invoiceId && invoiceResponse.result.invoice?.version !== undefined) {
+    const invResData = (invoiceResponse as any).result || invoiceResponse;
+    const invoiceId = invResData.invoice?.id;
+    if (invoiceId && invResData.invoice?.version !== undefined) {
       // Publish the invoice so Square sends it out to customer
-      await square.invoicesApi.publishInvoice(invoiceId, {
-        version: invoiceResponse.result.invoice.version,
+      await square.invoices.publish({
+        invoiceId,
+        version: invResData.invoice.version,
         idempotencyKey: crypto.randomUUID(),
       });
     }
 
-    const serializedResult = serializeSquareResponse(invoiceResponse.result);
+    const serializedResult = serializeSquareResponse(invResData);
     return res.json({
       success: true,
       simulated: false,
-      invoice: serializedResult.invoice,
+      invoice: serializedResult.invoice || invResData.invoice,
     });
   } catch (err: any) {
     console.error("[Square Invoice Error]:", err);

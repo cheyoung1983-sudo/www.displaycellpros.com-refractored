@@ -1,18 +1,18 @@
-import { Client, Environment } from "square";
+import { SquareClient, SquareEnvironment } from "square";
 
-let squareClientInstance: Client | null = null;
+let squareClientInstance: SquareClient | null = null;
 
 /**
  * Lazy initialization helper for Square SDK client.
  * Prevents server startup crashes when SQUARE_ACCESS_TOKEN is not yet set in environment.
  */
-export function getSquareClient(): Client {
+export function getSquareClient(): SquareClient {
   if (!squareClientInstance) {
     const accessToken = process.env.SQUARE_ACCESS_TOKEN;
     const environment =
       process.env.SQUARE_ENVIRONMENT?.toLowerCase() === "production"
-        ? Environment.Production
-        : Environment.Sandbox;
+        ? SquareEnvironment.Production
+        : SquareEnvironment.Sandbox;
 
     if (!accessToken) {
       console.warn(
@@ -20,8 +20,8 @@ export function getSquareClient(): Client {
       );
     }
 
-    squareClientInstance = new Client({
-      accessToken: accessToken || "SANDBOX_MOCK_ACCESS_TOKEN",
+    squareClientInstance = new SquareClient({
+      token: accessToken || "SANDBOX_MOCK_ACCESS_TOKEN",
       environment,
     });
   }
