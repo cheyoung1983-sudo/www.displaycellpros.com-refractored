@@ -20,7 +20,7 @@ process.on("uncaughtException", (err) => {
 
 // Initialize Express
 export const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Middleware
 app.use(express.json());
@@ -1183,7 +1183,12 @@ async function startServer() {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      const indexPath = path.join(distPath, "index.html");
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send("Build artifact index.html not found.");
+      }
     });
   }
 
