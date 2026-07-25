@@ -52,12 +52,7 @@ export function Footer() {
           <div className="flex gap-4 items-center select-none font-mono text-[9.5px]">
             <span className="flex items-center gap-1.5 text-slate-400">
               <Wifi className="w-3.5 h-3.5 text-emerald-500" />
-              CELLSMART HUB: CONNECTED
-            </span>
-            <span className="text-slate-700">|</span>
-            <span className="flex items-center gap-1.5 text-slate-400">
-              <Check className="w-3 h-3 text-emerald-500" />
-              SQUARE WEBHOOKS: READY
+              CLOUD HUB: CONNECTED
             </span>
           </div>
         </div>
