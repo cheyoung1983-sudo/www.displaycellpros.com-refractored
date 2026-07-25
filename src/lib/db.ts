@@ -6,31 +6,37 @@ import { Pool, Client } from "pg";
 let pool: Pool | null = null;
 
 /**
+ * Normalizes host path for Unix Domain Sockets vs TCP hostnames.
+ */
+function normalizeHost(rawHost: string): { host: string; isUnixSocket: boolean } {
+  if (rawHost.startsWith("/")) {
+    const cleanedHost = rawHost.replace(/\/\.?s\.PGSQL\.\d+$/, "");
+    return { host: cleanedHost, isUnixSocket: true };
+  }
+  return { host: rawHost, isUnixSocket: false };
+}
+
+/**
  * Returns the initialized PostgreSQL connection pool.
  * Implements lazy loading and defensive checks to prevent crashing if environment variables are not yet populated.
  */
 export function getDbPool(): Pool {
   if (pool) return pool;
 
-  const host = process.env.PGHOST;
-  const user = process.env.PGUSER;
+  const rawHost = process.env.PGHOST || "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com";
+  const user = process.env.PGUSER || "postgres";
   const roleArn = process.env.AWS_ROLE_ARN;
   const region = process.env.AWS_REGION || "us-east-1";
   const port = Number(process.env.PGPORT) || 5432;
   const database = process.env.PGDATABASE || "postgres";
 
-  if (!host || !user) {
-    throw new Error(
-      "PostgreSQL configuration variables (PGHOST, PGUSER) are missing. " +
-      "Please configure your environment variables in Vercel or your local .env file."
-    );
-  }
+  const { host, isUnixSocket } = normalizeHost(rawHost);
 
-  console.log(`[Database] Initializing connection pool to ${host}:${port}/${database} as user ${user}`);
+  console.log(`[Database] Initializing connection pool to ${isUnixSocket ? 'Unix Socket ' + host : host + ':' + port}/${database} as user ${user}`);
 
   let passwordOption: any;
 
-  if (roleArn) {
+  if (roleArn && !isUnixSocket) {
     console.log(`[Database] Configuring AWS IAM OIDC Authentication using role: ${roleArn}`);
     const signer = new Signer({
       hostname: host,
@@ -44,17 +50,30 @@ export function getDbPool(): Pool {
     });
     passwordOption = () => signer.getAuthToken();
   } else {
-    console.log("[Database] No AWS_ROLE_ARN detected. Defaulting to standard password authentication.");
-    passwordOption = process.env.PGPASSWORD || "";
+    passwordOption = process.env.PGPASSWORD || process.env.SQL_PASSWORD || "";
   }
 
-  pool = new Pool({
+  const poolConfig: any = {
     host,
     user,
     database,
     password: passwordOption,
     port,
-    ssl: { rejectUnauthorized: false },
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  };
+
+  if (isUnixSocket) {
+    poolConfig.ssl = false;
+  } else {
+    poolConfig.ssl = { rejectUnauthorized: false };
+  }
+
+  pool = new Pool(poolConfig);
+
+  pool.on("error", (err) => {
+    console.error("[Database Pool Error]: Unexpected error on idle client:", err);
   });
 
   try {
@@ -73,21 +92,30 @@ export function getDbPool(): Pool {
  * is passed, it connects via an isolated single-client instance to avoid polluting or leaking the main Pool.
  */
 export async function queryWithToken(sql: string, params: any[] = [], token?: string): Promise<any> {
-  const host = process.env.PGHOST;
-  const user = process.env.PGUSER;
+  const rawHost = process.env.PGHOST || "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com";
+  const user = process.env.PGUSER || "postgres";
   const port = Number(process.env.PGPORT) || 5432;
   const database = process.env.PGDATABASE || "postgres";
 
+  const { host: normalizedHost, isUnixSocket } = normalizeHost(rawHost);
+
   if (token) {
-    console.log(`[Database] Query executing via explicit token connection to ${host}:${port}/${database} as user ${user}`);
-    const client = new Client({
-      host,
+    console.log(`[Database] Query executing via explicit token connection to ${isUnixSocket ? 'Unix Socket ' + normalizedHost : normalizedHost + ':' + port}/${database} as user ${user}`);
+    const clientConfig: any = {
+      host: normalizedHost,
       user,
       database,
       password: token,
       port,
-      ssl: { rejectUnauthorized: false },
-    });
+    };
+
+    if (isUnixSocket) {
+      clientConfig.ssl = false;
+    } else {
+      clientConfig.ssl = { rejectUnauthorized: false };
+    }
+
+    const client = new Client(clientConfig);
     await client.connect();
     try {
       const result = await client.query(sql, params);
