@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   CheckCircle2, 
   MessageSquare, 
@@ -14,6 +14,7 @@ import {
   Building,
   UserCheck
 } from "lucide-react";
+import { trackGoogleAdsConversion } from "../lib/gtag";
 
 interface ContactReceivedViewProps {
   onBookClick?: () => void;
@@ -26,6 +27,13 @@ export function ContactReceivedView({
 }: ContactReceivedViewProps) {
   const [copiedId, setCopiedId] = useState(false);
   const [inquiryRef] = useState(() => "DCP-INQ" + Math.floor(100000 + Math.random() * 900000));
+
+  useEffect(() => {
+    trackGoogleAdsConversion("contact_requested", {
+      transaction_id: inquiryRef,
+      value: 10.0,
+    });
+  }, [inquiryRef]);
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(inquiryRef);

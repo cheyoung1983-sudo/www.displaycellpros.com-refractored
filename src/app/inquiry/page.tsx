@@ -1,14 +1,14 @@
 "use client";
 
 import React from 'react';
-import { ContactReceivedView } from '../../components/ContactReceivedView';
+import { InquiryView } from '../../components/InquiryView';
 import { useRouter } from 'next/navigation';
 
-export default function ReceivedPage() {
+export default function InquiryPage() {
   const router = useRouter();
 
   return (
-    <ContactReceivedView
+    <InquiryView
       onNavigateHome={() => router.push('/')}
       onBookClick={() => {
         if (typeof window !== "undefined") {

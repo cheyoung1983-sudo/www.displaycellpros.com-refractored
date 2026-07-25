@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   CheckCircle2, 
   Calendar, 
@@ -18,6 +18,7 @@ import {
   Share2,
   Download
 } from "lucide-react";
+import { trackGoogleAdsConversion } from "../lib/gtag";
 
 interface ConfirmationViewProps {
   onBookClick?: () => void;
@@ -32,6 +33,13 @@ export function ConfirmationView({
 }: ConfirmationViewProps) {
   const [copiedId, setCopiedId] = useState(false);
   const [confirmationRef] = useState(() => "DCP-APT" + Math.floor(100000 + Math.random() * 900000));
+
+  useEffect(() => {
+    trackGoogleAdsConversion(pageType === "schedule" ? "appointment_scheduled" : "signup_completed", {
+      transaction_id: confirmationRef,
+      value: 120.0,
+    });
+  }, [pageType, confirmationRef]);
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(confirmationRef);

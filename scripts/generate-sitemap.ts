@@ -21,6 +21,8 @@ const routes: Route[] = [
   { path: '/schedule', priority: '0.9', changefreq: 'weekly' },
   { path: '/confirm', priority: '0.9', changefreq: 'weekly' },
   { path: '/recieved', priority: '0.9', changefreq: 'weekly' },
+  { path: '/inquiry', priority: '0.9', changefreq: 'weekly' },
+  { path: '/Inquiry', priority: '0.9', changefreq: 'weekly' },
   { path: '/b2b', priority: '0.8', changefreq: 'monthly' },
   { path: '/store', priority: '0.7', changefreq: 'weekly' },
   { path: '/privacy', priority: '0.5', changefreq: 'monthly' },

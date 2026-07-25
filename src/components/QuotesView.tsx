@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   CheckCircle2, 
   Clock, 
@@ -28,6 +28,7 @@ import {
   CreditCard
 } from "lucide-react";
 import { SquarePaymentModal } from "./SquarePaymentModal";
+import { trackGoogleAdsConversion } from "../lib/gtag";
 
 interface QuotesViewProps {
   onBookClick?: () => void;
@@ -59,6 +60,14 @@ export function QuotesView({
   const [serviceType, setServiceType] = useState<"mobile_driveway" | "store_dropoff">("mobile_driveway");
   const [isSubmitted, setIsSubmitted] = useState(true); // Default to Request Received state for conversion page
   const [quoteReference] = useState(() => "DCP-Q" + Math.floor(100000 + Math.random() * 900000));
+
+  useEffect(() => {
+    trackGoogleAdsConversion("quote_requested", {
+      transaction_id: quoteReference,
+      value: 149.0,
+      device_info: `${deviceBrand} ${deviceModel}`,
+    });
+  }, [quoteReference, deviceBrand, deviceModel]);
 
   const handleCopyQuoteId = () => {
     navigator.clipboard.writeText(quoteReference);

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { ConfirmationView } from '@/components/ConfirmationView';
+import { ConfirmationView } from '../../components/ConfirmationView';
 import { useRouter } from 'next/navigation';
 
 export default function SchedulePage() {
