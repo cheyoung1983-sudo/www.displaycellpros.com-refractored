@@ -6,13 +6,14 @@ import {
   MapPin, Settings, ShieldCheck, Cpu, RefreshCw, Plus, FileText,
   Trash2, Mail, Eye, EyeOff, Globe, Server, Check, CheckCircle2,
   TrendingUp, DollarSign, Zap, ShoppingCart, ChevronUp, ChevronDown,
-  LogOut
+  LogOut, Calendar
 } from 'lucide-react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { RdsDiagnosticPanel } from '../../components/RdsDiagnosticPanel';
 import CacheManagement from '../../components/CacheManagement';
 import { HardwareScanChart } from '../../components/HardwareScanChart';
 import TicketTemplatesPanel from '../../components/TicketTemplatesPanel';
+import { SquareMiniCalendar } from '../../components/SquareMiniCalendar';
 import { RepairTicket, POSLog, QuoteResponse, TicketTemplate } from '@/lib/types';
 import { calculateQuoteInternal, WA_TAX_DATA } from '@/lib/repair-logic';
 
@@ -20,7 +21,7 @@ export default function LabPortal() {
   const { user: auth0User, isLoading: isAuth0Loading, error: auth0Error } = useUser();
 
   // State from App.tsx
-  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "postgres" | "settings">("triage");
+  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "postgres" | "settings" | "calendar">("triage");
   const [diagnosticMode, setDiagnosticMode] = useState<"standard" | "thinking" | "vision">("standard");
 
   // Device/Quote state
@@ -198,6 +199,10 @@ export default function LabPortal() {
             <button onClick={() => setLabTab("triage")} className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold ${labTab === "triage" ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}>
               <div className="flex items-center gap-2"><Terminal className="w-4 h-4" /> AI Diagnostic Console</div>
             </button>
+            <button onClick={() => setLabTab("calendar")} className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold ${labTab === "calendar" ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}>
+              <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-400" /> Square Appointments</div>
+              <span className="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded font-mono font-bold">LIVE</span>
+            </button>
             <button onClick={() => setLabTab("pos")} className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold ${labTab === "pos" ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}>
               <div className="flex items-center gap-2"><Activity className="w-4 h-4" /> POS Ledger & Sync</div>
             </button>
@@ -236,6 +241,7 @@ export default function LabPortal() {
             </div>
           )}
 
+          {labTab === "calendar" && <SquareMiniCalendar />}
           {labTab === "postgres" && <RdsDiagnosticPanel />}
           {labTab === "settings" && <CacheManagement onAddToast={() => {}} />}
         </div>

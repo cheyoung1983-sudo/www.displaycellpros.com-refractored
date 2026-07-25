@@ -45,7 +45,8 @@ import {
   Mail,
   Eye,
   EyeOff,
-  BarChart2
+  BarChart2,
+  Calendar
 } from "lucide-react";
 import { RepairTicket, POSLog, QuoteResponse } from "./types";
 import { Toast, ToastContainer, ToastType } from "./components/ToastNotification";
@@ -63,6 +64,7 @@ import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
 import CacheManagement from "./components/CacheManagement";
 import QrScannerModal from "./components/QrScannerModal";
 import CompetitorComparisonChart from "./components/CompetitorComparisonChart";
+import { SquareMiniCalendar } from "./components/SquareMiniCalendar";
 import { TicketTemplate } from "./types";
 
 // --- DATA MODELS ---
@@ -153,7 +155,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // --- DIAGNOSTIC HUB STATES ---
-  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "postgres" | "settings" | "comparison">("triage");
+  const [labTab, setLabTab] = useState<"triage" | "pos" | "tax" | "postgres" | "settings" | "comparison" | "calendar">("triage");
 
   // Active Customer & Device Details
   const [customerName, setCustomerName] = useState<string>("Jane Miller");
@@ -2267,6 +2269,23 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                         VS
                       </span>
                     </button>
+
+                    <button
+                      onClick={() => setLabTab("calendar")}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-semibold transition-all ${
+                        labTab === "calendar" 
+                          ? "bg-blue-600 text-white shadow-md" 
+                          : "text-slate-300 hover:bg-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-emerald-400" />
+                        <span>Square Appointments</span>
+                      </div>
+                      <span className="px-1.5 py-0.2 text-[9px] rounded font-mono bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-800/60">
+                        LIVE
+                      </span>
+                    </button>
                   </nav>
                 </div>
 
@@ -2370,6 +2389,11 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 {/* COMPETITOR DIAGNOSTIC BENCHMARKS & GAP ANALYSIS CHART */}
                 {labTab === "comparison" && (
                   <CompetitorComparisonChart />
+                )}
+
+                {/* SQUARE APPOINTMENTS MINI CALENDAR VIEW */}
+                {labTab === "calendar" && (
+                  <SquareMiniCalendar onOpenAppointmentsModal={() => setIsSquareAppointmentsOpen(true)} />
                 )}
 
                 {/* 1. TRIAGE CHAT MODULE */}
@@ -3267,6 +3291,30 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       <span className="text-emerald-400 font-bold">READY</span>
                     </div>
                   </div>
+                </div>
+
+                {/* Square Appointments Mini Calendar Quick Launcher */}
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs font-mono shadow-xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-white uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                      Square Calendar
+                    </span>
+                    <span className="text-[9px] bg-emerald-950 text-emerald-300 font-bold px-1.5 py-0.5 rounded">
+                      LIVE
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 leading-snug">
+                    View scheduled repair appointments & technician calendars.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setLabTab("calendar")}
+                    className="w-full py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-bold text-[10.5px] uppercase rounded border border-blue-500/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                    Open Mini Calendar
+                  </button>
                 </div>
 
                 {/* Offline-Capable Diagnostic Ticket Templates */}
