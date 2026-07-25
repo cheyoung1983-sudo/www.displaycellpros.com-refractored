@@ -1,6 +1,7 @@
-# Task: Fix Vercel Build - Module Resolution & Dependencies
+# Task: Integrate Vercel Connect (MCP)
 
-- [x] Update `tsconfig.json` path mapping
-- [x] Add `react-is` dependency to `package.json`
-- [x] Run `npm install` to sync lockfile
-- [/] Verify with `npx tsc --noEmit`
+- [x] Add `@vercel/connect` to `package.json` and run `npm install`
+- [x] Configure `VERCEL_CONNECT_SERVER_ID` in `.env.local`
+- [x] Create API route `/api/mcp/token` using `getToken`
+- [x] Create API route `/api/mcp/authorize` using `startAuthorization`
+- [x] Verify build and token generation

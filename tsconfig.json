@@ -43,7 +43,6 @@
     "dist",
     "functions",
     "dcp-static",
-    "dcp-static-cb",
-    "src/App.tsx"
+    "dcp-static-cb"
   ]
 }

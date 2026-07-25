@@ -1,5 +1,7 @@
 import { query } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   const response = await query('select * from comments');
   const comments = response.rows;

@@ -1,36 +1,37 @@
-# Secure Asset Delivery (AWS CloudFront) Implementation
+# Walkthrough: Vercel Connect (MCP) Integration
 
-I have implemented the infrastructure to support **AWS CloudFront Signed URLs** using the Key Pairs you provided. This allows the application to securely serve private assets (like forensic reports) while keeping them inaccessible to unauthorized users.
+I have successfully integrated **Vercel Connect** into your project, enabling secure token generation and authorization for your Vercel-native Model Context Protocol (MCP) server.
 
 ## Changes Made
 
-### 1. New Utility: CloudFront Signer
-Created [src/lib/cloudfront.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/cloudfront.ts).
-- Uses `@aws-sdk/cloudfront-signer` to generate cryptographically signed URLs.
-- Configured to support multiple Key Pairs (Primary and Secondary).
-- Implements a 1-hour default expiry for all signed links.
+### 1. New Dependency: @vercel/connect
+Installed the `@vercel/connect` library to handle the cryptographic handshake and token retrieval from Vercel's edge infrastructure.
 
 ### 2. Environment Configuration
-Updated [.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env.local).
-- Added `CLOUDFRONT_KEY_PAIR_ID_1` and `_2` based on your provided files.
-- Staged the `CLOUDFRONT_PRIVATE_KEY_1` variable to use **AWS Secrets Manager** resolution.
+Updated [.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env.local) with your MCP server ID:
+`VERCEL_CONNECT_SERVER_ID="mcp.vercel.com/cheyoung1983-sudo-www-displaycellpros-com-refractored"`
 
-### 3. Dependencies
-- Installed `@aws-sdk/cloudfront-signer` for production-grade security.
+### 3. API Route: Token Generation
+Created [src/app/api/mcp/token/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/api/mcp/token/route.ts).
+- **Endpoint:** `/api/mcp/token`
+- **Security:** Requires an active Auth0 session.
+- **Identity Mapping:** Automatically maps the Auth0 `sub` to the MCP `subject.id`.
+- **Logic:** Calls `getToken` with the requested `openid`, `email`, and `profile` scopes.
 
-## How to Complete the Setup
+### 4. API Route: Authorization Handshake
+Created [src/app/api/mcp/authorize/route.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/api/mcp/authorize/route.ts).
+- **Endpoint:** `/api/mcp/authorize`
+- **Logic:** Calls `startAuthorization` to initiate the secure handshake between your user and the MCP provider.
 
-> [!CAUTION]
-> **Private Key Security:** I have **not** stored your private key contents in the codebase. You must secure them in AWS Secrets Manager for the system to work.
+## How to Verify
 
-1.  **Upload to Secrets Manager:**
-    - Key 1: Upload the content of `pk-LHRE6C3FQAL7HR7UKFVNA72G3G6GD5MD.pem` to a secret named `prod/cloudfront/pk-1`.
-    - Key 2: Upload the content of `pk-APKAX3LBP6Q6HAW6HRI5.pem` to a secret named `prod/cloudfront/pk-2`.
-2.  **Deployment:**
-    - Ensure your Vercel/Cloud environment has permission to read these secrets.
-3.  **Verification:**
-    - You can test the signing logic in production or by running:
-      ```bash
-      npx tsx scripts/test-cloudfront.ts
-      ```
-      *(Note: Local testing will fail until the Secrets Manager bridge is active).*
+> [!NOTE]
+> Ensure you are logged in to the application via Auth0 before testing these endpoints.
+
+1.  **Get Token:**
+    Navigate to `/api/mcp/token`. If authorized, it should return a JSON response containing your Vercel Connect token.
+2.  **Start Authorization:**
+    Navigate to `/api/mcp/authorize`. This should initiate the redirect flow to the MCP provider for initial user consent.
+
+> [!IMPORTANT]
+> **Production Readiness:** The routes are marked as `dynamic = 'force-dynamic'` to ensure they work correctly with your Vercel-native Postgres and Auth0 environment.
