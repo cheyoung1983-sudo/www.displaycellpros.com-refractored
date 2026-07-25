@@ -7,20 +7,31 @@ import './index.css';
 // Intercept and ignore benign Vite HMR websocket and network failure logs during container boot
 if (typeof window !== 'undefined') {
   window.addEventListener('unhandledrejection', (event) => {
-    const msg = String(event.reason || '');
-    if (msg.includes('WebSocket') || msg.includes('websocket') || msg.includes('vite') || msg.includes('HMR')) {
+    const reason = event.reason;
+    const msg = String(reason?.message || reason?.reason || reason || '');
+    if (
+      msg.includes('WebSocket') || 
+      msg.includes('websocket') || 
+      msg.includes('vite') || 
+      msg.includes('HMR') ||
+      msg.includes('closed without opened')
+    ) {
       event.preventDefault();
-      console.info('[HMR Ignored Rejection]:', event.reason);
     }
   });
 
   window.addEventListener('error', (event) => {
-    const msg = String(event.message || '');
-    if (msg.includes('WebSocket') || msg.includes('websocket') || msg.includes('vite') || msg.includes('HMR')) {
+    const msg = String(event.message || event.error?.message || '');
+    if (
+      msg.includes('WebSocket') || 
+      msg.includes('websocket') || 
+      msg.includes('vite') || 
+      msg.includes('HMR') ||
+      msg.includes('closed without opened')
+    ) {
       event.preventDefault();
-      console.info('[HMR Ignored Error]:', event.message);
     }
-  });
+  }, true);
 }
 
 // Register the Service Worker for offline Diagnostic Lab capabilities
