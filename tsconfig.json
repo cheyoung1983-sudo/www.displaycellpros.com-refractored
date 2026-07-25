@@ -17,9 +17,7 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true,
@@ -45,6 +43,7 @@
     "dist",
     "functions",
     "dcp-static",
-    "dcp-static-cb"
+    "dcp-static-cb",
+    "src/App.tsx"
   ]
 }

@@ -1604,8 +1604,8 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
       "/api/auth0/applications",
       withAuth0(async (req, res, svc) => {
         const result = await svc.listApplications({
-          per_page: Number(req.query.per_page ?? 50),
-          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          per_page: Number(req.query.per_page as string ?? "50"),
+          page: req.query.page !== undefined ? Number(req.query.page as string) : 0,
           q: req.query.q as string | undefined,
           include_totals: req.query.include_totals === "true",
         });
@@ -1617,7 +1617,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.get(
       "/api/auth0/applications/:clientId",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.getApplication(req.params.clientId);
+        const result = await svc.getApplication(req.params.clientId as string);
         res.json(result);
       })
     );
@@ -1635,7 +1635,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.patch(
       "/api/auth0/applications/:clientId",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.updateApplication(req.params.clientId, req.body);
+        const result = await svc.updateApplication(req.params.clientId as string, req.body);
         res.json(result);
       })
     );
@@ -1647,8 +1647,8 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
       "/api/auth0/resource-servers",
       withAuth0(async (req, res, svc) => {
         const result = await svc.listResourceServers({
-          per_page: Number(req.query.per_page ?? 50),
-          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          per_page: Number(req.query.per_page as string ?? "50"),
+          page: req.query.page !== undefined ? Number(req.query.page as string) : 0,
           include_totals: req.query.include_totals === "true",
         });
         res.json(result);
@@ -1660,7 +1660,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
       "/api/auth0/resource-servers/:id",
       withAuth0(async (req, res, svc) => {
         const result = await svc.getResourceServer(
-          decodeURIComponent(req.params.id)
+          decodeURIComponent(req.params.id as string)
         );
         res.json(result);
       })
@@ -1680,7 +1680,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
       "/api/auth0/resource-servers/:id",
       withAuth0(async (req, res, svc) => {
         const result = await svc.updateResourceServer(
-          decodeURIComponent(req.params.id),
+          decodeURIComponent(req.params.id as string),
           req.body
         );
         res.json(result);
@@ -1694,8 +1694,8 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
       "/api/auth0/actions",
       withAuth0(async (req, res, svc) => {
         const result = await svc.listActions({
-          per_page: Number(req.query.per_page ?? 50),
-          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          per_page: Number(req.query.per_page as string ?? "50"),
+          page: req.query.page !== undefined ? Number(req.query.page as string) : 0,
           triggerId: req.query.triggerId as string | undefined,
           actionName: req.query.actionName as string | undefined,
           deployed:
@@ -1711,7 +1711,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.get(
       "/api/auth0/actions/:actionId",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.getAction(req.params.actionId);
+        const result = await svc.getAction(req.params.actionId as string);
         res.json(result);
       })
     );
@@ -1729,7 +1729,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.patch(
       "/api/auth0/actions/:actionId",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.updateAction(req.params.actionId, req.body);
+        const result = await svc.updateAction(req.params.actionId as string, req.body);
         res.json(result);
       })
     );
@@ -1738,7 +1738,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.post(
       "/api/auth0/actions/:actionId/deploy",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.deployAction(req.params.actionId);
+        const result = await svc.deployAction(req.params.actionId as string);
         res.json(result);
       })
     );
@@ -1750,8 +1750,8 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
       "/api/auth0/logs",
       withAuth0(async (req, res, svc) => {
         const result = await svc.listLogs({
-          per_page: Number(req.query.per_page ?? 50),
-          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          per_page: Number(req.query.per_page as string ?? "50"),
+          page: req.query.page !== undefined ? Number(req.query.page as string) : 0,
           q: req.query.q as string | undefined,
           from: req.query.from as string | undefined,
           sort: req.query.sort as string | undefined,
@@ -1765,7 +1765,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.get(
       "/api/auth0/logs/:logId",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.getLog(req.params.logId);
+        const result = await svc.getLog(req.params.logId as string);
         res.json(result);
       })
     );
@@ -1777,8 +1777,8 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
       "/api/auth0/forms",
       withAuth0(async (req, res, svc) => {
         const result = await svc.listForms({
-          per_page: Number(req.query.per_page ?? 50),
-          page: req.query.page !== undefined ? Number(req.query.page) : 0,
+          per_page: Number(req.query.per_page as string ?? "50"),
+          page: req.query.page !== undefined ? Number(req.query.page as string) : 0,
         });
         res.json(result);
       })
@@ -1788,7 +1788,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.get(
       "/api/auth0/forms/:formId",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.getForm(req.params.formId);
+        const result = await svc.getForm(req.params.formId as string);
         res.json(result);
       })
     );
@@ -1806,7 +1806,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.patch(
       "/api/auth0/forms/:formId",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.updateForm(req.params.formId, req.body);
+        const result = await svc.updateForm(req.params.formId as string, req.body);
         res.json(result);
       })
     );
@@ -1815,7 +1815,7 @@ You requested deeper reasoning diagnostics on a **${brand} ${model}** exhibiting
     app.post(
       "/api/auth0/forms/:formId/publish",
       withAuth0(async (req, res, svc) => {
-        const result = await svc.publishForm(req.params.formId);
+        const result = await svc.publishForm(req.params.formId as string);
         res.json(result);
       })
     );
