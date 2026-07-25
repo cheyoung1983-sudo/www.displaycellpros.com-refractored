@@ -184,9 +184,20 @@ export function QuotesView({
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+              <a
+                href="https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 sm:flex-none px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-1.5"
+              >
+                <Calendar className="w-4 h-4" />
+                Schedule via Square
+                <ExternalLink className="w-3 h-3" />
+              </a>
+
               <button
                 onClick={() => setIsSquareModalOpen(true)}
-                className="flex-1 sm:flex-none px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-none px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5"
               >
                 <CreditCard className="w-4 h-4 text-emerald-200" />
                 Pay via Square
@@ -194,10 +205,10 @@ export function QuotesView({
 
               <a
                 href="tel:5095550199"
-                className="flex-1 sm:flex-none px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-none px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
               >
                 <Phone className="w-4 h-4" />
-                Call (509) 555-0199
+                Call Desk
               </a>
               {onBookClick && (
                 <button

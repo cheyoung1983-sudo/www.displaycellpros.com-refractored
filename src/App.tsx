@@ -58,6 +58,7 @@ import { QuotesView } from "./components/QuotesView";
 import { ConfirmationView } from "./components/ConfirmationView";
 import { ContactReceivedView } from "./components/ContactReceivedView";
 import { InquiryView } from "./components/InquiryView";
+import { SquareAppointmentsModal } from "./components/SquareAppointmentsModal";
 import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
 import CacheManagement from "./components/CacheManagement";
 import QrScannerModal from "./components/QrScannerModal";
@@ -148,6 +149,7 @@ export default function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
+  const [isSquareAppointmentsOpen, setIsSquareAppointmentsOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // --- DIAGNOSTIC HUB STATES ---
@@ -1599,6 +1601,14 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                 </button>
 
                 <button 
+                  onClick={() => setIsSquareAppointmentsOpen(true)}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center gap-1.5"
+                >
+                  <QrCode size={16} />
+                  Square Booking
+                </button>
+
+                <button 
                   onClick={() => setIsAiOpen(true)}
                   className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] flex items-center gap-2"
                 >
@@ -1633,6 +1643,13 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                   className="w-full text-left flex items-center gap-2 block px-3 py-3 rounded-md text-base font-bold text-blue-400 bg-slate-900 border border-slate-755 mb-2"
                 >
                   <Cpu size={18} /> Diagnostics Lab Portal (Beta)
+              </button>
+
+              <button 
+                  onClick={() => { setIsSquareAppointmentsOpen(true); setMobileMenuOpen(false); }}
+                  className="w-full text-left flex items-center gap-2 block px-3 py-3 rounded-md text-base font-bold text-white bg-emerald-600 mb-2"
+                >
+                  <QrCode size={18} /> Square Appointments Booking
               </button>
 
               <button 
@@ -3347,6 +3364,14 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
           }}
         />
       )}
+
+      {/* Official Square Appointments Location & Booking Modal */}
+      <SquareAppointmentsModal 
+        isOpen={isSquareAppointmentsOpen}
+        onClose={() => setIsSquareAppointmentsOpen(false)}
+        locationQrUrl="https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R"
+        locationId="LRDXJ4YQ6W96R"
+      />
       
       {/* Floating Action Button for AI triage launcher */}
       {!isAiOpen && (

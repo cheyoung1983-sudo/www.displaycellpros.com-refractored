@@ -115,13 +115,24 @@ export function InquiryView({
               </div>
             </div>
 
-            <a
-              href="tel:5095550199"
-              className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"
-            >
-              <Phone className="w-4 h-4" />
-              Call (509) 555-0199
-            </a>
+            <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
+              <a
+                href="https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                <span>Square Appointments</span>
+              </a>
+
+              <a
+                href="tel:5095550199"
+                className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                <Phone className="w-4 h-4" />
+                Call Desk
+              </a>
+            </div>
           </div>
         </div>
       </div>

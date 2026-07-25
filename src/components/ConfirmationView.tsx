@@ -112,6 +112,17 @@ export function ConfirmationView({
 
             <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
               <a
+                href="https://app.squareup.com/appointments/business_locations/qrcode/LRDXJ4YQ6W96R"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                <Calendar className="w-4 h-4" />
+                Square Appointments
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              <a
                 href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=Display+%26+Cell+Pros+Repair+Appointment&details=Mobile+driveway+repair+appointment.+Confirmation+%23${confirmationRef}&location=7302+N+Division+St,+Spokane,+WA+99208`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -123,10 +134,10 @@ export function ConfirmationView({
 
               <a
                 href="tel:5095550199"
-                className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
               >
                 <Phone className="w-4 h-4" />
-                Call (509) 555-0199
+                Call Desk
               </a>
             </div>
           </div>
