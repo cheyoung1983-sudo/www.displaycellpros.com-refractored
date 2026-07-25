@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono, Inter } from "next/font/google";
 import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { LayoutWrapper } from "@/components/LayoutWrapper";
+import { LayoutWrapper } from "../components/LayoutWrapper";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({

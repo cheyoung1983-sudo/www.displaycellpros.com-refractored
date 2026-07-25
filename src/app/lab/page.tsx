@@ -14,8 +14,8 @@ import CacheManagement from '../../components/CacheManagement';
 import { HardwareScanChart } from '../../components/HardwareScanChart';
 import TicketTemplatesPanel from '../../components/TicketTemplatesPanel';
 import { SquareMiniCalendar } from '../../components/SquareMiniCalendar';
-import { RepairTicket, POSLog, QuoteResponse, TicketTemplate } from '@/lib/types';
-import { calculateQuoteInternal, WA_TAX_DATA } from '@/lib/repair-logic';
+import { RepairTicket, POSLog, QuoteResponse, TicketTemplate } from '../../lib/types';
+import { calculateQuoteInternal, WA_TAX_DATA } from '../../lib/repair-logic';
 
 export default function LabPortal() {
   const { user: auth0User, isLoading: isAuth0Loading, error: auth0Error } = useUser();

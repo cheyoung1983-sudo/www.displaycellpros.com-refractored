@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDbPool, isDbConfigured } from '@/lib/db';
-import { auth0 } from '@/lib/auth0';
+import { getDbPool, isDbConfigured } from '../../../lib/db';
+import { auth0 } from '../../../lib/auth0';
 
 export const dynamic = 'force-dynamic';
 

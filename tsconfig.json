@@ -17,6 +17,7 @@
     "moduleDetection": "force",
     "allowJs": true,
     "jsx": "react-jsx",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*",
@@ -30,7 +31,6 @@
     "github-mcp-server",
     "node_modules",
     "dist",
-    "**/app/**/*",
     "**/middleware.ts",
     "**/proxy.ts",
     "**/auth0.ts",

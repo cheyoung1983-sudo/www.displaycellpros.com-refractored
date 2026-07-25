@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { QuotesView } from '@/components/QuotesView';
+import { QuotesView } from '../../components/QuotesView';
 import { useRouter } from 'next/navigation';
 
 export default function QuotesPage() {
