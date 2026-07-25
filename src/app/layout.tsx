@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono, Inter } from "next/font/google";
 import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { LayoutWrapper } from "../components/LayoutWrapper";
 import "./globals.css";
 
@@ -85,6 +86,7 @@ export default function RootLayout({
             {children}
           </LayoutWrapper>
           <SpeedInsights />
+          <Analytics />
         </Auth0Provider>
       </body>
     </html>
