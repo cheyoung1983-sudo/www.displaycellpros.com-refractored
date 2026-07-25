@@ -10,6 +10,7 @@ declare global {
   }
 }
 
+export const GOOGLE_TAG_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID || "G-3FG5F3TYVB";
 export const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-11520847291";
 
 /**
@@ -24,15 +25,19 @@ export function initGoogleTag() {
       window.dataLayer.push(arguments);
     };
     window.gtag("js", new Date());
+    window.gtag("config", GOOGLE_TAG_ID, {
+      send_page_view: true,
+      cookie_flags: "max-age=7200;secure;samesite=none",
+    });
     window.gtag("config", GOOGLE_ADS_ID, {
       send_page_view: true,
       cookie_flags: "max-age=7200;secure;samesite=none",
     });
 
-    // Dynamically insert gtag.js script tag
+    // Dynamically insert gtag.js script tag for primary tag
     const script = document.createElement("script");
     script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`;
     document.head.appendChild(script);
   }
 }
