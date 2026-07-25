@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const APP_URL = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
+const APP_URL = process.env.APP_URL || 'https://www.displaycellpros.com';
 const lastMod = new Date().toISOString().split('T')[0];
 
 interface Route {
@@ -17,12 +17,6 @@ interface Route {
 const routes: Route[] = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
   { path: '/services', priority: '0.8', changefreq: 'monthly' },
-  { path: '/quotes', priority: '0.9', changefreq: 'weekly' },
-  { path: '/schedule', priority: '0.9', changefreq: 'weekly' },
-  { path: '/confirm', priority: '0.9', changefreq: 'weekly' },
-  { path: '/recieved', priority: '0.9', changefreq: 'weekly' },
-  { path: '/inquiry', priority: '0.9', changefreq: 'weekly' },
-  { path: '/Inquiry', priority: '0.9', changefreq: 'weekly' },
   { path: '/b2b', priority: '0.8', changefreq: 'monthly' },
   { path: '/store', priority: '0.7', changefreq: 'weekly' },
   { path: '/privacy', priority: '0.5', changefreq: 'monthly' },

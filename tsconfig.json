@@ -10,33 +10,40 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "paths": {
       "@/*": [
-        "./src/*",
         "./*"
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "strict": false,
+    "incremental": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
+  "include": [
+    "api",
+    "server.ts",
+    "src",
+    "vite.config.ts",
+    ".next/types/**/*.ts"
+  ],
   "exclude": [
-    "github-mcp-server",
     "node_modules",
     "dist",
-    "**/app/**/*",
-    "**/middleware.ts",
-    "**/proxy.ts",
-    "**/auth0.ts",
-    "**/Footer.tsx",
-    "**/Navbar.tsx",
-    "**/Profile.tsx",
-    "**/LayoutWrapper.tsx"
+    "functions",
+    "dcp-static",
+    "dcp-static-cb"
   ]
 }

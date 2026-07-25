@@ -14,7 +14,7 @@ import {
   FileCode,
   Clock
 } from "lucide-react";
-import { TicketTemplate } from "../types";
+import { TicketTemplate } from "@/lib/types";
 
 interface CacheManagementProps {
   onRefreshCompleted?: () => void;
@@ -123,55 +123,18 @@ export default function CacheManagement({ onRefreshCompleted, onAddToast }: Cach
         addLog("Template endpoint was not previously locked in cache. Proceeding.", "info");
       }
 
-      // 2. Fetch fresh data from network or fallback to local templates
+      // 2. Fetch fresh data from the network with bypassing cache header
       addLog("Sending network-revalidate signal to cloud servers...", "info");
       
-      let freshTemplates = [];
-      try {
-        const response = await fetch("/api/ticket-templates", {
-          headers: { "Cache-Control": "no-cache" }
-        });
+      const response = await fetch("/api/ticket-templates", {
+        headers: { "Cache-Control": "no-cache" }
+      });
 
-        if (response.ok) {
-          freshTemplates = await response.json();
-        } else {
-          throw new Error(`HTTP ${response.status}`);
-        }
-      } catch (err: any) {
-        addLog(`Network fetch warning: ${err.message}. Using built-in offline templates.`, "warning");
-        freshTemplates = [
-          {
-            id: "tpl-apple-screen",
-            name: "Apple Screen Replacement Template",
-            brand: "Apple",
-            issueType: "screen",
-            description: "Standard visual screen rebuild with high-purity polyurethane adhesive seals and premium oleophobic screen finish.",
-            estimatedTime: "45 mins",
-            difficulty: "Intermediate",
-            defaultPrice: 149.00
-          },
-          {
-            id: "tpl-samsung-battery",
-            name: "Samsung Battery Swap & Safety Calibration",
-            brand: "Samsung",
-            issueType: "battery",
-            description: "Chemical lithium-ion swap including back cover gasket reset and deep voltage-regulation thermal sweep.",
-            estimatedTime: "30 mins",
-            difficulty: "Easy",
-            defaultPrice: 89.00
-          },
-          {
-            id: "tpl-generic-buttons",
-            name: "Multi-Key Micro-Soldering Template",
-            brand: "Generic",
-            issueType: "button",
-            description: "Contact trace cleaning with customized isopropyl solvents and mechanical feedback leaf-spring adjustments.",
-            estimatedTime: "60 mins",
-            difficulty: "Advanced",
-            defaultPrice: 119.00
-          }
-        ];
+      if (!response.ok) {
+        throw new Error(`Cloud API returned HTTP ${response.status}`);
       }
+
+      const freshTemplates = await response.json();
       
       // 3. Manually put the fresh response in the cache to guarantee the Service Worker has it
       await cache.put(

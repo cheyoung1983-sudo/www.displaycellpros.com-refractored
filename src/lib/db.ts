@@ -1,133 +1,54 @@
-import { Signer } from "@aws-sdk/rds-signer";
-import { awsCredentialsProvider } from "@vercel/oidc-aws-credentials-provider";
+import { awsCredentialsProvider } from "@vercel/functions/oidc";
 import { attachDatabasePool } from "@vercel/functions";
-import { Pool, Client } from "pg";
+import { Signer } from "@aws-sdk/rds-signer";
+import { ClientBase, Pool } from "pg";
 
-let pool: Pool | null = null;
+const signerOptions: any = {
+  hostname: process.env.PGHOST,
+  port: Number(process.env.PGPORT) || 5432,
+  username: process.env.PGUSER,
+  region: process.env.AWS_REGION || "us-east-1",
+};
 
-/**
- * Normalizes host path for Unix Domain Sockets vs TCP hostnames.
- */
-function normalizeHost(rawHost: string): { host: string; isUnixSocket: boolean } {
-  if (rawHost.startsWith("/")) {
-    const cleanedHost = rawHost.replace(/\/\.?s\.PGSQL\.\d+$/, "");
-    return { host: cleanedHost, isUnixSocket: true };
-  }
-  return { host: rawHost, isUnixSocket: false };
-}
-
-/**
- * Returns the initialized PostgreSQL connection pool.
- * Implements lazy loading and defensive checks to prevent crashing if environment variables are not yet populated.
- */
-export function getDbPool(): Pool {
-  if (pool) return pool;
-
-  const rawHost = process.env.PGHOST || "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com";
-  const user = process.env.PGUSER || "postgres";
-  const roleArn = process.env.AWS_ROLE_ARN;
-  const region = process.env.AWS_REGION || "us-east-1";
-  const port = Number(process.env.PGPORT) || 5432;
-  const database = process.env.PGDATABASE || "postgres";
-
-  const { host, isUnixSocket } = normalizeHost(rawHost);
-
-  console.log(`[Database] Initializing connection pool to ${isUnixSocket ? 'Unix Socket ' + host : host + ':' + port}/${database} as user ${user}`);
-
-  let passwordOption: any;
-
-  if (roleArn && !isUnixSocket) {
-    console.log(`[Database] Configuring AWS IAM OIDC Authentication using role: ${roleArn}`);
-    const signer = new Signer({
-      hostname: host,
-      port: port,
-      username: user,
-      region: region,
-      credentials: awsCredentialsProvider({
-        roleArn: roleArn,
-        clientConfig: { region: region },
-      }),
-    });
-    passwordOption = () => signer.getAuthToken();
-  } else {
-    passwordOption = process.env.PGPASSWORD || process.env.SQL_PASSWORD || "";
-  }
-
-  const poolConfig: any = {
-    host,
-    user,
-    database,
-    password: passwordOption,
-    port,
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
-  };
-
-  if (isUnixSocket) {
-    poolConfig.ssl = false;
-  } else {
-    poolConfig.ssl = { rejectUnauthorized: false };
-  }
-
-  pool = new Pool(poolConfig);
-
-  pool.on("error", (err) => {
-    console.error("[Database Pool Error]: Unexpected error on idle client:", err);
+// Use Vercel OIDC credentials only when running in Vercel environment
+if (process.env.VERCEL && process.env.AWS_ROLE_ARN) {
+  signerOptions.credentials = awsCredentialsProvider({
+    roleArn: process.env.AWS_ROLE_ARN,
+    clientConfig: { region: process.env.AWS_REGION || "us-east-1" },
   });
-
-  try {
-    attachDatabasePool(pool);
-    console.log("[Database] Attached connection pool to @vercel/functions handler.");
-  } catch (err: any) {
-    console.log(`[Database] Note: attachDatabasePool is not applicable in this runtime context: ${err.message}`);
-  }
-
-  return pool;
 }
 
-/**
- * Executes a PostgreSQL query.
- * If an explicit database authentication token (such as a 15-minute temporary AWS IAM sign-in token)
- * is passed, it connects via an isolated single-client instance to avoid polluting or leaking the main Pool.
- */
-export async function queryWithToken(sql: string, params: any[] = [], token?: string): Promise<any> {
-  const rawHost = process.env.PGHOST || "database-2.cluster-ccxgoew4ygug.us-east-1.rds.amazonaws.com";
-  const user = process.env.PGUSER || "postgres";
-  const port = Number(process.env.PGPORT) || 5432;
-  const database = process.env.PGDATABASE || "postgres";
+const signer = new Signer(signerOptions);
 
-  const { host: normalizedHost, isUnixSocket } = normalizeHost(rawHost);
+const pool = new Pool({
+  host: process.env.PGHOST,
+  user: process.env.PGUSER,
+  database: process.env.PGDATABASE || "postgres",
+  // The auth token value can be cached for up to 15 minutes (900 seconds) if desired.
+  password: () => signer.getAuthToken(),
+  port: Number(process.env.PGPORT),
+  // Recommended to switch to `true` in production.
+  // See https://docs.aws.amazon.com/lambda/latest/dg/services-rds.html#rds-lambda-certificates
+  ssl: { rejectUnauthorized: false },
+  max: 20,
+});
+attachDatabasePool(pool);
 
-  if (token) {
-    console.log(`[Database] Query executing via explicit token connection to ${isUnixSocket ? 'Unix Socket ' + normalizedHost : normalizedHost + ':' + port}/${database} as user ${user}`);
-    const clientConfig: any = {
-      host: normalizedHost,
-      user,
-      database,
-      password: token,
-      port,
-    };
+// Single query transaction.
+export async function query(sql: string, args: any[] = []) {
+  return pool.query(sql, args);
+}
 
-    if (isUnixSocket) {
-      clientConfig.ssl = false;
-    } else {
-      clientConfig.ssl = { rejectUnauthorized: false };
-    }
-
-    const client = new Client(clientConfig);
-    await client.connect();
-    try {
-      const result = await client.query(sql, params);
-      return result;
-    } finally {
-      await client.end().catch((err) => console.warn("[Database] Error closing explicit connection:", err));
-    }
+// Use it for multiple queries transaction.
+export async function withConnection<T>(
+  fn: (client: ClientBase) => Promise<T>,
+): Promise<T> {
+  const client = await pool.connect();
+  try {
+    return await fn(client);
+  } finally {
+    client.release();
   }
-
-  // Fallback to global pool
-  const standardPool = getDbPool();
-  return await standardPool.query(sql, params);
 }
 
 /**

@@ -30,7 +30,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Display & Cell Pros LLC" }],
   manifest: "/manifest.json",
   other: {
-    "google-site-verification": "DjTZnriRaF2EHXE831Ic98h35DrLC07FA6gYqBV_TLU",
     "geo.region": "US-WA",
     "geo.placename": "Spokane",
     "geo.position": "47.6588;-117.4260",
@@ -40,7 +39,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "Display & Cell Pros | Mobile Device Repair & Diagnostic Lab",
     description: "Professional, on-site device hardware triage & certified repairs delivered straight to your location in Spokane and Spokane Valley. Combat-veteran owned.",
-    url: process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "/",
+    url: "https://www.displaycellpros.com",
   },
   twitter: {
     card: "summary_large_image",
@@ -63,18 +62,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${jetBrainsMono.variable} ${inter.variable}`}>
       <head>
-        {/* Google Analytics (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-E192YYWZKK"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-E192YYWZKK');
-            `,
-          }}
-        />
         {/* Service Worker Registration */}
         <script
           dangerouslySetInnerHTML={{
