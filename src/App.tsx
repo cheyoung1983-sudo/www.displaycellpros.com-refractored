@@ -55,6 +55,8 @@ import { RdsDiagnosticPanel } from "./components/RdsDiagnosticPanel";
 import { jsPDF } from "jspdf";
 import { PrivacyPolicyView } from "./components/PrivacyPolicyView";
 import { QuotesView } from "./components/QuotesView";
+import { ConfirmationView } from "./components/ConfirmationView";
+import { ContactReceivedView } from "./components/ContactReceivedView";
 import TicketTemplatesPanel from "./components/TicketTemplatesPanel";
 import CacheManagement from "./components/CacheManagement";
 import QrScannerModal from "./components/QrScannerModal";
@@ -108,6 +110,9 @@ export default function App() {
     if (path.includes("store")) return "store";
     if (path.includes("lab")) return "lab";
     if (path.includes("quote") || path.includes("quotes")) return "quotes";
+    if (path.includes("schedule")) return "schedule";
+    if (path.includes("confirm")) return "confirm";
+    if (path.includes("recieved") || path.includes("received") || path.includes("contact")) return "recieved";
     return "home";
   });
 
@@ -130,6 +135,9 @@ export default function App() {
       else if (path.includes("store")) setActiveTab("store");
       else if (path.includes("lab")) setActiveTab("lab");
       else if (path.includes("quote") || path.includes("quotes")) setActiveTab("quotes");
+      else if (path.includes("schedule")) setActiveTab("schedule");
+      else if (path.includes("confirm")) setActiveTab("confirm");
+      else if (path.includes("recieved") || path.includes("received") || path.includes("contact")) setActiveTab("recieved");
       else setActiveTab("home");
     };
 
@@ -1646,6 +1654,26 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
             deviceBrand={deviceBrand}
             deviceModel={deviceModel}
             issueType={issueType}
+          />
+        )}
+        {activeTab === "schedule" && (
+          <ConfirmationView 
+            pageType="schedule"
+            onBookClick={() => setIsAiOpen(true)}
+            onNavigateHome={() => navigateTab("home")}
+          />
+        )}
+        {activeTab === "confirm" && (
+          <ConfirmationView 
+            pageType="confirm"
+            onBookClick={() => setIsAiOpen(true)}
+            onNavigateHome={() => navigateTab("home")}
+          />
+        )}
+        {activeTab === "recieved" && (
+          <ContactReceivedView 
+            onBookClick={() => setIsAiOpen(true)}
+            onNavigateHome={() => navigateTab("home")}
           />
         )}
         {activeTab === "b2b" && <B2BView onBookClick={() => setIsAiOpen(true)} />}
