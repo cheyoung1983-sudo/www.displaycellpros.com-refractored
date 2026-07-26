@@ -18,3 +18,5 @@ dcp-static
 dcp-static-cb
 googleb89bdda23b0fc37b.html
 github-mcp-server
+*.exe
+.next

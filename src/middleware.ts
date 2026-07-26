@@ -1,45 +1,38 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { get, has } from '@vercel/edge-config';
-import { proxy } from './proxy';
+import { getToken } from 'next-auth/jwt';
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // 1. Auth0 Proxy Middleware
-  const authResponse = await proxy(request);
-  if (authResponse) return authResponse;
-
-  // 2. Existing Edge Config logic
-  if (pathname === '/welcome' || pathname === '/api/welcome') {
-    try {
-      if (await has('greeting')) {
-        const greeting = await get('greeting');
-        return NextResponse.json({
-          greeting: greeting || "hello world",
-          source: "vercel-edge-config-middleware",
-          timestamp: new Date().toISOString()
-        }, {
-          headers: { 'x-middleware-cache': 'hit' }
-        });
-      }
-    } catch (err) {
-      console.error('Middleware Edge Config Error:', err);
-    }
+/**
+ * Middleware that protects routes using the NextAuth session.
+ * Unauthenticated requests are redirected to the Vercel OAuth start endpoint.
+ */
+export async function middleware(req: NextRequest) {
+  // Publicly accessible paths – skip auth
+  const publicPaths = [
+    '/api/auth',
+    '/_next',
+    '/favicon.ico',
+    '/welcome',
+    '/api/welcome',
+  ];
+  if (publicPaths.some(p => req.nextUrl.pathname.startsWith(p))) {
+    return NextResponse.next();
   }
 
+  // Retrieve the JWT token (session)
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+
+  if (!token?.accessToken) {
+    // No valid session – redirect to Vercel OAuth flow
+    const signInUrl = new URL('/api/auth/start', req.url);
+    signInUrl.searchParams.set('userId', 'usr_123'); // optional mapping
+    return NextResponse.redirect(signInUrl);
+  }
+
+  // Authenticated – continue to the requested page/API
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (handled by SDK handleAuth, though proxy might overlap)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-  ],
+  matcher: ['/((?!api/auth).*)'],
 };

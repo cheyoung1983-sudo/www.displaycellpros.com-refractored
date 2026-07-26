@@ -1,6 +1,7 @@
 import React from "react";
 import { auth0 } from "../lib/auth0";
 import LoginButton from "../components/LoginButton";
+import VercelLoginButton from "../components/VercelLoginButton";
 import LogoutButton from "../components/LogoutButton";
 import Profile from "../components/Profile";
 
@@ -52,7 +53,7 @@ export default async function Home() {
                 <p className="text-slate-400 text-sm md:text-[15px] text-center leading-relaxed tracking-[-0.01em]">
                   Sign in to access your technician account and Spokane diagnostic tools.
                 </p>
-                <LoginButton />
+                <>\n  <LoginButton />\n  <VercelLoginButton />\n</>
                 <a
                   href="/welcome"
                   className="text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:text-slate-300 transition-colors"
