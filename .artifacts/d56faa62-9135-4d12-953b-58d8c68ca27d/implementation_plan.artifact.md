@@ -1,34 +1,38 @@
-# Implementation Plan: Fix Vercel Build - Command Not Found (Exit 127)
+# Implementation Plan: Repair Vercel/Autonoma Integration & Consolidate Projects
 
-The goal is to resolve the Vercel build error `Command "npm run build" exited with 127`. This error typically indicates that a command within the build script (like `next` or `tsx`) cannot be located by the shell.
+The goal is to fix the "sh: 1: vite: command not found" error, complete the project consolidation on Vercel, and ensure the Autonoma MCP plugin is correctly paired.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Lockfile Conflict:** I am removing `bun.lock` to ensure Vercel uses `npm` as the primary package manager. Having multiple lockfiles (`package-lock.json` and `bun.lock`) can cause Vercel to use the wrong runtime or fail to install dependencies correctly.
+> [!CAUTION]
+> **Zero-Interaction Execution:** Since you cannot access the terminal to confirm prompts, I will use the `--yes` flag for all Vercel and Git operations.
 >
-> **Explicit Framework:** I am adding the `framework` property to `vercel.json` to explicitly tell Vercel this is a Next.js project.
+> **Project Deletion:** I am proceeding to delete the redundant projects to leave only `displaycellpros.com`.
 
 ## Proposed Changes
 
-### [Repository Cleanup]
-
-#### [DELETE] [bun.lock](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/bun.lock)
-- Remove the Bun lockfile to avoid package manager confusion. We are using `npm` and `package-lock.json`.
-
-### [Configuration]
-
-#### [MODIFY] [vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/vercel.json)
-- Add `"framework": "nextjs"` to the configuration.
+### [Vercel Deployment Repair]
 
 #### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
-- Ensure all build dependencies are in the `dependencies` block if they are needed for the `postbuild` step (e.g., `tsx`).
-- Move `tsx` from `devDependencies` to `dependencies` to guarantee its availability during the Vercel build lifecycle.
+- **Fix:** Ensure the `build` script uses `next build` instead of `vite build`. (Already applied in source, but ensuring it's synced).
+
+#### [ACTION] Sync Environment Variables
+- I will push all 18+ local environment variables (AWS, Auth0, Autonoma) to the `displaycellpros.com` project using `vercel env add --yes`.
+
+### [Autonoma MCP Repair]
+
+#### [ACTION] Re-pair Plugin
+- I will re-run the `mcp-remote` onboarding with code `VNTPA9VD` using the `--yes` or equivalent non-interactive strategy if available.
+- I will update the IDE configuration files.
+
+### [Vercel Cleanup]
+
+#### [DELETE] Redundant Projects
+- `vercel project rm www.displaycellpros.com-refractored --yes`
+- `vercel project rm cheyoung1983-sudo-www.displaycellpros.com-refractored --yes`
 
 ## Verification Plan
 
-### Automated Tests
-- Run `npm run build` locally to ensure the full build and `postbuild` (sitemap) flow works without error.
-
 ### Manual Verification
-- Deploy to Vercel and monitor the logs. The `127` error should be resolved as the correct package manager (`npm`) is used and all commands are available in the path.
+- **Build Status:** Run `vercel deploy --prod --yes` and verify the build log shows a successful Next.js compilation.
+- **MCP Status:** Check if the `autonoma` tool is active in your agent.
