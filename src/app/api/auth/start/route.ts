@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const userId = url.searchParams.get('userId') ?? 'usr_123';
 
   // startAuthorization returns a Promise<string> – await it to get a proper URL
-  const authUrl = await startAuthorization('mcp.vercel.com/sky-mountain', {
+  const { url: authUrl } = await startAuthorization('mcp.vercel.com/sky-mountain', {
     clientId: process.env.VERCEL_CLIENT_ID,
     clientSecret: process.env.VERCEL_CLIENT_SECRET,
     subject: { type: 'user', id: userId },
