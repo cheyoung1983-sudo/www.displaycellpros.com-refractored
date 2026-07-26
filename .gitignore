@@ -11,3 +11,4 @@ coverage/
 .artifacts/
 .vscode/
 github-mcp-server/
+.vercel

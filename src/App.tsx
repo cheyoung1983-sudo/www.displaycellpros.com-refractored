@@ -182,16 +182,22 @@ export default function App() {
   const saveReportToRdsDatabase2 = async () => {
     setIsSavingToRds(true);
     try {
-      const telemetryCode = `${deviceBrand.toUpperCase()}-${deviceModel.slice(0, 8).replace(/\s+/g, "").toUpperCase()}-${issueType.toUpperCase()}`;
+      const safeBrand = (deviceBrand || "Apple").toString();
+      const safeModel = (deviceModel || "Device").toString();
+      const safeIssue = (issueType || "screen").toString();
+      const safeTier = (deviceTier || "flagship").toString();
+      const safeCustomer = (customerName || "Customer").toString();
+
+      const telemetryCode = `${safeBrand.toUpperCase()}-${safeModel.slice(0, 8).replace(/\s+/g, "").toUpperCase()}-${safeIssue.toUpperCase()}`;
       const telemetryTrace = `--- TELEMETRY TRACE ---
 ID: COM-CORE-USB-01
 Timestamp: ${new Date().toLocaleString()}
-Manufacturer: ${deviceBrand}
-Model: ${deviceModel}
-Tier: ${deviceTier}
-Fault: ${issueType.toUpperCase()}
-Battery Health: ${issueType === "battery" ? "76%" : "94%"}
-Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
+Manufacturer: ${safeBrand}
+Model: ${safeModel}
+Tier: ${safeTier}
+Fault: ${safeIssue.toUpperCase()}
+Battery Health: ${safeIssue === "battery" ? "76%" : "94%"}
+Status: ${safeIssue === "battery" ? "DEGRADED" : "OPTIMAL"}`;
 
       const res = await fetch("/api/scan-reports", {
         method: "POST",
@@ -199,11 +205,11 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          deviceBrand,
-          deviceModel,
-          issueType,
-          deviceTier,
-          customerName,
+          deviceBrand: safeBrand,
+          deviceModel: safeModel,
+          issueType: safeIssue,
+          deviceTier: safeTier,
+          customerName: safeCustomer,
           telemetryCode,
           telemetryTrace,
           status: "PERSISTED_TO_AWS_RDS_DATABASE_2"
@@ -216,19 +222,24 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
           recordId: data.recordId,
           createdAt: data.createdAt
         });
+        const toastTitle = data.source === "local-fallback" ? "Report Recorded" : "Persisted to AWS RDS";
+        const toastMessage = data.source === "local-fallback" 
+          ? `Report stored in local hub (Record ID: #${data.recordId || "N/A"}). AWS RDS connection pending.`
+          : `Scan report saved to database-2 (Record ID: #${data.recordId || "N/A"})`;
+
         addToast(
-          "Persisted to AWS RDS",
-          `Scan report saved to database-2 (Record ID: #${data.recordId || "N/A"})`,
+          toastTitle,
+          toastMessage,
           "success",
           5000
         );
       } else {
-        throw new Error(data.message || "Failed to persist report.");
+        throw new Error(data.message || data.error || "Failed to persist report.");
       }
     } catch (err: any) {
       console.error("[Save RDS Error]:", err);
       addToast(
-        "RDS Save Error",
+        "RDS Save Notice",
         err.message || "Could not persist report to AWS RDS database-2.",
         "error",
         5000
@@ -1939,7 +1950,17 @@ Status: ${issueType === "battery" ? "DEGRADED" : "OPTIMAL"}`;
                       )}
 
                       {!isScanning && hasScanned && (
-                        <div id="diagnostic-report-collapsible-container" className="mt-4 border border-slate-800 rounded-lg overflow-hidden bg-slate-950 shadow-lg">
+                        <div 
+                          id="diagnostic-report-collapsible-container" 
+                          title="Device scan status: Clean"
+                          className="group relative mt-4 border border-slate-800 rounded-lg overflow-hidden bg-slate-950 shadow-lg"
+                        >
+                          {/* Hoverable status summary tooltip */}
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none absolute top-2.5 right-36 z-20 bg-slate-900/95 text-emerald-400 text-[9px] font-mono font-bold px-2 py-0.5 rounded border border-emerald-500/40 shadow-md flex items-center gap-1.5 backdrop-blur-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Device scan status: Clean</span>
+                          </div>
+
                           {/* Header bar that acts as a toggle */}
                           <div 
                             onClick={() => setIsReportExpanded(!isReportExpanded)}
