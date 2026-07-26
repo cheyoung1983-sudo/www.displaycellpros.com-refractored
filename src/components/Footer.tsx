@@ -1,7 +1,4 @@
-"use client";
-
 import React from 'react';
-import Link from 'next/link';
 import { Wrench, ShieldCheck, Phone, MapPin, Clock, Wifi, Check } from 'lucide-react';
 
 export function Footer() {
@@ -10,10 +7,10 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <Link href="/" className="flex items-center mb-4">
+            <a href="#" className="flex items-center mb-4">
               <Wrench className="h-6 w-6 text-blue-500 mr-2" />
               <span className="font-bold text-lg text-white">Display & Cell Pros LLC</span>
-            </Link>
+            </a>
             <p className="text-sm text-slate-400 mb-4 max-w-sm leading-relaxed">
               Spokane's premier mobile technical service laboratory. Combat-veteran owned, operating in strict compliance with Washington State's Right to Repair laws.
             </p>
@@ -35,9 +32,9 @@ export function Footer() {
               <li>WA UBI: 605 985 265</li>
               <li>NAICS: 811210</li>
               <li>
-                <Link href="/privacy" className="hover:text-blue-400 transition-colors">
+                <a href="#privacy" className="hover:text-blue-400 transition-colors">
                   Privacy & Data Policy
-                </Link>
+                </a>
               </li>
               <li><a href="#" className="hover:text-blue-400 transition-colors">Liability Waiver</a></li>
             </ul>

@@ -14,7 +14,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^4.25.0",
     "@aws-sdk/client-secrets-manager": "^3.1095.0",
     "@aws-sdk/rds-signer": "^3.1089.0",
     "@tailwindcss/postcss": "^4.1.14",
@@ -37,7 +36,6 @@
     "jsqr": "^1.4.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "next": "^16.2.11",
     "openai": "^6.48.0",
     "pg": "^8.22.0",
     "react": "^19.0.1",
