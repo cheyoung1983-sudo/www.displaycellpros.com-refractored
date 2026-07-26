@@ -1,4 +1,7 @@
-# Task: Web Bot Authority Verification
+# Task: Fix Vercel Build - Command Not Found (Exit 127)
 
-- [x] Add Signature headers to `vercel.json`
-- [x] Verify build and headers
+- [ ] Remove `bun.lock` to resolve lockfile conflict
+- [ ] Add `"framework": "nextjs"` to `vercel.json`
+- [ ] Move `tsx` to `dependencies` in `package.json`
+- [ ] Run `npm install` to update `package-lock.json`
+- [ ] Verify local build: `npm run build`

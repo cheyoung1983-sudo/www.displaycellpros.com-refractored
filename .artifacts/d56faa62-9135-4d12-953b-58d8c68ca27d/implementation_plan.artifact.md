@@ -1,27 +1,34 @@
-# Implementation Plan: Web Bot Authority Verification
+# Implementation Plan: Fix Vercel Build - Command Not Found (Exit 127)
 
-The goal is to integrate the provided cryptographic signature fields into the project's global headers. This identifies `displaycellpros.com` as a verified "web-bot" authority, specifically for integration with Shopify's security and crawler ecosystem.
+The goal is to resolve the Vercel build error `Command "npm run build" exited with 127`. This error typically indicates that a command within the build script (like `next` or `tsx`) cannot be located by the shell.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Signature Expiry:** The provided signature expires on **Aug 24, 2026**. You will need to regenerate and update these headers before that date to maintain verified status.
+> **Lockfile Conflict:** I am removing `bun.lock` to ensure Vercel uses `npm` as the primary package manager. Having multiple lockfiles (`package-lock.json` and `bun.lock`) can cause Vercel to use the wrong runtime or fail to install dependencies correctly.
 >
-> **Global Application:** These headers will be applied to **all** responses served by Vercel. This is the standard way to broadcast site identity to modern bot-verification systems.
+> **Explicit Framework:** I am adding the `framework` property to `vercel.json` to explicitly tell Vercel this is a Next.js project.
 
 ## Proposed Changes
 
-### [Vercel Configuration]
+### [Repository Cleanup]
+
+#### [DELETE] [bun.lock](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/bun.lock)
+- Remove the Bun lockfile to avoid package manager confusion. We are using `npm` and `package-lock.json`.
+
+### [Configuration]
 
 #### [MODIFY] [vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/vercel.json)
-- Add the following headers to the global source `/(.*)`:
-  - `Signature`: `sig1=:5/HQDD5jvSTDvbJEMpDy4VmjcVvxiDDQrLa+g9rPPW/IzLQT6QSJfczYKxkJvALIYdrS1FdpUZX8s9V8aArxCQ==:`
-  - `Signature-Input`: `sig1=("@authority" "signature-agent");keyid="SjjyXvQ2cGhsRXs9DXEaV6ClyCun0Pj5yxjV67dLGOk";nonce="yZhDJXFCVwpJMj8FxFBrx4QplAgRZv2+NbtSLlx/yPxo9247/q1chWIiA3oLHtxssAHYHgE/gzchAN2/c/l3Cw==";tag="web-bot-auth";created=1785016539;expires=1787608539`
-  - `Signature-Agent`: `"https://shopify.com"`
+- Add `"framework": "nextjs"` to the configuration.
+
+#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
+- Ensure all build dependencies are in the `dependencies` block if they are needed for the `postbuild` step (e.g., `tsx`).
+- Move `tsx` from `devDependencies` to `dependencies` to guarantee its availability during the Vercel build lifecycle.
 
 ## Verification Plan
 
+### Automated Tests
+- Run `npm run build` locally to ensure the full build and `postbuild` (sitemap) flow works without error.
+
 ### Manual Verification
-- Deploy to Vercel.
-- Use `curl -I https://displaycellpros.com` to verify that the headers are correctly returned in the response.
-- Confirm the `Signature-Agent` matches `"https://shopify.com"`.
+- Deploy to Vercel and monitor the logs. The `127` error should be resolved as the correct package manager (`npm`) is used and all commands are available in the path.
