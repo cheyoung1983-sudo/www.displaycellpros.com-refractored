@@ -53,7 +53,7 @@
       "destination": "https://www.displaycellpros.com/$1",
       "permanent": true
     }
-  ]
+  ],
   "crons": [
     {
       "path": "/api/cron/refresh",

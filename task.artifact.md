@@ -1,7 +1,8 @@
-# Task: Vercel Project Consolidation & Deployment
+# Task: Diagnostics Hub Restoration & Global Cleanup
 
-- [x] Unlink local directory and re-link to `displaycellpros.com`
-- [/] Sync environment variables from `.env.local` to `displaycellpros.com`
-- [ ] Delete `www.displaycellpros.com-refractored`
-- [ ] Delete `cheyoung1983-sudo-www.displaycellpros.com-refractored`
-- [ ] Deploy `displaycellpros.com` to production
+- [x] Fix `vercel.json` parsing error
+- [ ] Remove `triage.displaycellpros.com` from Vercel
+- [ ] Sync provided OpenAI API key to Vercel
+- [ ] Restore real logic to Lab Portal (`src/app/lab/page.tsx`)
+- [ ] Perform global repository cleanup (delete legacy folders/files)
+- [ ] Verify build and deploy

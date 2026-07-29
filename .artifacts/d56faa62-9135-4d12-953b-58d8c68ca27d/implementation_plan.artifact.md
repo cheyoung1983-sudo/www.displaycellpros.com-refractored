@@ -1,38 +1,51 @@
-# Implementation Plan: Repair Vercel/Autonoma Integration & Consolidate Projects
+# Implementation Plan: Diagnostics Hub Restoration & Global Cleanup
 
-The goal is to fix the "sh: 1: vite: command not found" error, complete the project consolidation on Vercel, and ensure the Autonoma MCP plugin is correctly paired.
+The goal is to restore the complete "Diagnostics Hub" (Triage AI) using Vercel best practices, remove all Google/Firebase dependencies, and clean up the repository of non-essential legacy files.
 
 ## User Review Required
 
-> [!CAUTION]
-> **Zero-Interaction Execution:** Since you cannot access the terminal to confirm prompts, I will use the `--yes` flag for all Vercel and Git operations.
+> [!IMPORTANT]
+> **Repository Cleanup:** I am deleting several legacy sub-directories (`ai-text-demo`, `cb001`, `functions`, etc.) and root executables to consolidate the project into a clean Next.js structure.
 >
-> **Project Deletion:** I am proceeding to delete the redundant projects to leave only `displaycellpros.com`.
+> **Domain Removal:** I am removing the `triage.displaycellpros.com` domain from Vercel as it is no longer required.
+>
+> **Secrets Update:** I will apply the provided OpenAI API key to your Vercel production environment.
 
 ## Proposed Changes
 
-### [Vercel Deployment Repair]
+### [Vercel Configuration]
 
-#### [MODIFY] [package.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/package.json)
-- **Fix:** Ensure the `build` script uses `next build` instead of `vite build`. (Already applied in source, but ensuring it's synced).
+#### [MODIFY] [vercel.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/vercel.json)
+- Fix the missing comma in the JSON structure (already fixed in buffer).
+- Ensure `crons` and `redirects` are correctly defined for the Next.js framework.
 
-#### [ACTION] Sync Environment Variables
-- I will push all 18+ local environment variables (AWS, Auth0, Autonoma) to the `displaycellpros.com` project using `vercel env add --yes`.
+#### [ACTION] Remove Redundant Domain
+- Run `vercel domains rm triage.displaycellpros.com --yes`.
 
-### [Autonoma MCP Repair]
+#### [ACTION] Update OpenAI Key
+- Sync the provided OpenAI key (`sk-proj-...`) to Vercel production.
 
-#### [ACTION] Re-pair Plugin
-- I will re-run the `mcp-remote` onboarding with code `VNTPA9VD` using the `--yes` or equivalent non-interactive strategy if available.
-- I will update the IDE configuration files.
+### [Diagnostics Hub Restoration]
 
-### [Vercel Cleanup]
+#### [MODIFY] [src/app/lab/page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/lab/page.tsx)
+- Replace mock handlers with real logic for:
+  - **AI Diagnostics:** Connecting to `/api/triage`.
+  - **Tax Lookup:** Connecting to `/api/tax-lookup`.
+  - **Quote Generation:** Integrating with `calculateQuoteInternal` and `/api/generate-quote`.
+  - **WebUSB/Hardware Probing:** Restoring the physical scan logic for the driveway lab.
 
-#### [DELETE] Redundant Projects
-- `vercel project rm www.displaycellpros.com-refractored --yes`
-- `vercel project rm cheyoung1983-sudo-www.displaycellpros.com-refractored --yes`
+### [Global Repository Cleanup]
+
+#### [DELETE] Legacy Folders & Files
+- **Directories:** `ai-text-demo/`, `cb001/`, `cb7001/`, `cb7002/`, `dcp67/`, `dcpkode9/`, `dcp-static/`, `dcp-static-cb/`, `functions/`, `my-nextjs-project/`, `shopify-storefront/`.
+- **Root Files:** `.env.vercel.refractored`, `pemhttpd.exe`, all `postgresql_*.exe`, `edb_*.exe`, `postgis_*.exe`.
 
 ## Verification Plan
 
+### Automated Tests
+- Run `npm run build` locally to ensure the project compiles without legacy baggage.
+- Verify `npx tsc --noEmit` passes.
+
 ### Manual Verification
-- **Build Status:** Run `vercel deploy --prod --yes` and verify the build log shows a successful Next.js compilation.
-- **MCP Status:** Check if the `autonoma` tool is active in your agent.
+- Deploy to Vercel and verify the Lab Portal (`/lab`) is fully functional.
+- Confirm the `triage` subdomain is no longer active.
