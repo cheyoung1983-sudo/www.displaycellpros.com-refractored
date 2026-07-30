@@ -1,8 +1,10 @@
-# Task: Diagnostics Hub Restoration & Global Cleanup
+# Vercel Build Fix Tasks
 
-- [x] Fix `vercel.json` parsing error
-- [ ] Remove `triage.displaycellpros.com` from Vercel
-- [ ] Sync provided OpenAI API key to Vercel
-- [ ] Restore real logic to Lab Portal (`src/app/lab/page.tsx`)
-- [ ] Perform global repository cleanup (delete legacy folders/files)
-- [ ] Verify build and deploy
+- [ ] Fix configuration errors
+    - [ ] Remove `outputFileTracingRoot` from `next.config.js`
+    - [ ] Delete redundant `next.config.mjs`
+- [ ] Resolve Middleware/Proxy conflict
+    - [ ] Merge `src/middleware.ts` logic into `src/proxy.ts`
+    - [ ] Delete `src/middleware.ts`
+- [ ] Verify build
+    - [ ] Run `npm run build`
