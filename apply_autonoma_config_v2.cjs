@@ -8,7 +8,7 @@ const document = {
   version: 1,
   apps: [
     {
-      name: "www-displaycellpros-com-refractored",
+      name: "ui-testing-cyan-castle",
       path: ".",
       build: {
         framework: "runtime",
