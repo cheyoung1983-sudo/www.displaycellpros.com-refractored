@@ -21,7 +21,7 @@ function handleOutput(data) {
               name: "trigger_deploy",
               arguments: {
                   applicationId,
-                  description: "Deploying refractored app preview"
+                  description: "Deploying refractored app preview - Force Build 1.0.2"
               }
           }
       }) + '\n');
