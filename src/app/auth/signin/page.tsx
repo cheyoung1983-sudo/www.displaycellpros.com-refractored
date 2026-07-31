@@ -1,5 +1,5 @@
 import React from 'react';
-import SignInButton from '@/components/SignInButton';
+import SignInButton from '../../../components/SignInButton';
 import styles from './SignInPage.module.css';
 
 export default function SignInPage() {

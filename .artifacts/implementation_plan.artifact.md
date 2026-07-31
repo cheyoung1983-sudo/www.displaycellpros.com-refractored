@@ -1,48 +1,45 @@
-# Implementation Plan - Vercel Best Practice Deployment
+# Fix Build Errors and Align with Professional Standards
 
-Professionalize the repository for high-performance Vercel deployment by optimizing the deployment bundle and providing a robust CLI-based workflow.
+The project is currently failing to build on Vercel due to module resolution errors. Additionally, there are violations of the established professional standards (use of `any` types, improper import patterns).
 
 ## User Review Required
 
 > [!IMPORTANT]
-> I will be significantly expanding `.vercelignore` to exclude legacy and experimental folders (e.g., `cb001`, `functions`, `netlify`). This will dramatically speed up your deployments and prevent Vercel from scanning unrelated code.
+> I am proposing to rename `src/lib/constants.tsx` to `src/lib/ui-constants.tsx` to resolve a name conflict with `src/lib/constants.ts`. This will require updating all references to this file.
+
+> [!WARNING]
+> There are duplicate `components` and `lib` directories in both the root and `src/`. I will prioritize using the files in `src/` as they are aligned with the Next.js App Router structure.
 
 ## Proposed Changes
 
-### 1. Optimize Deployment Payload
+### [Cleanup & Resolution]
 
-#### [MODIFY] [.vercelignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.vercelignore)
-- Add all experimental and legacy project folders:
-    - `cb001`, `cb7001`, `cb7002`
-    - `dcp67`, `dcpkode9`
-    - `netlify/`, `netlify.toml`
-    - `functions/` (Legacy Firebase functions)
-    - `ai-text-demo/`, `my-nextjs-project/`, `shopify-storefront/`
-    - `.backup/` (Where we moved the duplicate project)
-    - `api/` (Legacy root API folder)
-    - `server.ts` (Legacy monolithic server)
-- This ensures only the active `src/`, `public/`, and `prisma/` folders are uploaded.
+#### [RENAME] [constants.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/constants.tsx) -> [ui-constants.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/ui-constants.tsx)
+Renaming to avoid conflict with `constants.ts` (which contains auth tokens).
 
-### 2. Standardize Deployment Workflow
+#### [MODIFY] [ServicesView.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/ServicesView.tsx)
+- Update import from `@/lib/constants.tsx` to `@/lib/ui-constants`.
+- Remove any potential `any` types.
 
-#### [NEW] [deploy_vercel.ps1](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/scripts/deploy_vercel.ps1)
-- Create a professional PowerShell script to automate the recommended "Best Practice" deployment:
-    1. `vercel link` (Connect)
-    2. `vercel env pull` (Sync secrets)
-    3. `vercel build` (Local verification)
-    4. `vercel deploy --prebuilt` (Fast, verified upload)
+#### [MODIFY] [StoreView.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/StoreView.tsx)
+- Update import from `@/lib/constants.tsx` to `@/lib/ui-constants`.
 
-### 3. Cleanup redundant files
+#### [MODIFY] [page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/auth/signin/page.tsx)
+- Verify and fix `SignInButton` import resolution.
 
-#### [DELETE] [.env.vercel.refractored](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env.vercel.refractored)
-- Remove stray environment files to prevent accidental leakage or confusion.
+#### [MODIFY] [page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/comments/page.tsx)
+- Fix `@/lib/db` import resolution.
+- Define `Comment` interface and remove `any`.
+
+#### [MODIFY] [db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/db.ts)
+- Remove `any` from `signerOptions` and `query` arguments.
+- Define proper types for DB configuration.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` locally after updating `.vercelignore` to ensure Next.js still has everything it needs.
-- Run `vercel build` to verify that the local Vercel CLI environment correctly compiles the application.
+- Run `npm run lint` (which triggers `tsc --noEmit`) to verify type safety and resolution.
+- Run `next build` locally (if possible) to simulate the Vercel build.
 
 ### Manual Verification
-- Execute the deployment script and verify that the "Files Uploaded" count is significantly lower.
-- Check the Vercel dashboard to confirm the build succeeds without the previous conflicts.
+- Verify that the Services and Store pages still render correctly with the renamed constants file.

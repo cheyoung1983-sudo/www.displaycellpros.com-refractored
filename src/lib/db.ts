@@ -1,12 +1,13 @@
 import { awsCredentialsProvider } from "@vercel/functions/oidc";
 import { attachDatabasePool } from "@vercel/functions";
 import { Signer } from "@aws-sdk/rds-signer";
+import type { SignerOptions } from "@aws-sdk/rds-signer";
 import { ClientBase, Pool } from "pg";
 
-const signerOptions: any = {
-  hostname: process.env.PGHOST,
+const signerOptions: SignerOptions = {
+  hostname: process.env.PGHOST || '',
   port: Number(process.env.PGPORT) || 5432,
-  username: process.env.PGUSER,
+  username: process.env.PGUSER || '',
   region: process.env.AWS_REGION || "us-east-1",
 };
 
@@ -35,7 +36,7 @@ const pool = new Pool({
 attachDatabasePool(pool);
 
 // Single query transaction.
-export async function query(sql: string, args: any[] = []) {
+export async function query(sql: string, args: unknown[] = []) {
   return pool.query(sql, args);
 }
 

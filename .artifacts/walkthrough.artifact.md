@@ -1,29 +1,38 @@
-# Walkthrough - Professional Compliance & Mobile Readiness
+# Walkthrough - Fixing Build Errors & Professional Standards Alignment
 
-I have successfully established the **Mobile Readiness Framework** and integrated your Android self-signing requirements into the core professional compliance layer.
+I have resolved the "Module not found" errors that were blocking the Vercel build and updated the codebase to adhere to the established professional standards (RSC focus, explicit types, and clean imports).
 
-## Key Implementation Details
+## Changes Made
 
-### 1. Compliance Lab Expansion (Android Signing)
-- **SHA-1 Tracking**: Updated the [Compliance Lab](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/OAuthDocumentationPanel.tsx) with a dedicated section for tracking **SHA-1 (Debug)** and **SHA-1 (Release)** fingerprints. This ensures you have a central registry for all cross-platform identity secrets.
-- **Embedded keytool Utility**: Integrated your provided `keytool` instructions as quick-copy technician snippets directly in the UI.
+### 1. Resolved Module Resolution Conflict
+The project had both `src/lib/constants.ts` and `src/lib/constants.tsx`. Next.js/Webpack can have ambiguity when resolving files with the same base name.
+- Renamed `src/lib/constants.tsx` to `src/lib/ui-constants.tsx`.
+- Updated all imports to use `ui-constants`.
+- Removed explicit `.tsx` and `.ts` extensions from imports across the project to follow Next.js conventions.
 
-### 2. Mobile Strategy Artifact
-- **Strategic Guide**: Created [mobile_readiness.artifact.md](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.artifacts/mobile_readiness.artifact.md) which summarizes the 2-step process for registering a native Android shell with your `displaycellpros-com` Firebase project.
-- **Unified Identity Map**: Documented the hybrid authentication flow (Auth.js for Web vs. Firebase SDK for Mobile) to ensure a consistent user experience across devices.
+### 2. Fixed Import Resolution Paths
+Identified and fixed broken `@/` alias imports by switching to relative paths in key App Router pages.
+- **SignIn Page**: Fixed import of `SignInButton`.
+- **Comments Page**: Fixed import of `db` query utility.
+- **Services/Store Views**: Fixed imports of constants.
 
-### 3. Professional UI Refinement
-- **Lab Status Header**: Refactored the header in [App.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/App.tsx) to include a high-fidelity **"Mobile Signal"** indicator alongside your Latency and Database status.
-- **Visual Compliance**: The Lab now displays a progress gauge for **Redundancy Health**, visually demonstrating your business's technical stability across Google, OpenAI, Vercel, and Netlify.
+### 3. Type Safety Improvements (Removal of `any`)
+Aligned with the "No `any`" standard:
+- **Database Layer**: Defined `SignerOptions` and updated the `query` function to use `unknown[]` instead of `any[]` for arguments in [db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/db.ts).
+- **Comments Feature**: Defined a `Comment` interface in [page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/comments/page.tsx) and applied it to the database results.
+
+### 4. Code Cleanup
+- Cleaned up duplicated or ambiguous references in `ServicesView` and `StoreView`.
 
 ## Verification Results
 
-### Build & Stability
-- [x] **Production Build**: Successful (~8 seconds).
-- [x] **Component Integrity**: Verified that the new SHA-1 inputs and `keytool` documentation do not interfere with core diagnostic logic.
+### Manual Verification
+- Verified that all renamed files and updated imports point to valid existing files.
+- Ensured `src/lib/ui-constants.tsx` correctly exports `SERVICES` and `STORE_PRODUCTS` used by the frontend views.
 
-> [!IMPORTANT]
-> **Android Registration**: Once you generate your production SHA-1 fingerprint using the instructions in the Lab, remember to paste it into the **Settings > General** section of your Firebase Console to enable native Google Sign-In and Email Links.
+> [!NOTE]
+> The build failure was primarily due to the overlap between `constants.ts` and `constants.tsx`. By separating them and using explicit relative paths where the alias resolution was failing, the build should now proceed successfully on Vercel.
 
-> [!TIP]
-> Your business is now technically "Mobile Signal" ready. Even though we are currently deploying as a high-performance web app, all the structural requirements for a native Android expansion are locked and verified.
+### Next Steps
+1. Push these changes to the `main-stabilized` branch.
+2. Monitor the Vercel deployment logs for confirmation of success.
