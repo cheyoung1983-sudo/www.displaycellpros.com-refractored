@@ -6,8 +6,10 @@
 - [x] Fix `SignInButton` import in `src/app/auth/signin/page.tsx`
 - [x] Fix `@/lib/db` and remove `any` in `src/app/comments/page.tsx`
 - [x] Clean up `db.ts` (remove `any`)
-- [x] Fix TypeScript version mismatch
-- [x] Resolve CSS type declaration issue
-- [x] Migrate to Prisma 7 (Driver Adapters)
-- [x] Fix App Router "use client" issues
-- [x] Verify local build success
+- [x] Configure Auth0 with new credentials in `.env.local`
+- [x] Update Auth0 client in `src/lib/auth0.ts`
+- [x] Implement Middleware Proxy in `src/proxy.ts` and `src/middleware.ts`
+- [x] Create standardized Auth0 components (Login, Logout, Profile)
+- [x] Update landing page to use Auth0 session
+- [x] Simplify `globals.css` for Tailwind compatibility
+- [x] Verify successful project build
