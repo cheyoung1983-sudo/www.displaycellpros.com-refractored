@@ -23,9 +23,9 @@ export async function GET() {
     try {
       const newToken = await refreshVercelToken(data.refresh_token);
       const updated = {
-        access_token: newToken.access_token,
-        refresh_token: newToken.refresh_token ?? data.refresh_token,
-        expires_at: now + newToken.expires_in,
+        access_token: (newToken as any).access_token,
+        refresh_token: (newToken as any).refresh_token ?? data.refresh_token,
+        expires_at: now + (newToken as any).expires_in,
       };
       fs.writeFileSync(storePath, JSON.stringify(updated, null, 2));
       return NextResponse.json({ refreshed: true, token: updated });
