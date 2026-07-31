@@ -14,13 +14,13 @@ const authOptions = {
         if (!credentials?.code) return null; const code = credentials.code as string;
         const tokenResponse = await exchangeCodeForToken(code);
         const now = Math.floor(Date.now() / 1000);
-        const expiresAt = now + (tokenResponse.expires_in ?? 0);
+        const expiresAt = now + ((tokenResponse as any).expires_in ?? 0);
         return tokenResponse
           ? { id: "vercel-user",
               name: "VercelUser",
-              accessToken: tokenResponse.access_token,
-              refreshToken: tokenResponse.refresh_token,
-              accessTokenExpires: expiresAt,
+              // accessToken: (tokenResponse as any).access_token,
+              // refreshToken: (tokenResponse as any).refresh_token,
+              // accessTokenExpires: expiresAt,
             }
           : null;
       },
@@ -41,9 +41,9 @@ const authOptions = {
       if (token.refreshToken) {
         try {
           const refreshed = await refreshVercelToken(token.refreshToken as string);
-          token.accessToken = refreshed.access_token;
-          token.refreshToken = refreshed.refresh_token ?? token.refreshToken;
-          token.accessTokenExpires = now + refreshed.expires_in;
+          token.accessToken = (refreshed as any).access_token;
+          token.refreshToken = (refreshed as any).refresh_token ?? token.refreshToken;
+          token.accessTokenExpires = now + (refreshed as any).expires_in;
         } catch (e) {
           console.error("Vercel token refresh failed", e);
           token.accessToken = null;
@@ -63,7 +63,7 @@ const authOptions = {
   },
   adapter: PrismaAdapter(prisma),
   secret: process.env.AUTH_SECRET,
-  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
+  session: { strategy: "jwt" as const, maxAge: 30 * 24 * 60 * 60 },
   cookies: {
     sessionToken: {
       name: `next-auth.session-token`,

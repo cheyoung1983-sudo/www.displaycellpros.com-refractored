@@ -18,10 +18,10 @@ export async function GET(request: Request) {
     const token = await exchangeCodeForToken(code);
     const response = NextResponse.json(token);
     // Set HttpOnly cookies for token data (expires with access token)
-    const maxAge = token.expires_in ?? 3600; // seconds
+    const maxAge = (token as any).expires_in ?? 3600; // seconds
     response.cookies.set({
       name: 'nextauth.session-token',
-      value: token.access_token,
+      value: (token as any).access_token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     });
     response.cookies.set({
       name: 'nextauth.refresh-token',
-      value: token.refresh_token ?? '',
+      value: (token as any).refresh_token ?? '',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

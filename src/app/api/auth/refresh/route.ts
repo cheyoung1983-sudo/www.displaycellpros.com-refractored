@@ -20,11 +20,11 @@ export async function GET(request: Request) {
   try {
     const token = await refreshVercelToken(refreshToken);
     const response = NextResponse.json(token);
-    const maxAge = token.expires_in ?? 3600;
+    const maxAge = (token as any).expires_in ?? 3600;
     // Update session token cookie
     response.cookies.set({
       name: 'nextauth.session-token',
-      value: token.access_token,
+      value: (token as any).access_token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     // Keep refresh token cookie (may have been rotated)
     response.cookies.set({
       name: 'nextauth.refresh-token',
-      value: token.refresh_token ?? refreshToken,
+      value: (token as any).refresh_token ?? refreshToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
