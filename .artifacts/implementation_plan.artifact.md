@@ -1,41 +1,48 @@
-# Implementation Plan - Fix Vercel Build Errors
+# Implementation Plan - Vercel Best Practice Deployment
 
-Resolve the build conflict between `middleware.ts` and `proxy.ts`, and fix the invalid `outputFileTracingRoot` configuration.
+Professionalize the repository for high-performance Vercel deployment by optimizing the deployment bundle and providing a robust CLI-based workflow.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> I will be consolidating the authentication logic from `src/middleware.ts` (NextAuth) and `src/proxy.ts` (Auth0) into a single `src/proxy.ts` file as required by the latest Next.js version (16.x) used in this project.
->
-> I will also remove the Windows-specific absolute path in `next.config.js`.
+> I will be significantly expanding `.vercelignore` to exclude legacy and experimental folders (e.g., `cb001`, `functions`, `netlify`). This will dramatically speed up your deployments and prevent Vercel from scanning unrelated code.
 
 ## Proposed Changes
 
-### 1. Consolidate Middleware Logic
+### 1. Optimize Deployment Payload
 
-#### [MODIFY] [src/proxy.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/proxy.ts)
-- Integrate the `NextAuth` session retrieval logic from `middleware.ts` into the `proxy` function.
-- Ensure that both Auth0 and NextAuth paths are handled correctly if both are intended to be active.
-- Update the `matcher` to include all relevant paths from both files.
+#### [MODIFY] [.vercelignore](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.vercelignore)
+- Add all experimental and legacy project folders:
+    - `cb001`, `cb7001`, `cb7002`
+    - `dcp67`, `dcpkode9`
+    - `netlify/`, `netlify.toml`
+    - `functions/` (Legacy Firebase functions)
+    - `ai-text-demo/`, `my-nextjs-project/`, `shopify-storefront/`
+    - `.backup/` (Where we moved the duplicate project)
+    - `api/` (Legacy root API folder)
+    - `server.ts` (Legacy monolithic server)
+- This ensures only the active `src/`, `public/`, and `prisma/` folders are uploaded.
 
-#### [DELETE] [src/middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/middleware.ts)
-- Remove the conflicting middleware file.
+### 2. Standardize Deployment Workflow
 
-### 2. Fix Configuration
+#### [NEW] [deploy_vercel.ps1](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/scripts/deploy_vercel.ps1)
+- Create a professional PowerShell script to automate the recommended "Best Practice" deployment:
+    1. `vercel link` (Connect)
+    2. `vercel env pull` (Sync secrets)
+    3. `vercel build` (Local verification)
+    4. `vercel deploy --prebuilt` (Fast, verified upload)
 
-#### [MODIFY] [next.config.js](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/next.config.js)
-- Remove `outputFileTracingRoot: "C:\\Users\\cheyo\\OneDrive\\Documents\\GitHub\\displaycellpros.com"`.
-- This option is generally not needed on Vercel and causes errors when set to a Windows absolute path.
+### 3. Cleanup redundant files
 
-#### [DELETE] [next.config.mjs](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/next.config.mjs)
-- Remove the redundant config file to ensure `next.config.js` is the single source of truth.
+#### [DELETE] [.env.vercel.refractored](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/.env.vercel.refractored)
+- Remove stray environment files to prevent accidental leakage or confusion.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `npm run build` locally to verify that the "Both middleware file and proxy file are detected" error is resolved.
-- Check that the build completes without the `outputFileTracingRoot` warning.
+- Run `npm run build` locally after updating `.vercelignore` to ensure Next.js still has everything it needs.
+- Run `vercel build` to verify that the local Vercel CLI environment correctly compiles the application.
 
 ### Manual Verification
-- Deploy to Vercel and verify that the build succeeds.
-- Verify that both Auth0 and NextAuth protected routes still function as expected (if applicable).
+- Execute the deployment script and verify that the "Files Uploaded" count is significantly lower.
+- Check the Vercel dashboard to confirm the build succeeds without the previous conflicts.

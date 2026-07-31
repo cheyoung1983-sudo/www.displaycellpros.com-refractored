@@ -1,5 +1,5 @@
 // src/app/api/auth/[...nextauth]/route.ts
-import NextAuth from "next-auth";
+import NextAuth, { User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { exchangeCodeForToken, refreshVercelToken } from "@/lib/vercelAuth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -10,13 +10,13 @@ const authOptions = {
     CredentialsProvider({
       name: "Vercel",
       credentials: { code: { label: "Code", type: "text" } },
-      async authorize(credentials) {
-        if (!credentials?.code) return null;
-        const tokenResponse = await exchangeCodeForToken(credentials.code);
+      async authorize(credentials): Promise<User | null> {
+        if (!credentials?.code) return null; const code = credentials.code as string;
+        const tokenResponse = await exchangeCodeForToken(code);
         const now = Math.floor(Date.now() / 1000);
         const expiresAt = now + (tokenResponse.expires_in ?? 0);
         return tokenResponse
-          ? {
+          ? { id: "vercel-user",
               name: "VercelUser",
               accessToken: tokenResponse.access_token,
               refreshToken: tokenResponse.refresh_token,
