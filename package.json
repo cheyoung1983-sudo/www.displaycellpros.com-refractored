@@ -23,6 +23,7 @@
     "@neondatabase/serverless": "^1.1.0",
     "@next-auth/prisma-adapter": "^1.0.7",
     "@openai/codex-sdk": "^0.145.0",
+    "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.0",
     "@vercel/connect": "0.6.0",
     "@vercel/edge-config": "^1.4.3",

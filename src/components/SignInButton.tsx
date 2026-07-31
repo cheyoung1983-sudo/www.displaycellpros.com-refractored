@@ -1,3 +1,5 @@
+"use client";
+
 // src/components/SignInButton.tsx
 import { signIn } from "next-auth/react";
 import React from "react";

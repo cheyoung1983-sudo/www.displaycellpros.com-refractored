@@ -1,10 +1,10 @@
 import { awsCredentialsProvider } from "@vercel/functions/oidc";
 import { attachDatabasePool } from "@vercel/functions";
 import { Signer } from "@aws-sdk/rds-signer";
-import type { SignerOptions } from "@aws-sdk/rds-signer";
+import type { SignerConfig } from "@aws-sdk/rds-signer";
 import { ClientBase, Pool } from "pg";
 
-const signerOptions: SignerOptions = {
+const signerOptions: SignerConfig = {
   hostname: process.env.PGHOST || '',
   port: Number(process.env.PGPORT) || 5432,
   username: process.env.PGUSER || '',
@@ -21,7 +21,7 @@ if (process.env.VERCEL && process.env.AWS_ROLE_ARN) {
 
 const signer = new Signer(signerOptions);
 
-const pool = new Pool({
+export const pool = new Pool({
   host: process.env.PGHOST,
   user: process.env.PGUSER,
   database: process.env.PGDATABASE || "postgres",

@@ -1,38 +1,33 @@
-# Walkthrough - Fixing Build Errors & Professional Standards Alignment
+# Walkthrough - Fixing Build Errors & Prisma 7 Migration
 
-I have resolved the "Module not found" errors that were blocking the Vercel build and updated the codebase to adhere to the established professional standards (RSC focus, explicit types, and clean imports).
+I have successfully resolved all build errors and migrated the project to support Prisma 7 with RDS IAM authentication. The project now compiles correctly on a local `next build` simulation.
 
 ## Changes Made
 
-### 1. Resolved Module Resolution Conflict
-The project had both `src/lib/constants.ts` and `src/lib/constants.tsx`. Next.js/Webpack can have ambiguity when resolving files with the same base name.
-- Renamed `src/lib/constants.tsx` to `src/lib/ui-constants.tsx`.
-- Updated all imports to use `ui-constants`.
-- Removed explicit `.tsx` and `.ts` extensions from imports across the project to follow Next.js conventions.
+### 1. TypeScript Version Fix
+- Downgraded `typescript` from `^6.0.3` (or `7.0.2` in logs) to `^5.5.0` in the root `package.json` to ensure compatibility with Next.js 15.
 
-### 2. Fixed Import Resolution Paths
-Identified and fixed broken `@/` alias imports by switching to relative paths in key App Router pages.
-- **SignIn Page**: Fixed import of `SignInButton`.
-- **Comments Page**: Fixed import of `db` query utility.
-- **Services/Store Views**: Fixed imports of constants.
+### 2. CSS Type Declaration
+- Created [src/globals.d.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/globals.d.ts) with `declare module '*.css';`.
+- Updated [tsconfig.json](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/tsconfig.json) to include the new declaration file and explicitly list source paths.
+- This resolved the "Cannot find module or type declarations for side-effect import of './globals.css'" error.
 
-### 3. Type Safety Improvements (Removal of `any`)
-Aligned with the "No `any`" standard:
-- **Database Layer**: Defined `SignerOptions` and updated the `query` function to use `unknown[]` instead of `any[]` for arguments in [db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/db.ts).
-- **Comments Feature**: Defined a `Comment` interface in [page.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/app/comments/page.tsx) and applied it to the database results.
+### 3. Prisma 7 Migration (Driver Adapters)
+Prisma 7 removed support for `url = env("DATABASE_URL")` in the `.prisma` schema file.
+- **Dependency**: Installed `@prisma/adapter-pg`.
+- **Schema**: Updated [prisma/schema.prisma](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/prisma/schema.prisma) to remove the `url` property.
+- **Database Logic**: Updated [src/lib/db.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/db.ts) to export the `pg` Pool so it can be shared with Prisma.
+- **Client Initialization**: Updated [src/lib/prisma.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/lib/prisma.ts) to use the `PrismaPg` adapter, allowing Prisma to use the custom RDS IAM signing logic already present in the project.
 
-### 4. Code Cleanup
-- Cleaned up duplicated or ambiguous references in `ServicesView` and `StoreView`.
+### 4. App Router Interactivity Fix
+- Added `"use client";` to [src/components/SignInButton.tsx](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/src/components/SignInButton.tsx) to resolve the "Event handlers cannot be passed to Client Component props" error during pre-rendering.
 
 ## Verification Results
 
-### Manual Verification
-- Verified that all renamed files and updated imports point to valid existing files.
-- Ensured `src/lib/ui-constants.tsx` correctly exports `SERVICES` and `STORE_PRODUCTS` used by the frontend views.
-
-> [!NOTE]
-> The build failure was primarily due to the overlap between `constants.ts` and `constants.tsx`. By separating them and using explicit relative paths where the alias resolution was failing, the build should now proceed successfully on Vercel.
+### Automated Tests
+- Ran `npx prisma generate` - **PASSED**
+- Ran `npx next build` - **PASSED** (Successfully generated all 18 routes).
 
 ### Next Steps
-1. Push these changes to the `main-stabilized` branch.
-2. Monitor the Vercel deployment logs for confirmation of success.
+1. Deploy the updated code to Vercel.
+2. The `DATABASE_URL` is already in `.env`, and Prisma is now correctly configured to use the `pg` adapter for RDS connections.

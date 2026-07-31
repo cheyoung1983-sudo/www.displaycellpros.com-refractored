@@ -6,6 +6,8 @@
 - [x] Fix `SignInButton` import in `src/app/auth/signin/page.tsx`
 - [x] Fix `@/lib/db` and remove `any` in `src/app/comments/page.tsx`
 - [x] Clean up `db.ts` (remove `any`)
-- [x] Verify build and type safety
-- [x] Clean up duplicates where possible (renamed constants.tsx)
-- [x] Align with professional standards (RSC, types)
+- [x] Fix TypeScript version mismatch
+- [x] Resolve CSS type declaration issue
+- [x] Migrate to Prisma 7 (Driver Adapters)
+- [x] Fix App Router "use client" issues
+- [x] Verify local build success

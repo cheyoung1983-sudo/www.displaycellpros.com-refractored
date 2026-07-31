@@ -1,20 +1,9 @@
 // src/lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { pool } from "./db";
 
-let prisma: PrismaClient;
-
-if (process.env.NODE_ENV === "production") {
-  // In production we instantiate a single Prisma client.
-  prisma = new PrismaClient();
-} else {
-  // In development we use a global to avoid hot‑module reload issues.
-  // @ts-ignore – global augmentation
-  if (!global.__prisma) {
-    // @ts-ignore
-    global.__prisma = new PrismaClient();
-  }
-  // @ts-ignore
-  prisma = global.__prisma;
-}
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 export default prisma;
