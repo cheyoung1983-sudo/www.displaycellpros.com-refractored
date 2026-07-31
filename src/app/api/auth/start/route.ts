@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
   // startAuthorization returns a Promise<string> – await it to get a proper URL
   const { url: authUrl } = await startAuthorization('mcp.vercel.com/sky-mountain', {
-    // clientId: process.env.VERCEL_CLIENT_ID ?? "",
+    // clientId: process.env.VERCEL_CLIENT_ID,
     // clientSecret: process.env.VERCEL_CLIENT_SECRET,
     subject: { type: 'user', id: userId },
     scopes: ['openid', 'email', 'profile'],

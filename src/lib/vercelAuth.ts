@@ -20,18 +20,19 @@ export async function exchangeCodeForToken(code: string): Promise<string> {
  */
 export async function refreshVercelToken(refreshToken: string): Promise<string> {
   // Example using @vercel/functions/oidc – adjust audience/secret as needed.
-  // Ensure the environment variables VERCEL_OIDC_AUDIENCE and VERCEL_OIDC_CLIENT_SECRET are set.
-  try {
-    const { createSigner } = await import('@vercel/functions/oidc');
-    const signer = createSigner({
-      audience: process.env.VERCEL_OIDC_AUDIENCE ?? '',
-      clientSecret: process.env.VERCEL_OIDC_CLIENT_SECRET ?? ''
-    });
-    const refreshed = await signer.refresh(refreshToken);
-    // @ts-ignore – token shape may vary; we return the access token.
-    return refreshed.access_token;
-  } catch (err) {
-    console.error('Failed to refresh Vercel token:', err);
-    throw err;
-  }
+    // Ensure the environment variables VERCEL_OIDC_AUDIENCE and VERCEL_OIDC_CLIENT_SECRET are set.
+    try {
+      // const { createSigner } = await import('@vercel/functions');
+      // const signer = createSigner({
+      //   audience: process.env.VERCEL_OIDC_AUDIENCE ?? '',
+      //   clientSecret: process.env.VERCEL_CLIENT_SECRET ?? ''
+      // });
+      // const refreshed = await signer.refresh(refreshToken);
+      // // @ts-ignore – token shape may vary; we return the access token.
+      // return refreshed.access_token;
+      throw new Error('Not implemented');
+    } catch (err) {
+      console.error('Failed to refresh Vercel token:', err);
+      throw err;
+    }
 }

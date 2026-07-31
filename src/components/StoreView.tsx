@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
-import { STORE_PRODUCTS } from '@/lib/constants';
+import { STORE_PRODUCTS } from '@/lib/constants.tsx';
 
 export function StoreView() {
   return (
