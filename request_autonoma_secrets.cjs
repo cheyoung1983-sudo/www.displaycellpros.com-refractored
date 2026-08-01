@@ -21,7 +21,7 @@ function handleOutput(data) {
               name: "request_env",
               arguments: {
                   applicationId,
-                  appName: "www-displaycellpros-com-refractored",
+                  appName: "ui-testing-cyan-castle",
                   keys: [
                     "VITE_RECAPTCHA_SITE_KEY",
                     "VITE_FIREBASE_API_KEY",

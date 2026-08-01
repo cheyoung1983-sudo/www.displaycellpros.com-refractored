@@ -9,12 +9,12 @@ const document = {
   apps: [
     {
       name: "ui-testing-cyan-castle",
-      path: ".",
+      path: "www.displaycellpros.com-refractored",
       build: {
         framework: "runtime",
         runtime: "node",
         version: "22",
-        build_script: "npm install && npm run build --v=1.0.1",
+        build_script: "npm install && npm run build --v=1.0.3",
         entrypoint: "npm start",
         build_context: "app"
       },
@@ -37,7 +37,7 @@ const document = {
         { key: "PGDATABASE", value: "{{db.database}}" },
         { key: "PGPASSWORD", value: "{{db.password}}" }
       ],
-      health_check: "/",
+      health_check: "/api/health",
       primary: true,
       resources: {
         cpu: "250m",
