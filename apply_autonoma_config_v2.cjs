@@ -14,7 +14,7 @@ const document = {
         framework: "runtime",
         runtime: "node",
         version: "22",
-        build_script: "npm install && npm run build --v=1.0.4",
+        build_script: "npm install && npm run build --v=1.0.5",
         entrypoint: "npm start",
         build_context: "app"
       },
