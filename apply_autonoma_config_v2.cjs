@@ -9,12 +9,12 @@ const document = {
   apps: [
     {
       name: "ui-testing-cyan-castle",
-      path: "www.displaycellpros.com-refractored",
+      path: ".",
       build: {
         framework: "runtime",
         runtime: "node",
         version: "22",
-        build_script: "npm install && npm run build --v=1.0.3",
+        build_script: "npm install && npm run build --v=1.0.4",
         entrypoint: "npm start",
         build_context: "app"
       },
@@ -31,6 +31,7 @@ const document = {
       ],
       port: 3000,
       connections: [
+        { key: "IS_AUTONOMA", value: "true" },
         { key: "PGHOST", value: "{{db.host}}" },
         { key: "PGPORT", value: "{{db.port}}" },
         { key: "PGUSER", value: "{{db.user}}" },
