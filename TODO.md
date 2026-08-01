@@ -15,8 +15,8 @@ The build was failing because `createSigner` is not found on `@vercel/functions/
 ## 3. Resolve Prisma Client Generation [DONE]
 The build failed with `Type error: Module '"@prisma/client"' has no exported member 'PrismaClient'`.
 
-- **Action Taken:** Added `"postinstall": "prisma generate"` to `package.json` to ensure the client is generated after every dependency installation on Vercel.
-- **Action Taken:** Updated `prisma/schema.prisma` and `prisma.config.ts` for Prisma 7 compatibility.
+- **Action Taken:** Restored `url = env("DATABASE_URL")` to `prisma/schema.prisma` and updated `prisma.config.ts` to explicitly map the datasource. This ensures the Prisma CLI can correctly identify the provider and generate the types during the build phase.
+- **Action Taken:** Added `prisma generate` to the `build` script in `package.json`.
 
 ## 4. Final Deployment
 Once the above steps are completed:
