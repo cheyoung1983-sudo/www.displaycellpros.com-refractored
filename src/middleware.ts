@@ -42,9 +42,14 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 3. Auth0 Middleware (from legacy proxy.ts)
-  // Note: auth0.middleware expects a Request, which NextRequest is.
-  return await auth0.middleware(request);
+  // 3. Auth0 Middleware
+  try {
+    return await auth0.middleware(request);
+  } catch (err) {
+    console.error('[AUTH0 MIDDLEWARE ERROR]', err);
+    // Fallback to allow request to proceed if middleware fails, or you could return a custom error page
+    return NextResponse.next();
+  }
 }
 
 export const config = {
