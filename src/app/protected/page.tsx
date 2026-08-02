@@ -7,7 +7,7 @@ export default async function ProtectedPage() {
   const session = await auth0.getSession();
 
   if (!session) {
-    redirect(\u0027/auth/login\u0027);
+    redirect('/auth/login');
   }
 
   return (

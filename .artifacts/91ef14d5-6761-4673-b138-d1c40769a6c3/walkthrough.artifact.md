@@ -4,11 +4,11 @@ I have integrated Auth0 authentication into your Next.js application following t
 
 ## Changes Made
 
-### 1. Configuration \u0026 Environment
+### 1. Configuration & Environment
 - **[.env.local](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/www.displaycellpros.com-refractored/.env.local)**: Created with the provided Auth0 credentials (`AUTH0_SECRET`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, etc.).
 - **[auth0.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/www.displaycellpros.com-refractored/src/lib/auth0.ts)**: Confirmed the `Auth0Client` initialization.
 
-### 2. Middleware \u0026 Proxy
+### 2. Middleware & Proxy
 - **[middleware.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/www.displaycellpros.com-refractored/src/middleware.ts)**: Verified that Auth0 middleware is integrated. It correctly handles the session and routing while preserving your existing security firewall and Edge Config greeting logic.
 - **[proxy.ts](file:///C:/Users/cheyo/OneDrive/Documents/GitHub/displaycellpros.com/www.displaycellpros.com-refractored/src/proxy.ts)**: Created as requested in step 9, providing the `proxy` export.
 
