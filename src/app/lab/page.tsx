@@ -179,7 +179,7 @@ export default function LabPortal() {
       </div>
 
       <div className="grid grid-cols-12 gap-6 items-stretch">
-        <aside className="col-span-12 lg:col-span-3 bg-slate-850/60 border border-slate-800 rounded-xl p-4 flex flex-col space-y-5">
+        <aside className="col-span-12 lg:col-span-3 bg-slate-800/60 border border-slate-800 rounded-xl p-4 flex flex-col space-y-5">
           <div>
             <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 font-mono">Device Hardware Analyzer</p>
             <div className="bg-slate-900 rounded-lg p-3.5 border border-slate-800 space-y-4 shadow-inner">

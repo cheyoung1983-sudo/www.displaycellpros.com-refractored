@@ -271,7 +271,7 @@ export default function CacheManagement({ onRefreshCompleted, onAddToast }: Cach
               <div className="flex flex-col items-center justify-center py-12 text-slate-500 font-mono text-xs space-y-3">
                 <AlertTriangle className="w-8 h-8 text-amber-500/70" />
                 <span>No active templates matched in Cache Storage.</span>
-                <p className="text-[10px] text-slate-550 max-w-sm text-center">
+                <p className="text-[10px] text-slate-500 max-w-sm text-center">
                   Verify your internet connection and trigger a "Force Refresh Cache" to prime the Service Worker container.
                 </p>
               </div>

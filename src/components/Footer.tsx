@@ -44,7 +44,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-slate-850 pt-5 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
+        <div className="mt-8 border-t border-slate-800 pt-5 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
           <div>
             &copy; {new Date().getFullYear()} Display & Cell Pros LLC. All rights reserved.
           </div>

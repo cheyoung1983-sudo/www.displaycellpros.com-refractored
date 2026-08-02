@@ -27,7 +27,7 @@ export function ServicesView({ onBookClick }: ServicesViewProps) {
               <div className="text-xs text-slate-500 uppercase tracking-widest mb-1 font-mono">Estimated Baseline</div>
               <div className="text-2xl font-bold text-white">{srv.price}</div>
               <div className="mt-3 text-xs text-slate-400 border-t border-slate-800 pt-3">
-                <span className="font-semibold text-slate-350">Includes:</span> {srv.examples}
+                <span className="font-semibold text-slate-300">Includes:</span> {srv.examples}
               </div>
             </div>
 

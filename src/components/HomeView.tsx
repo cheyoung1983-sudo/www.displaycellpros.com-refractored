@@ -10,7 +10,7 @@ export function HomeView({ onBookClick, onLabClick }: HomeViewProps) {
   return (
     <div className="animate-in fade-in duration-300">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-slate-900 border-b border-slate-850">
+      <div className="relative overflow-hidden bg-slate-900 border-b border-slate-800">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/90 to-transparent z-10"></div>
           <img

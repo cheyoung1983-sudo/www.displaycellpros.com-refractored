@@ -258,7 +258,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                   </p>
 
                   <div className="mt-3 space-y-2">
-                    <div className="bg-slate-950 p-2 rounded border border-slate-850/60 font-mono text-[9px] text-slate-500">
+                    <div className="bg-slate-950 p-2 rounded border border-slate-800/60 font-mono text-[9px] text-slate-500">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-blue-400 font-bold block"># EXTRACT SHA-1 (WINDOWS):</span>
                         <span className="text-[8px] text-slate-600 font-medium italic">Hint: Use full path if keytool not found</span>
@@ -349,7 +349,7 @@ export function OAuthDocumentationPanel({ projectId, devUrl, prodUrl }: OAuthDoc
                   </p>
 
                   <div className="mt-3 space-y-2">
-                    <div className="bg-slate-950 p-2 rounded border border-slate-850/60 font-mono text-[9px] text-slate-500">
+                    <div className="bg-slate-950 p-2 rounded border border-slate-800/60 font-mono text-[9px] text-slate-500">
                       <span className="text-blue-400 font-bold block mb-1"># REGISTER NEW OAUTH CLIENT:</span>
                       <code className="select-all block break-all mb-2">
                         vercel oauth-apps register --name "D&CP Lab" --slug dcp-lab --redirect-uri {prodUrl}/api/auth/callback

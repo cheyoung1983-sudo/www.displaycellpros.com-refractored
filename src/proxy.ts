@@ -4,7 +4,7 @@ import { validateLexicalPayload } from '@/lib/lexical-firewall';
 import { auth0 } from "./lib/auth0";
 import { get } from "@vercel/edge-config";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const url = new URL(request.url);
   const { pathname } = request.nextUrl;
 

@@ -375,7 +375,7 @@ export default function QrScannerModal({ isOpen, onClose, onScanSuccess }: QrSca
                     <span className="text-xs text-slate-300 font-bold">{scanResult.details}</span>
                   </div>
                 )}
-                <div className="flex justify-between pt-1 text-[8.5px] text-slate-550">
+                <div className="flex justify-between pt-1 text-[8.5px] text-slate-500">
                   <span>TELEMETRY SYNC STATUS</span>
                   <span className="text-blue-400 font-bold uppercase">STABLE ONLINE</span>
                 </div>
@@ -458,7 +458,7 @@ export default function QrScannerModal({ isOpen, onClose, onScanSuccess }: QrSca
                     </div>
                   )}
 
-                  <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-850 flex gap-2.5 text-[10px] text-slate-400 leading-normal font-sans">
+                  <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800 flex gap-2.5 text-[10px] text-slate-400 leading-normal font-sans">
                     <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                     <p>
                       Aim your camera directly at the device QR tag or any display screen to instantly capture telemetry arrays. Hold steady in standard workshop lighting.
@@ -498,7 +498,7 @@ export default function QrScannerModal({ isOpen, onClose, onScanSuccess }: QrSca
                     </label>
                   </div>
 
-                  <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-850 text-[10px] text-slate-400 leading-normal flex gap-2.5">
+                  <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800 text-[10px] text-slate-400 leading-normal flex gap-2.5">
                     <Sparkles className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                     <p>
                       Take a photo of a smartphone sticker with your workbench iPad, drag and drop the file, and our hardware engine will parse the raw bytes instantly.
@@ -510,7 +510,7 @@ export default function QrScannerModal({ isOpen, onClose, onScanSuccess }: QrSca
               {/* Tab Content 3: Demo Labels Deck */}
               {activeTab === "demo" && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-1.5 bg-slate-950 p-2.5 border border-slate-850 rounded-lg text-[9.5px] text-slate-400 font-mono leading-relaxed">
+                  <div className="flex items-center gap-1.5 bg-slate-950 p-2.5 border border-slate-800 rounded-lg text-[9.5px] text-slate-400 font-mono leading-relaxed">
                     <Barcode className="w-4 h-4 text-blue-400 shrink-0" />
                     <span>Select any of these sample phone tags to simulate real-time laser alignment scan trigger.</span>
                   </div>

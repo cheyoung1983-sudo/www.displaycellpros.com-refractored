@@ -352,7 +352,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
                   className={`py-1.5 px-2 rounded font-mono text-[9px] font-bold uppercase transition-all border ${
                     cableQuality === tier
                       ? "bg-blue-600/20 text-blue-400 border-blue-500/55 shadow-md shadow-blue-900/10"
-                      : "bg-slate-950 hover:bg-slate-850 text-slate-500 border-slate-850"
+                      : "bg-slate-950 hover:bg-slate-800 text-slate-500 border-slate-800"
                   }`}
                 >
                   {tier}
@@ -393,7 +393,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
                   type="button"
                   onClick={() => injectFault("cc_short")}
                   disabled={connectionState === "DISCONNECTED"}
-                  className="py-1 px-1.5 bg-slate-950 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/60 disabled:opacity-40 rounded text-[8px] font-extrabold border border-slate-850 font-mono text-slate-400 uppercase transition-all"
+                  className="py-1 px-1.5 bg-slate-950 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/60 disabled:opacity-40 rounded text-[8px] font-extrabold border border-slate-800 font-mono text-slate-400 uppercase transition-all"
                 >
                   CC Short
                 </button>
@@ -401,7 +401,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
                   type="button"
                   onClick={() => injectFault("vbus_surge")}
                   disabled={connectionState === "DISCONNECTED"}
-                  className="py-1 px-1.5 bg-slate-950 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/60 disabled:opacity-40 rounded text-[8px] font-extrabold border border-slate-850 font-mono text-slate-400 uppercase transition-all"
+                  className="py-1 px-1.5 bg-slate-950 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/60 disabled:opacity-40 rounded text-[8px] font-extrabold border border-slate-800 font-mono text-slate-400 uppercase transition-all"
                 >
                   VBUS Surge
                 </button>
@@ -409,7 +409,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
                   type="button"
                   onClick={() => injectFault("ground_leak")}
                   disabled={connectionState === "DISCONNECTED"}
-                  className="py-1 px-1.5 bg-slate-950 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/60 disabled:opacity-40 rounded text-[8px] font-extrabold border border-slate-850 font-mono text-slate-400 uppercase transition-all"
+                  className="py-1 px-1.5 bg-slate-950 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-900/60 disabled:opacity-40 rounded text-[8px] font-extrabold border border-slate-800 font-mono text-slate-400 uppercase transition-all"
                 >
                   PMIC Leak
                 </button>
@@ -421,11 +421,11 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
         </div>
 
         {/* Right Telemetry Readouts */}
-        <div className="col-span-12 md:col-span-7 flex flex-col justify-between space-y-3 bg-slate-950 border border-slate-850 rounded-xl p-3 shadow-inner">
+        <div className="col-span-12 md:col-span-7 flex flex-col justify-between space-y-3 bg-slate-950 border border-slate-800 rounded-xl p-3 shadow-inner">
           
           {/* Signal Scope Display */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="bg-slate-900/80 p-2 rounded border border-slate-850 flex flex-col justify-between font-mono">
+            <div className="bg-slate-900/80 p-2 rounded border border-slate-800 flex flex-col justify-between font-mono">
               <span className="text-[7.5px] font-extrabold text-slate-500 uppercase tracking-widest leading-none mb-1">
                 VBUS POTENTIAL
               </span>
@@ -437,7 +437,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
               </div>
             </div>
 
-            <div className="bg-slate-900/80 p-2 rounded border border-slate-850 flex flex-col justify-between font-mono">
+            <div className="bg-slate-900/80 p-2 rounded border border-slate-800 flex flex-col justify-between font-mono">
               <span className="text-[7.5px] font-extrabold text-slate-500 uppercase tracking-widest leading-none mb-1">
                 BUS CURRENT
               </span>
@@ -449,7 +449,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
               </div>
             </div>
 
-            <div className="bg-slate-900/80 p-2 rounded border border-slate-850 flex flex-col justify-between font-mono">
+            <div className="bg-slate-900/80 p-2 rounded border border-slate-800 flex flex-col justify-between font-mono">
               <span className="text-[7.5px] font-extrabold text-slate-500 uppercase tracking-widest leading-none mb-1">
                 CC PIN SENSE
               </span>
@@ -458,7 +458,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
               </span>
             </div>
 
-            <div className="bg-slate-900/80 p-2 rounded border border-slate-850 flex flex-col justify-between font-mono">
+            <div className="bg-slate-900/80 p-2 rounded border border-slate-800 flex flex-col justify-between font-mono">
               <span className="text-[7.5px] font-extrabold text-slate-500 uppercase tracking-widest leading-none mb-1">
                 LINK STATE
               </span>
@@ -484,7 +484,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
                 <span className="text-yellow-400 font-bold animate-pulse">NEGOTIATING PHYSICAL HANDSHAKE...</span>
                 <span className="text-slate-400">{progress}%</span>
               </div>
-              <div className="w-full bg-slate-900 rounded-full h-1 overflow-hidden border border-slate-850">
+              <div className="w-full bg-slate-900 rounded-full h-1 overflow-hidden border border-slate-800">
                 <div 
                   className="bg-gradient-to-r from-blue-600 to-teal-400 h-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
@@ -509,7 +509,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
             </div>
             <div 
               ref={logContainerRef}
-              className="h-28 bg-slate-950 border border-slate-850 rounded-lg p-2 overflow-y-auto font-mono text-[9px] leading-relaxed space-y-1 scrollbar-thin"
+              className="h-28 bg-slate-950 border border-slate-800 rounded-lg p-2 overflow-y-auto font-mono text-[9px] leading-relaxed space-y-1 scrollbar-thin"
             >
               {logs.map((log, i) => (
                 <div key={i} className="flex gap-2 items-start hover:bg-slate-900 px-1 py-0.5 rounded transition-all">
@@ -517,7 +517,7 @@ export const UsbSimulator: React.FC<UsbSimulatorProps> = ({ onDeviceDetected, on
                   <span className={`break-words ${
                     log.type === "success" ? "text-emerald-400 font-semibold" :
                     log.type === "warning" ? "text-amber-400" :
-                    log.type === "error" ? "text-rose-400 font-black" : "text-slate-350"
+                    log.type === "error" ? "text-rose-400 font-black" : "text-slate-300"
                   }`}>
                     {log.text}
                   </span>

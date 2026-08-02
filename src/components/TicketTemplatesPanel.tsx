@@ -170,7 +170,7 @@ export default function TicketTemplatesPanel({ onApplyTemplate }: TicketTemplate
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-150 group-hover:text-white transition-colors">
+                  <h4 className="text-xs font-bold text-slate-100 group-hover:text-white transition-colors">
                     {template.name}
                   </h4>
                   <span className="text-[9.5px] font-mono font-semibold text-slate-500 uppercase tracking-wide">
@@ -182,7 +182,7 @@ export default function TicketTemplatesPanel({ onApplyTemplate }: TicketTemplate
                 </span>
               </div>
 
-              <p className="text-[10px] text-slate-450 leading-relaxed font-sans">
+              <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
                 {template.description}
               </p>
 
