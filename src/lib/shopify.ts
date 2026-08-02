@@ -1,5 +1,5 @@
-const domain = process.env.SHOPIFY_STORE_DOMAIN!;
-const storefrontAccessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!;
+const domain = process.env.SHOPIFY_STORE_DOMAIN || process.env.DCP_SANDBOX_SHOPIFY_STORE_DOMAIN || "vercel-store-34d604b7-q6ui4f53.myshopify.com";
+const storefrontAccessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || process.env.DCP_SANDBOX_SHOPIFY_STOREFRONT_ACCESS_TOKEN || "cda195dfcf9e55984c840562aaeafa85";
 const endpoint = `https://${domain}/api/2025-01/graphql.json`;
 
 type ShopifyResponse<T> = {

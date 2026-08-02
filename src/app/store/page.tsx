@@ -5,6 +5,8 @@ import { PRODUCTS_QUERY } from '@/lib/shopify-queries';
 import { Product } from '@/lib/shopify-types';
 import { getCart } from '@/lib/cart-actions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Store() {
   const data = await shopifyFetch<{ products: { nodes: Product[] } }>(PRODUCTS_QUERY, {
     first: 20,
