@@ -4,7 +4,13 @@ import Profile from "@/components/Profile";
 import LogoutButton from "@/components/LogoutButton";
 
 export default async function ProtectedPage() {
-  const session = await auth0.getSession();
+  let session = null;
+  try {
+    session = await auth0.getSession();
+  } catch (err) {
+    console.error('[PROTECTED PAGE ERROR]', err);
+    redirect('/auth/login');
+  }
 
   if (!session) {
     redirect('/auth/login');

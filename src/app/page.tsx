@@ -8,9 +8,19 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   let session = null;
   try {
+    // Attempt to retrieve the session.
+    // If environment variables are missing on Vercel, this may throw.
     session = await auth0.getSession();
   } catch (err) {
-    console.error('[AUTH0 SESSION ERROR]', err);
+    console.error('[AUTH0 SESSION ERROR]: Initial data load failed.', {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      env: {
+        hasSecret: !!process.env.AUTH0_SECRET,
+        hasBaseUrl: !!process.env.AUTH0_BASE_URL,
+        baseUrl: process.env.AUTH0_BASE_URL
+      }
+    });
   }
   const user = session?.user;
 
