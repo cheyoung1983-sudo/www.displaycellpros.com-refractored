@@ -1,15 +1,11 @@
-// Stub Request for Jest environment
-declare global {
-  var Request: any;
-}
-// @ts-ignore - provide a minimal implementation
-global.Request = class {};
+
 
 import { NextRequest, NextResponse } from "next/server";
 
 // Mock the proxy module before importing middleware
-const mockProxy = jest.fn();
-jest.mock("../src/proxy", () => ({ __esModule: true, proxy: mockProxy }));
+let mockProxy: jest.Mock;
+jest.mock("../src/proxy", () => ({ __esModule: true, proxy: (...args: any[]) => mockProxy?.(...args) }));
+mockProxy = jest.fn();
 
 import middleware from "../src/middleware";
 
