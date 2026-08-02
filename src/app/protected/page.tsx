@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Profile from "@/components/Profile";
 import LogoutButton from "@/components/LogoutButton";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProtectedPage() {
   let session = null;
   try {

@@ -1,4 +1,4 @@
-import { getToken, startAuthorization, type TokenResponse } from '@vercel/connect';
+import { getTokenResponse, startAuthorization, type ConnectTokenResponse } from '@vercel/connect';
 
 /**
  * Environment variables required:
@@ -18,19 +18,13 @@ const CLIENT_SECRET = process.env.VERCEL_CLIENT_SECRET;
 export async function fetchVercelToken(
   subject: { type: 'app' } | { type: 'user'; id: string },
   scopes: string[] = ['openid', 'email', 'profile']
-): Promise<TokenResponse> {
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('VERCEL_CLIENT_ID and VERCEL_CLIENT_SECRET must be set in environment variables');
-  }
-
+): Promise<ConnectTokenResponse> {
   // The resource identifier is the Vercel MCP server for this project.
   const resource = 'mcp.vercel.com/sky-mountain';
 
-  // @vercel/connect uses client_secret_basic authentication automatically when clientId and clientSecret are provided via env vars.
-  // Pass subject and scopes.
-  return await getToken(resource, {
-    clientId: CLIENT_ID,
-    clientSecret: CLIENT_SECRET,
+  // @vercel/connect uses client_secret_basic authentication automatically
+  // when VERCEL_CLIENT_ID and VERCEL_CLIENT_SECRET are set in env.
+  return await getTokenResponse(resource, {
     subject,
     scopes,
   });
@@ -43,20 +37,14 @@ export async function fetchVercelToken(
  * @param res - The Next.js response object used to redirect the user.
  * @param userId - The ID of the user you want to authorize.
  */
-export function initiateUserAuthorization(res: any, userId: string) {
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('VERCEL_CLIENT_ID and VERCEL_CLIENT_SECRET must be set in environment variables');
-  }
-
+export async function initiateUserAuthorization(res: any, userId: string) {
   const resource = 'mcp.vercel.com/sky-mountain';
-  const authUrl = startAuthorization(resource, {
-    clientId: CLIENT_ID,
-    clientSecret: CLIENT_SECRET,
+  const { url } = await startAuthorization(resource, {
     subject: { type: 'user', id: userId },
     scopes: ['openid', 'email', 'profile'],
   });
   // Redirect the user to Vercel’s OAuth authorize endpoint.
-  res.writeHead(302, { Location: authUrl });
+  res.writeHead(302, { Location: url });
   res.end();
 }
 
@@ -64,7 +52,7 @@ export function initiateUserAuthorization(res: any, userId: string) {
  * Convenience wrapper that exchanges an authorization code for a token.
  * Use this in the callback endpoint of your OAuth flow.
  */
-export async function exchangeCodeForToken(code: string): Promise<TokenResponse> {
+export async function exchangeCodeForToken(code: string): Promise<ConnectTokenResponse> {
   if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error('VERCEL_CLIENT_ID and VERCEL_CLIENT_SECRET must be set in environment variables');
   }
@@ -88,10 +76,10 @@ export async function exchangeCodeForToken(code: string): Promise<TokenResponse>
     const err = await response.text();
     throw new Error(`Token exchange failed: ${err}`);
   }
-  return (await response.json()) as TokenResponse;
+  return (await response.json()) as ConnectTokenResponse;
 }
 
-export async function refreshVercelToken(refreshToken: string): Promise<TokenResponse> {
+export async function refreshVercelToken(refreshToken: string): Promise<ConnectTokenResponse> {
   if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error('VERCEL_CLIENT_ID and VERCEL_CLIENT_SECRET must be set in environment variables');
   }
@@ -112,5 +100,5 @@ export async function refreshVercelToken(refreshToken: string): Promise<TokenRes
   if (!resp.ok) {
     throw new Error(`Refresh failed: ${await resp.text()}`);
   }
-  return (await resp.json()) as TokenResponse;
+  return (await resp.json()) as ConnectTokenResponse;
 }
