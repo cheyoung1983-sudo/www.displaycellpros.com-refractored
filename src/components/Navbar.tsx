@@ -65,7 +65,7 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
               <div className="flex items-center gap-3 ml-2">
                 <div className="flex flex-col items-end">
                   <span className="text-[10px] font-bold text-white leading-none">{user.name}</span>
-                  <Link href="/api/auth/logout" className="text-[9px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest mt-1">Logout</Link>
+                  <Link href="/auth/logout" className="text-[9px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest mt-1">Logout</Link>
                 </div>
                 <div className="w-9 h-9 rounded-full border border-slate-700 p-0.5 bg-slate-800">
                   <img src={user.picture || ''} alt="Profile" className="w-full h-full rounded-full" referrerPolicy="no-referrer" />
@@ -73,7 +73,7 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
               </div>
             ) : (
               <a
-                href="/api/auth/login"
+                href="/auth/login"
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-all"
               >
                 <User size={14} /> Sign In
@@ -120,7 +120,7 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
 
             {user ? (
                <a
-                href="/api/auth/logout"
+                href="/auth/logout"
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full text-left flex items-center gap-2 block px-3 py-3 rounded-md text-base font-medium text-red-400 bg-slate-900 border border-red-900/30 mb-2"
               >
@@ -128,7 +128,7 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
               </a>
             ) : (
               <a
-                href="/api/auth/login"
+                href="/auth/login"
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full text-left flex items-center gap-2 block px-3 py-3 rounded-md text-base font-medium text-white bg-slate-700 border border-slate-600 mb-2"
               >
