@@ -18,7 +18,7 @@ export function StoreView() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {STORE_PRODUCTS.map(product => (
-          <div key={product.id} className="bg-slate-800 rounded-xl border border-slate-705 overflow-hidden group flex flex-col">
+          <div key={product.id} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden group flex flex-col">
             <div className="h-48 overflow-hidden relative">
               <img src={product.img} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur text-xs font-bold px-2 py-1 rounded text-slate-300">

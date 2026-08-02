@@ -84,7 +84,7 @@ export function HomeView({ onBookClick, onLabClick }: HomeViewProps) {
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-705 p-8 rounded-2xl hover:border-blue-500/50 transition-all group">
+    <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-2xl hover:border-blue-500/50 transition-all group">
       <div className="group-hover:scale-110 transition-transform duration-300">{icon}</div>
       <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
       <p className="text-slate-400 leading-relaxed text-sm">{desc}</p>

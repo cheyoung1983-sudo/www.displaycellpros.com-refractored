@@ -1,5 +1,4 @@
 // src/lib/vercelAuth.ts
-import { awsCredentialsProvider } from "@vercel/functions/oidc";
 
 /**
  * Exchange an Auth0 authorization code for a Vercel token.

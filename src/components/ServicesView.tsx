@@ -15,7 +15,7 @@ export function ServicesView({ onBookClick }: ServicesViewProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {SERVICES.map((srv, idx) => (
-          <div key={idx} className="bg-slate-800/80 rounded-2xl border border-slate-705 p-8 hover:border-blue-500/50 transition-all flex flex-col h-full relative overflow-hidden group">
+          <div key={idx} className="bg-slate-800/80 rounded-2xl border border-slate-700 p-8 hover:border-blue-500/50 transition-all flex flex-col h-full relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
 
             <div className="mb-6">{srv.icon}</div>
