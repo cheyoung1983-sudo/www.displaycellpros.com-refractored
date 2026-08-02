@@ -19,11 +19,8 @@ The build failed with `Type error: Module '"@prisma/client"' has no exported mem
 - **Action Taken:** Verified `prisma.config.ts` exists and contains the migration `datasource.url`.
 - **Action Taken:** Added `prisma generate` to the `build` script in `package.json`.
 
-## 4. Final Deployment
-Once the above steps are completed:
-1. Run `npx tsc --noEmit` to verify 0 errors.
-2. Run `npm run build` to verify production build success.
-3. Deploy to Vercel:
-   ```bash
-   npx vercel --prod
-   ```
+## 4. Next.js 16 Compatibility [DONE]
+The build log indicated that `middleware.ts` is deprecated in favor of `proxy.ts`.
+
+- **Action Taken:** Renamed `src/middleware.ts` to `src/proxy.ts`.
+- **Action Taken:** Added `export const dynamic = 'force-dynamic'` to the homepage to resolve build-time "Dynamic server usage" errors caused by session headers.
