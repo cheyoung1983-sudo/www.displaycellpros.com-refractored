@@ -2,21 +2,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Mock the proxy module before importing middleware
-jest.mock("../src/proxy", () => ({
-  __esModule: true,
-  proxy: jest.fn(),
-}));
+const mockProxy = jest.fn();
+jest.mock("../src/proxy", () => ({ __esModule: true, proxy: mockProxy }));
 
 import middleware from "../src/middleware";
 
-// No direct import; proxy is mocked via mockProxy variable
-
+// No direct import of proxy; use mockProxy in tests
 describe("middleware", () => {
   const url = "http://localhost/test";
   const request = new NextRequest(url);
-
-  const mockProxy = jest.fn();
-  jest.mock("../src/proxy", () => ({ __esModule: true, proxy: mockProxy }));
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -28,7 +22,7 @@ describe("middleware", () => {
     mockProxy.mockResolvedValueOnce(mockResponse);
 
     const result = await middleware(request);
-    expect(proxy).toHaveBeenCalledWith(request);
+    expect(mockProxy).toHaveBeenCalledWith(request);
     expect(result).toBe(mockResponse);
   });
 
