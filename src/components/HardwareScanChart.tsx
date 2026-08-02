@@ -82,12 +82,12 @@ export const HardwareScanChart: React.FC<HardwareScanChartProps> = ({
   return (
     <div id="hardware-scan-recharts-metrics" className="bg-slate-950 border border-slate-800 rounded-lg p-3 space-y-3.5">
       {/* Battery Radial Meter & Status Panel */}
-      <div className="flex items-center justify-between bg-slate-900/60 p-2.5 rounded border border-slate-850/60 gap-3">
+      <div className="flex items-center justify-between bg-slate-900/60 p-2.5 rounded border border-slate-800/60 gap-3">
         <div className="flex-1 min-w-0 space-y-1">
           <span className="text-[8.5px] font-extrabold text-slate-400 tracking-wider uppercase font-mono block">
             ESTIMATED BATTERY CYCLE HEALTH
           </span>
-          <p className="text-[9.5px] text-slate-350 font-semibold font-mono leading-snug">
+          <p className="text-[9.5px] text-slate-300 font-semibold font-mono leading-snug">
             {isBatteryIssue 
               ? "Battery degraded under nominal current series loads. Service required."
               : "Chemistry retention retention is within acceptable tolerance levels."}
@@ -215,7 +215,7 @@ export const HardwareScanChart: React.FC<HardwareScanChartProps> = ({
 
       {/* Numerical status breakdown */}
       <div className="grid grid-cols-2 gap-2 text-[9px] font-mono select-none">
-        <div className="p-1.5 bg-slate-900 border border-slate-850 rounded">
+        <div className="p-1.5 bg-slate-900 border border-slate-800 rounded">
           <span className="text-slate-500 block uppercase leading-none mb-1">Max Thermal Rail</span>
           <span className="text-white font-bold">
             {activeMetric === "voltage"
@@ -223,7 +223,7 @@ export const HardwareScanChart: React.FC<HardwareScanChartProps> = ({
               : "170 Total Cycles"}
           </span>
         </div>
-        <div className="p-1.5 bg-slate-900 border border-slate-850 rounded">
+        <div className="p-1.5 bg-slate-900 border border-slate-800 rounded">
           <span className="text-slate-500 block uppercase leading-none mb-1">Health State</span>
           <span className={`font-bold uppercase ${issueType === "battery" ? "text-rose-400" : "text-emerald-400"}`}>
             {activeMetric === "voltage"

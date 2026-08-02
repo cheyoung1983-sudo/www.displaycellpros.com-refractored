@@ -205,7 +205,7 @@ export function RdsDiagnosticPanel() {
       </div>
 
       {/* AWS IAM Token Override Control Panel */}
-      <div className="bg-slate-900 border border-slate-750 rounded-xl p-4 space-y-3">
+      <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 space-y-3">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-amber-400" />

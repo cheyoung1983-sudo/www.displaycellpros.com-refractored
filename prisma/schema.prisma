@@ -6,7 +6,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// NextAuth models – see https://next-auth.js.org/adapters/prisma
+// Authentication models
 model Account {
   id                 Int       @id @default(autoincrement())
   userId             Int

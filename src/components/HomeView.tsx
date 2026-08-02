@@ -10,7 +10,7 @@ export function HomeView({ onBookClick, onLabClick }: HomeViewProps) {
   return (
     <div className="animate-in fade-in duration-300">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-slate-900 border-b border-slate-850">
+      <div className="relative overflow-hidden bg-slate-900 border-b border-slate-800">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/90 to-transparent z-10"></div>
           <img
@@ -84,7 +84,7 @@ export function HomeView({ onBookClick, onLabClick }: HomeViewProps) {
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-705 p-8 rounded-2xl hover:border-blue-500/50 transition-all group">
+    <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-2xl hover:border-blue-500/50 transition-all group">
       <div className="group-hover:scale-110 transition-transform duration-300">{icon}</div>
       <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
       <p className="text-slate-400 leading-relaxed text-sm">{desc}</p>

@@ -28,7 +28,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
     <div className="max-w-4xl mx-auto px-4 py-12 animate-in fade-in duration-300">
       
       {/* Brand & Document Header */}
-      <div className="bg-slate-850 border border-slate-750 rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden shadow-xl">
+      <div className="bg-slate-800 border-slate-700 rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
           <Wrench className="w-48 h-48 text-blue-400" />
         </div>
@@ -55,11 +55,11 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
           </p>
 
           <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-mono">
-            <span className="bg-slate-900 border border-slate-800 text-slate-350 px-2.5 py-1 rounded-md flex items-center gap-1">
+            <span className="bg-slate-900 border border-slate-800 text-slate-300 px-2.5 py-1 rounded-md flex items-center gap-1">
               <Globe className="w-3.5 h-3.5 text-blue-400" />
               Verified Domain: displaycellpros.com
             </span>
-            <span className="bg-slate-900 border border-slate-800 text-slate-350 px-2.5 py-1 rounded-md flex items-center gap-1">
+            <span className="bg-slate-900 border border-slate-800 text-slate-300 px-2.5 py-1 rounded-md flex items-center gap-1">
               <Server className="w-3.5 h-3.5 text-indigo-400" />
               Infrastructure: Secure Cloud Hosting
             </span>
@@ -72,8 +72,8 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
         
         {/* Navigation & Fast Facts Sidebar (Left 4 Columns) */}
         <div className="md:col-span-4 space-y-6">
-          <div className="bg-slate-950 rounded-xl border border-slate-850 p-5 space-y-4">
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+          <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 space-y-4">
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono border-b border-slate-800 pb-2">
               App Fast Facts
             </h3>
             
@@ -104,11 +104,11 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
             </div>
           </div>
 
-          <div className="bg-slate-950 rounded-xl border border-slate-850 p-5 space-y-3.5 text-xs font-mono">
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider border-b border-slate-850 pb-2">
+          <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 space-y-3.5 text-xs font-mono">
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-2">
               Company Registry
             </h3>
-            <div className="space-y-2 text-slate-450 text-[11px]">
+            <div className="space-y-2 text-slate-400 text-[11px]">
               <div className="flex items-center gap-2">
                 <Phone size={13} className="text-blue-400" />
                 <span>509-903-6139</span>
@@ -147,11 +147,11 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
               Our software platform serves as an interactive diagnostic utility, customer service portal, and 
               point-of-sale receipting engine.
             </p>
-            <div className="bg-slate-950 rounded-xl border border-slate-850 p-4 space-y-3">
+            <div className="bg-slate-950 rounded-xl border border-slate-800 p-4 space-y-3">
               <span className="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono block">
                 Primary Software Features:
               </span>
-              <ul className="list-disc pl-5 space-y-2 text-xs font-mono text-slate-350">
+              <ul className="list-disc pl-5 space-y-2 text-xs font-mono text-slate-300">
                 <li>
                   <b className="text-white font-sans">Diagnostic Telemetry Capture</b>: Gathers physical parameters, battery wear indices, and signal traces of target phones to identify component-level degradation.
                 </li>
@@ -178,7 +178,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
               To ensure transparency and conform with industry standard User Data Policies, we explicitly document
               the exact scope and usage of requested User Data:
             </p>
-            <div className="bg-slate-900 border border-slate-755 rounded-xl p-4 space-y-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 space-y-4">
               <div className="flex items-start gap-3">
                 <Info className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
                 <div className="space-y-1.5">
@@ -198,7 +198,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
                   <h4 className="text-xs font-bold text-white uppercase font-mono tracking-wide">
                     Specific Data Elements Collected & Utilized:
                   </h4>
-                  <p className="text-xs text-slate-350">
+                  <p className="text-xs text-slate-300">
                     We retrieve only the user's <b>Unique User ID (UID)</b>, <b>Email Address</b>, and <b>Display Name</b>.
                   </p>
                   <ul className="list-disc pl-5 text-[11px] font-mono text-slate-400 space-y-1">
@@ -234,7 +234,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
             <p className="text-xs text-slate-400 font-mono">
               Last Updated: July 15, 2026
             </p>
-            <div className="bg-slate-950 rounded-xl border border-slate-850 p-5 space-y-5 text-xs text-slate-350 leading-relaxed max-h-[350px] overflow-y-auto font-mono">
+            <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 space-y-5 text-xs text-slate-300 leading-relaxed max-h-[350px] overflow-y-auto font-mono">
               
               <div className="space-y-2">
                 <h4 className="text-white font-sans font-bold uppercase text-[11px] tracking-wide">

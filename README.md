@@ -1,23 +1,63 @@
 <div align="center">
-  <img width="1200" height="475" alt="Display & Cell Pros Banner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+  <img width="1200" height="475" alt="Display & Cell Pros Banner" src="/logo.png" />
 </div>
 
-# Run and deploy your AI Studio app
+# Display & Cell Pros
 
-This contains everything you need to run your app locally.
+This repository contains the source code for the **Display & Cell Pros** web application, built with Next.js 16, Tailwind CSS, and Prisma.
 
-View your app in AI Studio: https://ai.studio/apps/c2e2eafb-3cb1-4649-b652-71711906b516
+## Getting Started
 
-## Run Locally
+### Prerequisites
 
-**Prerequisites:** Node.js
+- **Node.js**: v22.0.0 or higher
+- **npm**: v10.0.0 or higher
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Set the `OPENAI_API_KEY` in [.env.local](.env.local) to your OpenAI API key.
-3. Run the app:
-   ```bash
-   npm run dev
-   ```
+### Installation
+
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/your-repo/displaycellpros.git
+    cd displaycellpros
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+
+3.  **Configure environment variables**:
+    Create a `.env.local` file in the root directory and add the required variables. You can use [.env.example](.env.example) as a template.
+    ```bash
+    cp .env.example .env.local
+    ```
+
+4.  **Database Setup**:
+    Generate the Prisma client and push the schema to your database:
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+
+### Development
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+## Deployment
+
+This project is optimized for deployment on **Vercel**. Use the provided script for a standardized deployment workflow:
+
+```powershell
+./scripts/deploy_vercel.ps1
+```
+
+## Documentation
+
+- [Production Operations Guide](README_PROD.md)
+- [Project Tasks and TODOs](TODO.md)
