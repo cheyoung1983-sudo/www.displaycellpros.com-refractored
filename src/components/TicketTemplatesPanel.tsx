@@ -86,7 +86,7 @@ export default function TicketTemplatesPanel({ onApplyTemplate }: TicketTemplate
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-4.5 flex flex-col space-y-4 shadow-xl">
       {/* Header section with telemetry */}
-      <div className="flex items-center justify-between border-b border-slate-850 pb-3">
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-emerald-400" />
           <h3 className="text-xs font-extrabold text-white uppercase tracking-wider font-mono">
@@ -130,7 +130,7 @@ export default function TicketTemplatesPanel({ onApplyTemplate }: TicketTemplate
       </p>
 
       {/* Connection telemetry and stats */}
-      <div className="grid grid-cols-2 gap-2.5 bg-slate-950/80 p-2.5 rounded-lg border border-slate-850/60 text-[9.5px] font-mono text-slate-400">
+      <div className="grid grid-cols-2 gap-2.5 bg-slate-950/80 p-2.5 rounded-lg border border-slate-800/60 text-[9.5px] font-mono text-slate-400">
         <div>
           <span className="text-slate-500 block uppercase font-bold text-[8.5px]">Template Source:</span>
           {loading ? (
@@ -166,7 +166,7 @@ export default function TicketTemplatesPanel({ onApplyTemplate }: TicketTemplate
           templates.map((template) => (
             <div 
               key={template.id}
-              className="group bg-slate-950 hover:bg-slate-850/75 border border-slate-850 hover:border-slate-700/80 rounded-xl p-3.5 transition-all flex flex-col space-y-2.5 shadow-sm"
+              className="group bg-slate-950 hover:bg-slate-800/75 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3.5 transition-all flex flex-col space-y-2.5 shadow-sm"
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -215,7 +215,7 @@ export default function TicketTemplatesPanel({ onApplyTemplate }: TicketTemplate
       </div>
 
       {/* Service Worker Status details */}
-      <div className="text-[9px] font-mono text-slate-500 border-t border-slate-850/80 pt-2.5 flex items-center justify-between">
+      <div className="text-[9px] font-mono text-slate-500 border-t border-slate-800/80 pt-2.5 flex items-center justify-between">
         <span>SW Service Status:</span>
         {isServiceWorkerControlled ? (
           <span className="text-emerald-500 font-bold">● REGISTERED & RUNNING</span>

@@ -13,9 +13,10 @@ The build was failing because `createSigner` is not found on `@vercel/functions/
 - **Action Taken:** Migrated imports from the deprecated `@vercel/functions/oidc` to the modern `@vercel/oidc-aws-credentials-provider` in `src/lib/db.ts` and removed the unused import in `src/lib/vercelAuth.ts`.
 
 ## 3. Resolve Prisma Client Generation [DONE]
-The build failed with `Type error: Module '"@prisma/client"' has no exported member 'PrismaClient'`.
+The build failed with `Type error: Module '"@prisma/client"' has no exported member 'PrismaClient'` and then `P1012: The datasource property url is no longer supported in schema files`.
 
-- **Action Taken:** Restored `url = env("DATABASE_URL")` to `prisma/schema.prisma` and updated `prisma.config.ts` to explicitly map the datasource. This ensures the Prisma CLI can correctly identify the provider and generate the types during the build phase.
+- **Action Taken:** Removed `url = env("DATABASE_URL")` from `prisma/schema.prisma` to comply with Prisma 7 standards.
+- **Action Taken:** Verified `prisma.config.ts` exists and contains the migration `datasource.url`.
 - **Action Taken:** Added `prisma generate` to the `build` script in `package.json`.
 
 ## 4. Final Deployment

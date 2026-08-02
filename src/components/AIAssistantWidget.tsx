@@ -90,7 +90,7 @@ export function AIAssistantWidget({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm sm:items-end sm:justify-end sm:p-6 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-755 shadow-2xl rounded-2xl w-full max-w-md flex flex-col h-[520px] max-h-[85vh] overflow-hidden transform transition-all">
+      <div className="bg-slate-900 border border-slate-700 shadow-2xl rounded-2xl w-full max-w-md flex flex-col h-[520px] max-h-[85vh] overflow-hidden transform transition-all">
 
         {/* Header */}
         <div className="bg-slate-800 border-b border-slate-700 p-4 flex items-center justify-between">

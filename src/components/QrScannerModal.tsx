@@ -387,7 +387,7 @@ export default function QrScannerModal({ isOpen, onClose, onScanSuccess }: QrSca
                     setScanResult(null);
                     if (activeTab === "camera") startCamera();
                   }}
-                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-xs font-mono font-bold uppercase rounded-lg text-slate-300 transition-colors"
+                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono font-bold uppercase rounded-lg text-slate-300 transition-colors"
                 >
                   Scan Another Label
                 </button>
@@ -477,7 +477,7 @@ export default function QrScannerModal({ isOpen, onClose, onScanSuccess }: QrSca
                     className={`border-2 border-dashed rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3.5 cursor-pointer transition-all ${
                       dragActive 
                         ? "border-blue-500 bg-blue-950/10" 
-                        : "border-slate-800 bg-slate-950/20 hover:border-slate-750"
+                        : "border-slate-800 bg-slate-950/20 hover:border-slate-700"
                     }`}
                   >
                     <div className="p-3 bg-slate-900 rounded-full text-slate-400 border border-slate-800">
@@ -487,7 +487,7 @@ export default function QrScannerModal({ isOpen, onClose, onScanSuccess }: QrSca
                       <span className="text-xs font-bold text-white block">Drag and drop QR tag photo here</span>
                       <span className="text-[10px] text-slate-400 block mt-1">Supports PNG, JPG, JPEG up to 5MB</span>
                     </div>
-                    <label className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-750 text-[10.5px] font-mono font-bold uppercase rounded-lg text-slate-300 transition-all cursor-pointer">
+                    <label className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-[10.5px] font-mono font-bold uppercase rounded-lg text-slate-300 transition-all cursor-pointer">
                       Browse Files
                       <input 
                         type="file" 

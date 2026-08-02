@@ -113,7 +113,7 @@ export function Navbar({ onBookClick }: { onBookClick: () => void }) {
             <Link
               href="/lab"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 block px-3 py-3 rounded-md text-base font-bold text-blue-400 bg-slate-900 border border-slate-755 mb-2"
+              className="flex items-center gap-2 block px-3 py-3 rounded-md text-base font-bold text-blue-400 bg-slate-900 border border-slate-700 mb-2"
             >
               <Cpu size={18} /> Diagnostics Lab Portal (Beta)
             </Link>

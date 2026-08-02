@@ -28,7 +28,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
     <div className="max-w-4xl mx-auto px-4 py-12 animate-in fade-in duration-300">
       
       {/* Brand & Document Header */}
-      <div className="bg-slate-850 border border-slate-750 rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden shadow-xl">
+      <div className="bg-slate-800 border-slate-700 rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
           <Wrench className="w-48 h-48 text-blue-400" />
         </div>
@@ -178,7 +178,7 @@ export function PrivacyPolicyView({ onBackToHome, onNavigateToLab }: PrivacyPoli
               To ensure transparency and conform with industry standard User Data Policies, we explicitly document
               the exact scope and usage of requested User Data:
             </p>
-            <div className="bg-slate-900 border border-slate-755 rounded-xl p-4 space-y-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 space-y-4">
               <div className="flex items-start gap-3">
                 <Info className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
                 <div className="space-y-1.5">

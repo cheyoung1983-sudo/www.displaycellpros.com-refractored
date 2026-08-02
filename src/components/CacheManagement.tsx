@@ -280,7 +280,7 @@ export default function CacheManagement({ onRefreshCompleted, onAddToast }: Cach
                 {cachedTemplates.map((tpl) => (
                   <div 
                     key={tpl.id}
-                    className="p-3 bg-slate-950 border border-slate-850 rounded-lg flex items-center justify-between hover:border-slate-700 transition-colors"
+                    className="p-3 bg-slate-950 border border-slate-800 rounded-lg flex items-center justify-between hover:border-slate-700 transition-colors"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -312,7 +312,7 @@ export default function CacheManagement({ onRefreshCompleted, onAddToast }: Cach
               </div>
             )}
 
-            <div className="mt-4 pt-3 border-t border-slate-850 text-[10px] text-slate-500 flex justify-between items-center font-mono">
+            <div className="mt-4 pt-3 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between items-center font-mono">
               <span>Technician Authority Access</span>
               <span className="text-emerald-400 flex items-center gap-1">
                 <Check className="w-3.5 h-3.5 text-emerald-400" /> Encryption: SSL/SHA256
@@ -330,7 +330,7 @@ export default function CacheManagement({ onRefreshCompleted, onAddToast }: Cach
             </h3>
           </div>
 
-          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 font-mono h-[300px] flex flex-col justify-between">
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono h-[300px] flex flex-col justify-between">
             <div className="overflow-y-auto space-y-2.5 pr-1 max-h-[240px] text-[10px] leading-relaxed custom-scrollbar">
               {cacheStatusLog.length === 0 ? (
                 <div className="text-slate-600 text-center py-16">
