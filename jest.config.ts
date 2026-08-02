@@ -6,8 +6,12 @@ const createJestConfig = nextJest({
 });
 
 const config: Config = {
+  // Load polyfills before the test environment
+  setupFiles: ['<rootDir>/jest.setup.ts'],
+
   testEnvironment: 'jsdom',
   coverageProvider: 'v8',
+  // setupFilesAfterEnv still runs after environment setup
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
 
