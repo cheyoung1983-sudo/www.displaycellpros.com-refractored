@@ -1,4 +1,10 @@
-// __tests__/middleware.test.ts
+// Stub Request for Jest environment
+declare global {
+  var Request: any;
+}
+// @ts-ignore - provide a minimal implementation
+global.Request = class {};
+
 import { NextRequest, NextResponse } from "next/server";
 
 // Mock the proxy module before importing middleware
