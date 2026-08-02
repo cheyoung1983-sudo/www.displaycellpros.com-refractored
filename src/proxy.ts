@@ -1,5 +1,4 @@
 import { auth0 } from "./lib/auth0";
-import { Request } from "next/server";
 
 export async function proxy(request: Request) {
   return await auth0.middleware(request);

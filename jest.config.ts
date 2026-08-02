@@ -13,6 +13,9 @@ const config: Config = {
   coverageProvider: 'v8',
   // Runs after Jest environment is ready
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(@auth0/nextjs-auth0)/)',
+  ],
 };
 
 export default createJestConfig(config);
