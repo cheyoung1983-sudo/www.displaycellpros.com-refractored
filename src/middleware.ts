@@ -1,22 +1,32 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { validateLexicalPayload } from '@/lib/lexical-firewall';
+import { auth0 } from "./lib/auth0";
+import { get } from "@vercel/edge-config";
 
 export async function middleware(request: NextRequest) {
+  const url = new URL(request.url);
   const { pathname } = request.nextUrl;
 
-  // Only target the Diagnostics Hub and Triage APIs
+  // 1. Handle /welcome and /api/welcome via Edge Config (from legacy proxy.ts)
+  if (url.pathname === '/welcome' || url.pathname === '/api/welcome') {
+    try {
+      const greeting = await get('greeting');
+      return NextResponse.json({
+        greeting: greeting || "hello world",
+        source: "vercel-edge-config-middleware"
+      });
+    } catch (err) {
+      return NextResponse.json({
+        greeting: "hello world",
+        source: "error-fallback",
+        error: String(err)
+      });
+    }
+  }
+
+  // 2. Lexical Firewall for Diagnostics Hub and Triage APIs
   if (pathname.startsWith('/api/diagnostics') || pathname.startsWith('/api/triage')) {
-
-    // 1. Force Tenant Identity Presence (Mock example, adjust for real auth)
-    const tenantId = request.headers.get('x-tenant-id');
-    // For now, we allow if not present to avoid breaking existing flows during dev,
-    // but in production this should be enforced.
-    // if (!tenantId && process.env.NODE_ENV === 'production') {
-    //   return NextResponse.json({ error: 'Unauthorized tenant access.' }, { status: 401 });
-    // }
-
-    // 2. Perform Syntax Token Interception on POST payloads
     if (['POST', 'PUT'].includes(request.method)) {
       try {
         const payload = await request.clone().json();
@@ -32,9 +42,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // 3. Auth0 Middleware (from legacy proxy.ts)
+  // Note: auth0.middleware expects a Request, which NextRequest is.
+  return await auth0.middleware(request);
 }
 
 export const config = {
-  matcher: ['/api/diagnostics/:path*', '/api/triage/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+  ],
 };
