@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "paths": {
       "@/*": [
         "./src/*"
@@ -40,7 +40,8 @@
     "src/globals.d.ts",
     "api",
     "server.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

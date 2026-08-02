@@ -40,8 +40,6 @@ ${routes
 
   const outputPath = path.resolve(process.cwd(), 'public/sitemap.xml');
   fs.writeFileSync(outputPath, xml, 'utf-8');
-  console.log(`✅ Sitemap successfully generated at: ${outputPath}`);
-  console.log(`🔗 Base URL: ${APP_URL}`);
 };
 
 generateSitemap();
