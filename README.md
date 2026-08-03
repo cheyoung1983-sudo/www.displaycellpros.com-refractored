@@ -60,4 +60,5 @@ This project is optimized for deployment on **Vercel**. Use the provided script 
 ## Documentation
 
 - [Production Operations Guide](README_PROD.md)
+- [AI Triage Integration Blueprint](docs/ai-triage-integration.md)
 - [Project Tasks and TODOs](TODO.md)

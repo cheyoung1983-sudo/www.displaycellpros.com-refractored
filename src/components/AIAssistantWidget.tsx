@@ -21,7 +21,7 @@ export function AIAssistantWidget({
   onUpdateSpecs
 }: AIAssistantProps) {
   const [messages, setMessages] = useState<Array<{ sender: "user" | "ai" | "system"; text: string }>>([
-    { sender: 'ai', text: "Welcome to Display & Cell Pros Mobile Triage Hub! 🚐💨 Seattle and Spokane's top driveway raw hardware lab on wheels. What device issues can we solve for you today?" }
+    { sender: 'ai', text: "D&CP Virtual Intake Tech here. We bring the repair lab directly to your driveway with military-grade precision and local Spokane care. What device needs restoration today?" }
   ]);
   const [input, setInput] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
