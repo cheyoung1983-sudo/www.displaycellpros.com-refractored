@@ -20,6 +20,11 @@ Original repo: Next.js 16 + Prisma + Auth0 + Shopify (www.displaycellpros.com-re
 - Navbar (smooth scroll, mobile menu) + Footer.
 - Tested: 100% backend (6/6 pytest) and frontend (Playwright) pass.
 
+## Iteration 3 (2026-08-03) — PayPal
+- Added **PayPal Orders v2** checkout as a second payment option on each store product (alongside Stripe "Buy with Card"). Backend: `/api/paypal/config`, `/api/paypal/orders` (create), `/api/paypal/orders/{id}/capture`; server-side amounts from catalog; records to `payment_transactions` (provider=paypal). Frontend: `@paypal/react-paypal-js` buttons, graceful "SETUP REQUIRED" state when keys absent.
+- **ACTION REQUIRED**: PayPal has no built-in test key. Set `PAYPAL_CLIENT_ID` + `PAYPAL_SECRET` (sandbox) in `backend/.env` to activate. Until then PayPal buttons show a disabled setup-required badge; Stripe checkout is fully functional.
+- Stripe one-time-payment blueprint (product+price → Checkout Session mode=payment → checkout.session.completed webhook) is already fully satisfied by the existing Stripe implementation.
+
 ## Backlog / Next
 - P2: AI assistant conversation history UI / saved transcripts.
 - P2: Live map of lab coverage / dispatch tracking.

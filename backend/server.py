@@ -367,3 +367,85 @@ async def stripe_webhook(request: Request):
             {"session_id": obj["id"], "payment_status": {"$ne": "paid"}},
             {"$set": {"status": "completed", "payment_status": obj.get("payment_status", "paid"), "updated_at": now_iso()}})
     return {"status": "ok"}
+
+
+# ---------------- PayPal (Orders v2 REST) ----------------
+import httpx
+
+PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID", "")
+PAYPAL_SECRET = os.environ.get("PAYPAL_SECRET", "")
+PAYPAL_MODE = os.environ.get("PAYPAL_MODE", "sandbox")
+PAYPAL_BASE = "https://api-m.paypal.com" if PAYPAL_MODE == "live" else "https://api-m.sandbox.paypal.com"
+
+PRODUCT_BY_KEY = {p["lookup_key"]: p for p in PRODUCTS}
+
+
+def paypal_configured():
+    return bool(PAYPAL_CLIENT_ID and PAYPAL_SECRET)
+
+
+async def paypal_token():
+    async with httpx.AsyncClient() as c:
+        r = await c.post(f"{PAYPAL_BASE}/v1/oauth2/token",
+                         auth=(PAYPAL_CLIENT_ID, PAYPAL_SECRET),
+                         data={"grant_type": "client_credentials"},
+                         headers={"Accept": "application/json"})
+        r.raise_for_status()
+        return r.json()["access_token"]
+
+
+@api.get("/api/paypal/config")
+def paypal_config():
+    return {"configured": paypal_configured(), "client_id": PAYPAL_CLIENT_ID, "mode": PAYPAL_MODE}
+
+
+class PaypalOrderRequest(BaseModel):
+    lookup_key: str
+    quantity: int = Field(1, ge=1, le=100)
+
+
+@api.post("/api/paypal/orders")
+async def paypal_create_order(req: PaypalOrderRequest):
+    if not paypal_configured():
+        raise HTTPException(400, "PayPal is not configured. Add PAYPAL_CLIENT_ID and PAYPAL_SECRET.")
+    product = PRODUCT_BY_KEY.get(req.lookup_key)
+    if not product:
+        raise HTTPException(404, f"Unknown product: {req.lookup_key}")
+    amount = round(product["price"] * req.quantity, 2)
+    token = await paypal_token()
+    body = {
+        "intent": "CAPTURE",
+        "purchase_units": [{
+            "reference_id": req.lookup_key,
+            "description": product["name"],
+            "amount": {"currency_code": "USD", "value": f"{amount:.2f}"},
+        }],
+    }
+    async with httpx.AsyncClient() as c:
+        r = await c.post(f"{PAYPAL_BASE}/v2/checkout/orders", json=body,
+                         headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+        r.raise_for_status()
+        order = r.json()
+    db.payment_transactions.insert_one({
+        "provider": "paypal", "session_id": order["id"], "lookup_key": req.lookup_key,
+        "amount": amount, "currency": "usd", "status": "initiated", "payment_status": "pending",
+        "created_at": now_iso(), "updated_at": now_iso()})
+    return {"id": order["id"]}
+
+
+@api.post("/api/paypal/orders/{order_id}/capture")
+async def paypal_capture_order(order_id: str):
+    if not paypal_configured():
+        raise HTTPException(400, "PayPal is not configured.")
+    token = await paypal_token()
+    async with httpx.AsyncClient() as c:
+        r = await c.post(f"{PAYPAL_BASE}/v2/checkout/orders/{order_id}/capture",
+                         headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+        r.raise_for_status()
+        result = r.json()
+    paid = result.get("status") == "COMPLETED"
+    db.payment_transactions.update_one(
+        {"session_id": order_id, "payment_status": {"$ne": "paid"}},
+        {"$set": {"status": "completed" if paid else "failed",
+                  "payment_status": "paid" if paid else "failed", "updated_at": now_iso()}})
+    return {"order_id": order_id, "status": result.get("status"), "payment_status": "paid" if paid else "failed"}

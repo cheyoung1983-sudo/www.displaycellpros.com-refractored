@@ -11,7 +11,9 @@ export default function PaymentResult({ ok }) {
 
   useEffect(() => {
     if (!ok) return;
-    const sid = new URLSearchParams(window.location.search).get("session_id");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("provider") === "paypal") { setStatus("paid"); return; }
+    const sid = params.get("session_id");
     if (!sid) { setStatus("error"); return; }
     let tries = 0;
     const poll = async () => {
