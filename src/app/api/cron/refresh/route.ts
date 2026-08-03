@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
 import { refreshVercelToken } from '@/lib/vercelAuth';
 
-// Vercel Cron configuration: runs every 6 hours
-export const config = {
-  // Cron expression: minute hour day month day-of-week
-  // "0 */6 * * *" runs at minute 0 every 6th hour.
-  schedule: '0 */6 * * *',
-};
+
 
 /**
  * This endpoint is invoked by Vercel's scheduled cron job.
