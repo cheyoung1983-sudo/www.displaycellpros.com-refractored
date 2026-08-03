@@ -12,3 +12,4 @@ coverage/
 !.env.example
 *.exe
 .vercel
+memory/test_credentials.md

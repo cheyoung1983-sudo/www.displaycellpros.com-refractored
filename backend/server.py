@@ -23,6 +23,7 @@ DB_NAME = os.environ.get("DB_NAME")
 JWT_SECRET = os.environ.get("JWT_SECRET")
 JWT_ALG = "HS256"
 FRONTEND_URL = os.environ.get("FRONTEND_URL")
+CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "")
 EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY") or "sk_test_emergent"
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
@@ -31,9 +32,15 @@ client = MongoClient(MONGO_URL)
 db = client[DB_NAME]
 
 app = FastAPI(title="Display & Cell Pros API")
+# Credentialed CORS: reflect origin when wildcard, else allow an explicit allowlist.
+_origins = [o.strip() for o in CORS_ORIGINS.split(",") if o.strip() and o.strip() != "*"]
+if FRONTEND_URL:
+    _origins.append(FRONTEND_URL)
+_wildcard = CORS_ORIGINS.strip() == "*" or not _origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL] if FRONTEND_URL else ["*"],
+    allow_origins=[] if _wildcard else _origins,
+    allow_origin_regex=".*" if _wildcard else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
