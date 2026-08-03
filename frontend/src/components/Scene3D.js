@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, Stars, RoundedBox, Edges, Html, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -68,8 +68,20 @@ function Particles() {
 }
 
 export default function Scene3D() {
+  const wrapRef = useRef(null);
+  const [active, setActive] = useState(true);
+  const dpr = useMemo(() => (typeof window !== "undefined" && window.innerWidth < 768 ? [1, 1.2] : [1, 1.8]), []);
+
+  useEffect(() => {
+    if (!wrapRef.current || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setActive(e.isIntersecting), { threshold: 0.05 });
+    io.observe(wrapRef.current);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <Canvas camera={{ position: [0, 0.4, 6], fov: 45 }} dpr={[1, 1.8]} gl={{ antialias: true }}>
+    <div ref={wrapRef} className="w-full h-full">
+    <Canvas camera={{ position: [0, 0.4, 6], fov: 45 }} dpr={dpr} frameloop={active ? "always" : "never"} gl={{ antialias: true, powerPreference: "high-performance" }}>
       <color attach="background" args={["#05060a"]} />
       <fog attach="fog" args={["#05060a", 8, 16]} />
       <ambientLight intensity={0.4} />
@@ -85,5 +97,6 @@ export default function Scene3D() {
       <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.6}
         minPolarAngle={Math.PI / 2.6} maxPolarAngle={Math.PI / 1.9} />
     </Canvas>
+    </div>
   );
 }

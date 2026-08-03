@@ -26,6 +26,12 @@ export default function ChatWidget() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionId, message: text }),
       });
+      if (!res.ok) {
+        const msg = res.status === 429 ? "You're sending messages too fast — give me a few seconds." : "Signal lost — please try again.";
+        setMessages((m) => { const c = [...m]; c[c.length - 1] = { role: "assistant", content: msg }; return c; });
+        setBusy(false);
+        return;
+      }
       const reader = res.body.getReader();
       const dec = new TextDecoder();
       while (true) {

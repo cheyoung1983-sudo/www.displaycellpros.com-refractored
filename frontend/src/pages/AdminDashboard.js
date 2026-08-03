@@ -12,16 +12,31 @@ export default function AdminDashboard() {
   const nav = useNavigate();
   const [me, setMe] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [tab, setTab] = useState("bookings");
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    try {
+    const fetchAll = async () => {
       const meRes = await axios.get(`${API}/api/auth/me`, { withCredentials: true });
       setMe(meRes.data);
-      const b = await axios.get(`${API}/api/admin/bookings`, { withCredentials: true });
+      const [b, p] = await Promise.all([
+        axios.get(`${API}/api/admin/bookings`, { withCredentials: true }),
+        axios.get(`${API}/api/admin/payments`, { withCredentials: true }),
+      ]);
       setBookings(b.data);
+      setPayments(p.data);
+    };
+    try {
+      await fetchAll();
     } catch (e) {
-      nav("/admin/login");
+      // access token may have expired — try one silent refresh (JWT sessions only)
+      try {
+        await axios.post(`${API}/api/auth/refresh`, {}, { withCredentials: true });
+        await fetchAll();
+      } catch (e2) {
+        nav("/admin/login");
+      }
     }
     setLoading(false);
   }, [nav]);
@@ -64,6 +79,35 @@ export default function AdminDashboard() {
           ))}
         </div>
 
+        <div className="flex gap-3 mb-6">
+          <button data-testid="tab-bookings" onClick={() => setTab("bookings")}
+            className={`px-5 py-2 clip-tag font-mono text-xs tracking-widest transition-all ${tab === "bookings" ? "bg-[color:var(--cyan)] text-void font-bold" : "glass text-slate-300"}`}>
+            DISPATCHES ({bookings.length})
+          </button>
+          <button data-testid="tab-orders" onClick={() => setTab("orders")}
+            className={`px-5 py-2 clip-tag font-mono text-xs tracking-widest transition-all ${tab === "orders" ? "bg-[color:var(--magenta)] text-void font-bold" : "glass text-slate-300"}`}>
+            ORDERS ({payments.length})
+          </button>
+        </div>
+
+        {tab === "orders" ? (
+          <div className="space-y-3" data-testid="orders-list">
+            <div className="glass clip-tag p-4 hidden md:grid grid-cols-5 gap-4 font-mono text-[10px] tracking-widest text-slate-500">
+              <span>PROVIDER</span><span>PRODUCT</span><span>AMOUNT</span><span>STATUS</span><span>DATE</span>
+            </div>
+            {payments.length === 0 && <div className="glass clip-tag p-8 text-center font-mono text-xs text-slate-500">NO ORDERS YET</div>}
+            {payments.map((p, i) => (
+              <div key={i} data-testid={`order-row-${i}`} className="glass clip-tag p-4 grid md:grid-cols-5 gap-2 md:gap-4 items-center text-sm">
+                <span className={`font-mono text-[10px] tracking-widest uppercase font-bold ${p.provider === "paypal" ? "text-[color:var(--magenta)]" : "text-[color:var(--cyan)]"}`}>{p.provider || "stripe"}</span>
+                <span className="text-slate-300">{p.lookup_key}</span>
+                <span className="font-black text-white">${(p.amount || 0).toFixed(2)}</span>
+                <span className={`font-mono text-[10px] tracking-widest uppercase ${p.payment_status === "paid" ? "text-lime-neon" : p.payment_status === "failed" ? "text-[color:var(--magenta)]" : "text-yellow-400"}`}>{p.payment_status}</span>
+                <span className="font-mono text-[10px] text-slate-500">{new Date(p.created_at).toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+        <>
         <h2 className="font-display font-bold tracking-widest text-white mb-4 flex items-center gap-2"><Truck size={18} className="text-[color:var(--cyan)]" /> INCOMING DISPATCHES</h2>
         <div className="space-y-3">
           {bookings.length === 0 && <div className="glass clip-tag p-8 text-center font-mono text-xs text-slate-500">NO BOOKINGS YET</div>}
@@ -95,6 +139,8 @@ export default function AdminDashboard() {
             </motion.div>
           ))}
         </div>
+        </>
+        )}
       </div>
     </div>
   );

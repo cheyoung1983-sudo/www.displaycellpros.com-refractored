@@ -8,6 +8,7 @@ import QuoteLab from "../components/QuoteLab";
 import Store from "../components/Store";
 import Booking from "../components/Booking";
 import ChatWidget from "../components/ChatWidget";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 const Scene3D = lazy(() => import("../components/Scene3D"));
 
@@ -24,9 +25,11 @@ export default function MainSite() {
       <Navbar />
       <section id="home" data-testid="hero-section" className="relative min-h-screen">
         <div className="absolute inset-0 z-0">
-          <Suspense fallback={<div className="w-full h-full grid place-items-center font-mono text-xs tracking-widest text-[color:var(--cyan)] animate-pulse">BOOTING 3D LAB...</div>}>
-            <Scene3D />
-          </Suspense>
+          <ErrorBoundary fallback={<div className="w-full h-full grid-floor opacity-40" />}>
+            <Suspense fallback={<div className="w-full h-full grid place-items-center font-mono text-xs tracking-widest text-[color:var(--cyan)] animate-pulse">BOOTING 3D LAB...</div>}>
+              <Scene3D />
+            </Suspense>
+          </ErrorBoundary>
         </div>
         <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-void/40 via-transparent to-void" />
         <div className="relative z-20 max-w-7xl mx-auto px-5 pt-40 pb-20 pointer-events-none">

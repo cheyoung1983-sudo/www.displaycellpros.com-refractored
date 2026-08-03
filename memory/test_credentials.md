@@ -5,18 +5,20 @@
 - Email: `admin@displaycellpros.com`
 - Password: `DCPadmin2026`
 - Role: admin
+- Access token now 30 min (httpOnly cookie) + 7-day refresh token; dashboard auto-refreshes on 401.
+- Brute force: 5 failed logins per IP+email → 15 min lockout (429).
 
 ## Google Social Login (Emergent-managed)
-- Any Google account can sign in via the "Continue with Google" button on `/admin/login`.
-- Google users are created with role `staff` and can access the dispatch dashboard.
-- No app-managed password (OAuth flow).
+- "Continue with Google" on `/admin/login`. New users get role `staff`.
+- Optional allowlist: set GOOGLE_ALLOWED_EMAILS / GOOGLE_ALLOWED_DOMAINS in backend/.env to restrict. If both empty, any Google account is allowed.
 
 ## Auth Endpoints
-- POST `/api/auth/login` (email/password) → sets `access_token` httpOnly cookie
-- POST `/api/auth/google/session` (session_id) → sets `session_token` httpOnly cookie
-- GET `/api/auth/me` (protected)
-- POST `/api/auth/logout`
-- GET `/api/admin/bookings`, PATCH `/api/admin/bookings/{id}`, GET `/api/admin/payments` (protected)
+- POST `/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`, `/api/auth/google/session`, GET `/api/auth/me`
+- Admin: GET `/api/admin/bookings`, PATCH `/api/admin/bookings/{id}`, GET `/api/admin/payments`, GET `/api/admin/notifications`
 
-## Stripe (test mode, claimable sandbox)
-- Test card: 4242 4242 4242 4242, any future expiry, any CVC
+## Payments
+- Stripe test card: 4242 4242 4242 4242. Webhook: POST `/api/stripe/webhook`.
+- PayPal sandbox configured (PAYPAL_CLIENT_ID/SECRET). Webhook: POST `/api/paypal/webhook` (set PAYPAL_WEBHOOK_ID to enable signature verification).
+
+## Rate limits
+- /api/bookings: 5 / 5min per IP · /api/chat: 20 / 5min per IP · /api/auth/login: 15 / 5min per IP
