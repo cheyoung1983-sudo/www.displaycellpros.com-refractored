@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 3: PayPal integration tested end-to-end. Backend: 6/6 tests pass (config, order creation for casper_glass & fleet_case, unknown lookup_key -> 404, txn persistence with provider='paypal' status='initiated', capture-unapproved). Frontend: all 4 PayPal gold buttons render (paypal-buttons-1..4 with 8 PayPal iframes present), no SETUP REQUIRED badge, no PayPal SDK console errors, and Stripe BUY WITH CARD (buy-now-1) still redirects successfully to checkout.stripe.com.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/paypal/orders/{order_id}/capture", "issue": "Capturing an un-approved order returns 500 Internal Server Error because httpx r.raise_for_status() propagates as unhandled HTTPStatusError. PayPal actually returns a 422 UNPROCESSABLE_ENTITY. Should catch httpx.HTTPStatusError and return a structured 4xx response with PayPal error details instead of a bare 500."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_paypal.py",
+    "/app/test_reports/pytest/iteration3_paypal.xml"
+  ],
+  "action_items": [
+    "Optional: wrap httpx call in paypal_capture_order in try/except httpx.HTTPStatusError to translate PayPal 4xx into a proper HTTPException instead of surfacing as 500."
+  ],
+  "critical_code_review_comments": [
+    "paypal_capture_order and paypal_create_order both use raise_for_status() without try/except; any PayPal-side 4xx becomes an opaque 500 to the client. Wrap and forward status_code + PayPal error body.",
+    "PayPal capture endpoint has no auth check; anyone with an order_id could attempt to capture. Consider verifying the transaction exists in payment_transactions first (matches existing lookup_key/provider).",
+    "PayPal client_id is returned by GET /api/paypal/config (expected, public value) — correct behaviour.",
+    "No idempotency: repeated POST /api/paypal/orders inserts a new payment_transactions row each time even for same lookup_key. Acceptable but noted."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_paypal.py"
+  ],
+  "success_rate": {"backend": "100% (6/6)", "frontend": "100% (all PayPal buttons + Stripe redirect)"},
+  "test_credentials": "admin@displaycellpros.com / DCPadmin2026 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Test paypal orders created in sandbox (side-effect); payment_transactions rows inserted with provider='paypal', status='initiated'.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "PayPal sandbox is fully wired. Only outstanding polish item is graceful error handling on /api/paypal/orders/{id}/capture when the order has not been approved by the buyer (currently returns 500). All other flows (Stripe checkout, admin, chat, quote, bookings) verified in iterations 1 & 2.",
+  "rca of the issue": "500 on capture of un-approved order: httpx client calls r.raise_for_status(); PayPal returns HTTP 422 with UNPROCESSABLE_ENTITY. The exception is not caught and FastAPI converts it to a generic 500. Mitigation: try/except httpx.HTTPStatusError as e: raise HTTPException(status_code=e.response.status_code, detail=e.response.json())."
+}
