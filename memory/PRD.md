@@ -21,8 +21,12 @@ Original repo: Next.js 16 + Prisma + Auth0 + Shopify (www.displaycellpros.com-re
 - Tested: 100% backend (6/6 pytest) and frontend (Playwright) pass.
 
 ## Backlog / Next
-- P1: Auth (customer/admin portal) + admin bookings dashboard.
-- P1: Real payments (Stripe) for store checkout.
-- P2: AI diagnostic assistant chatbot.
+- P2: AI assistant conversation history UI / saved transcripts.
 - P2: Live map of lab coverage / dispatch tracking.
-- P2: User-facing API error toasts; enum validation on quote inputs.
+- P2: Email/SMS notifications on booking status change.
+
+## Iteration 2 (2026-08-03) — Commerce, AI & Admin
+- **Stripe Checkout** (claimable sandbox, test mode): BUY NOW on every store product → real Stripe Checkout; catalog synced via setup_stripe.py; /payment/success polls status. Tax mode: Stripe-calculates-only (automatic_tax) for physical goods.
+- **AI Repair Assistant "ARC"** (Claude Sonnet 4.6, streaming SSE): floating chat widget diagnoses device issues and recommends a repair tier.
+- **Admin Dispatch Control Room** (/admin): secured by TWO methods — JWT email/password (admin@displaycellpros.com) AND Emergent Google OAuth. Live booking list with status transitions, stat cards, payments view. Auth-gated with redirect.
+- Verified: testing agent 100% (14/14 backend + all frontend flows).
