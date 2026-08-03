@@ -25,6 +25,15 @@ Original repo: Next.js 16 + Prisma + Auth0 + Shopify (www.displaycellpros.com-re
 - **ACTION REQUIRED**: PayPal has no built-in test key. Set `PAYPAL_CLIENT_ID` + `PAYPAL_SECRET` (sandbox) in `backend/.env` to activate. Until then PayPal buttons show a disabled setup-required badge; Stripe checkout is fully functional.
 - Stripe one-time-payment blueprint (product+price → Checkout Session mode=payment → checkout.session.completed webhook) is already fully satisfied by the existing Stripe implementation.
 
+## Iteration 4 (2026-08-03) — Hardening, Security & Optimization
+- **Deployment**: fixed CORS for production (credential-safe origin reflection via `CORS_ORIGINS`), gitignored `memory/test_credentials.md`. Deployment scan: PASS, no blockers.
+- **Security**: removed JWT from login body (cookie-only); brute-force lockout (5 fails/15min → 429); 30-min access token + 7-day refresh (`/api/auth/refresh`, dashboard auto-refreshes on 401); Google login allowlist (`GOOGLE_ALLOWED_EMAILS/DOMAINS`); rate limits on login/bookings/chat.
+- **Payments reliability**: expanded Stripe webhook (async success/fail, expired, refunded); added PayPal webhook (`/api/paypal/webhook`, PAYMENT.CAPTURE.COMPLETED, optional signature verify via `PAYPAL_WEBHOOK_ID`).
+- **Data**: enum (`Literal`) validation on quote/booking/status; catalog (products+services) moved to MongoDB single source; DB indexes on startup; bad Stripe key → 404.
+- **Optimization**: 3D hero pauses render when off-screen (IntersectionObserver) + mobile DPR cap + ErrorBoundary fallback; admin/payment routes code-split (React.lazy); chat 429 handled.
+- **Product**: admin **Orders tab** (unified Stripe + PayPal payments); booking **notifications** recorded to `notifications` collection on create + status change (delivery MOCKED — no email/SMS provider wired).
+- Verified: testing agent 25/25 backend + all frontend checks pass.
+
 ## Backlog / Next
 - P2: AI assistant conversation history UI / saved transcripts.
 - P2: Live map of lab coverage / dispatch tracking.
