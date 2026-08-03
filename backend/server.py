@@ -424,7 +424,10 @@ async def paypal_create_order(req: PaypalOrderRequest):
     async with httpx.AsyncClient() as c:
         r = await c.post(f"{PAYPAL_BASE}/v2/checkout/orders", json=body,
                          headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=e.response.json())
         order = r.json()
     db.payment_transactions.insert_one({
         "provider": "paypal", "session_id": order["id"], "lookup_key": req.lookup_key,
@@ -438,10 +441,16 @@ async def paypal_capture_order(order_id: str):
     if not paypal_configured():
         raise HTTPException(400, "PayPal is not configured.")
     token = await paypal_token()
+    tx = db.payment_transactions.find_one({"session_id": order_id, "provider": "paypal"})
+    if not tx:
+        raise HTTPException(404, "Unknown PayPal order")
     async with httpx.AsyncClient() as c:
         r = await c.post(f"{PAYPAL_BASE}/v2/checkout/orders/{order_id}/capture",
                          headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=e.response.json())
         result = r.json()
     paid = result.get("status") == "COMPLETED"
     db.payment_transactions.update_one(
