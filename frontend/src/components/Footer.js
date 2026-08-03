@@ -27,6 +27,7 @@ export default function Footer() {
       </div>
       <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-white/5 text-center font-mono text-[10px] tracking-widest text-slate-600">
         © 2026 DISPLAY &amp; CELL PROS // ALL SYSTEMS NOMINAL
+        <a href="/admin/login" data-testid="footer-admin-link" className="ml-4 text-slate-500 hover:text-[color:var(--cyan)] transition-colors">STAFF LOGIN</a>
       </div>
     </footer>
   );

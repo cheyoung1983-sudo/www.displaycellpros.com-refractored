@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Check } from "lucide-react";
+import { ShoppingCart, Check, CreditCard, Loader2 } from "lucide-react";
 import axios from "axios";
 
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -8,10 +8,18 @@ const API = process.env.REACT_APP_BACKEND_URL;
 export default function Store() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const [buying, setBuying] = useState(null);
   useEffect(() => {
     axios.get(`${API}/api/products`).then((r) => setProducts(r.data)).catch(() => {});
   }, []);
   const add = (id) => setCart((c) => (c.includes(id) ? c : [...c, id]));
+  const buy = async (p) => {
+    setBuying(p.id);
+    try {
+      const r = await axios.post(`${API}/api/payments/checkout`, { lookup_key: p.lookup_key, quantity: 1, origin_url: window.location.origin });
+      window.location.href = r.data.checkout_url;
+    } catch (e) { setBuying(null); }
+  };
   return (
     <section id="store" data-testid="store-section" className="relative py-28 px-5">
       <div className="max-w-7xl mx-auto">
@@ -42,10 +50,15 @@ export default function Store() {
                 <div className="flex items-center justify-between">
                   <span className="text-xl font-black text-[color:var(--cyan)]">${p.price}</span>
                   <button data-testid={`add-to-cart-${p.id}`} onClick={() => add(p.id)}
-                    className={`btn-neon px-4 py-2 clip-tag font-mono text-[10px] tracking-widest font-bold flex items-center gap-1 ${cart.includes(p.id) ? "bg-lime-neon text-void" : "bg-[color:var(--cyan)] text-void hover:bg-[color:var(--magenta)]"}`}>
+                    className={`btn-neon px-4 py-2 clip-tag font-mono text-[10px] tracking-widest font-bold flex items-center gap-1 ${cart.includes(p.id) ? "bg-lime-neon text-void" : "bg-white/10 text-white hover:bg-white/20"}`}>
                     {cart.includes(p.id) ? <><Check size={12} /> ADDED</> : "ADD"}
                   </button>
                 </div>
+                <button data-testid={`buy-now-${p.id}`} onClick={() => buy(p)} disabled={buying === p.id}
+                  className="btn-neon mt-3 w-full py-2.5 clip-tag font-mono text-[10px] tracking-widest font-bold flex items-center justify-center gap-2 bg-[color:var(--cyan)] text-void hover:bg-[color:var(--magenta)]">
+                  {buying === p.id ? <Loader2 className="animate-spin" size={14} /> : <CreditCard size={14} />}
+                  {buying === p.id ? "REDIRECTING…" : "BUY NOW"}
+                </button>
               </div>
             </motion.div>
           ))}
