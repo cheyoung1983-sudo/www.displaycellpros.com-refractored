@@ -13,3 +13,10 @@ coverage/
 *.exe
 .vercel
 memory/test_credentials.md
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
